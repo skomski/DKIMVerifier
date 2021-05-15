@@ -1,0 +1,1420 @@
+Delivered-To: mail@skomski.com
+Received: by 2002:a05:6830:40ac:0:0:0:0 with SMTP id x44csp202550ott;
+        Thu, 13 May 2021 19:33:28 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJzeVc3HEyjRvCDBUVCxAzvspoXF8aHDNj/7GJ9lrc5FPT6r3/qRLmSxRYbAtY+NStxlGqLr
+X-Received: by 2002:a5d:5301:: with SMTP id e1mr13037615wrv.36.1620959608389;
+        Thu, 13 May 2021 19:33:28 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1620959608; cv=none;
+        d=google.com; s=arc-20160816;
+        b=kIuFiWlBbAf6N4BExygtO6ZCusbzxy3Cpp7SBxWPrNxNv4MLBL//mTveqSsEUZQm0+
+         zXxP4pJ4vj/ZeVX9Ew0vavKlWhpGuOAoQAe2Kff5eX5xUz+4V0eNwEB9ftJsUlRhoxmo
+         fsgdOKQNI1UYrqWcAffDZJ6G71xDpVm08bDO2URS3xQwGhnbC+NdzlbaYOSJh/yUyWiP
+         HHOmtpGkGIqDzGS00GSiK2xu+pJ0mxXblJI1FaxVMJv6XoPDvgf98I8KDxPh4lxOmgZB
+         Isglzc83zjflJ+8CwecuNAIZHwESyJAWhnwU28mOpG4ktBXCczFhnS0/bIfrLNsl5TPr
+         0fiw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20160816;
+        h=list-unsubscribe:list-id:content-transfer-encoding:mime-version
+         :subject:message-id:to:reply-to:from:date:dkim-signature;
+        bh=f8xkoFYRPNcVjEvYfTcIhYbrX9Mq0kb/88EXKPTmBxM=;
+        b=yedctzCV0RWaBXcxf+UQ+z/chMER2F8O7a0OvgqJSzESM9nlZA84jgDIH4jnDBuuHG
+         5cuW4qrBYSFwTaTTWHkGN3H/LAoFh3/jjM3GW/uAihEGMOinfFidVprPy7w+tZoEUfgu
+         jkaZ/+c+Yt4uPhqdf+P8toXqdvpWr08HiIRQ7JAF3GN4stjXQT/ynysHq7+g6MW8dP5E
+         XddKU9OcYW9c+D3NYPeDTpHRw/RmaBwg8ASiQChR4pL0VMkJ76tNOFc+K+EF3iix2PA0
+         aVAEDQ3p4TqASbeD//1ggmJDDUyGP7n/+QiCZ5Ablbb7x38jFjdmJmmrcDLHHkopc4KJ
+         z9Bg==
+ARC-Authentication-Results: i=1; mx.google.com;
+       dkim=pass header.i=@ppe-healthcare-europe.com header.s=repetita header.b=dMXIbd8i;
+       spf=pass (google.com: domain of bounce+caaah65iyaaaaa2aaaah3qaaaaaaaaaa7lmdxq@ppe-healthcare-europe.com designates 185.213.188.194 as permitted sender) smtp.mailfrom=bounce+caAAH65IYAAAAA2AAAAH3QAAAAAAAAAA7LMDXQ@ppe-healthcare-europe.com;
+       dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=ppe-healthcare-europe.com
+Return-Path: <bounce+caAAH65IYAAAAA2AAAAH3QAAAAAAAAAA7LMDXQ@ppe-healthcare-europe.com>
+Received: from smtp03.inxout07.de (smtp03.inxout07.de. [185.213.188.194])
+        by mx.google.com with ESMTP id r9si6352728wrz.393.2021.05.13.19.33.28
+        for <MAIL@skomski.com>;
+        Thu, 13 May 2021 19:33:28 -0700 (PDT)
+Received-SPF: pass (google.com: domain of bounce+caaah65iyaaaaa2aaaah3qaaaaaaaaaa7lmdxq@ppe-healthcare-europe.com designates 185.213.188.194 as permitted sender) client-ip=185.213.188.194;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@ppe-healthcare-europe.com header.s=repetita header.b=dMXIbd8i;
+       spf=pass (google.com: domain of bounce+caaah65iyaaaaa2aaaah3qaaaaaaaaaa7lmdxq@ppe-healthcare-europe.com designates 185.213.188.194 as permitted sender) smtp.mailfrom=bounce+caAAH65IYAAAAA2AAAAH3QAAAAAAAAAA7LMDXQ@ppe-healthcare-europe.com;
+       dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=ppe-healthcare-europe.com
+Received: from smtp03.inxout07.de (smtp03.inxout07.de [185.213.188.194])
+	by smtp03.inxout07.de (Postfix) with ESMTP id 831982E545B
+	for <MAIL@SKOMSKI.COM>; Fri, 14 May 2021 04:33:27 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=simple/simple; t=1620959607;
+	s=repetita; d=ppe-healthcare-europe.com;
+	h=Date:From:Reply-To:To:Message-ID:Subject:MIME-Version:Content-Type:Content-Transfer-Encoding:List-Id:List-Unsubscribe;
+	bh=Mey52Dmy1iJVXQO+Os+sIILo75UtVnZ+pUwCs6HVkTU=;
+	b=dMXIbd8iT73iS+tnT/02aBIjrIxYpF+H2hKGtwOd2eV/GL3wZo5rJR2zxlGBOn3A
+	LZY0Tn0zaZ2fesiIP51NZ9e0rU9GHqk2HS0rCIn8pU7hakUq8mgTVamwZXFDV4SCarj
+	JeQcTFnHbl/7cAUcGHA8uiJvG2Cq0kUKtVnyviDU=
+Date: Wed, 12 May 2021 03:44:19 +0000 (UTC)
+From: Testzentrum-Versorger <info@ppe-healthcare-europe.com>
+Reply-To: Testzentrum-Versorger <info@ppe-healthcare-europe.com>
+To: MAIL@SKOMSKI.COM
+Message-ID: <INX.13fcfd6bae5b429586b5b5cf4311ca62.1f7.ff189.a705c.1795e9417e22.bounce@ppe-healthcare-europe.com>
+Subject: =?UTF-8?Q?Testpflicht_-_wichtiges_Corona-Update:_Lolly-T?=
+ =?UTF-8?Q?ests_als_L=C3=B6sung_f=C3=BCr_Unternehmer!_Nun_verf=C3=BCgbar!?=
+MIME-Version: 1.0
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+X-Memberid: M23-1044131
+List-Id: "0" <13.13fcfd6bae5b429586b5b5cf4311ca62.localhost>
+List-Unsubscribe: <https://a8wheki.nta4itk.moyd3ur.zbae78c.g7vaem8c.t8ubsdik.ppe-healthcare-europe.com/d?q00002u00b7xkg00l0000iyy0000000000pvq6wy13>
+
+<html xmlns=3D"http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3DUTF-8">
+<meta content=3D"width=3Dmobile-width; initial-scale=3D1.0; maximum-scale=
+=3D1.0; user-scalable=3Dno" name=3D"viewport">
+<meta name=3D"viewport" content=3D"width=3Ddevice-width; initial-scale=3D1.=
+0; maximum-scale=3D1.0; user-scalable=3Dno;">
+<meta http-equiv=3D"X-UA-Compatible" content=3D"IE=3D9; IE=3D8; IE=3D7; IE=
+=3DEDGE">
+<meta content=3D"#EEEEEE" name=3D"sr bgcolor"> =20
+<title>Olly-Lolly</title>
+<style type=3D"text/css">
+=09html, body{width:100%; margin:0; font-family: 'Open Sans', 'Arial', 'Cal=
+ibri', sans-serif;}
+=09.ExternalClass{width:100%;}
+=09.ReadMsgBody{width:100%;}
+=09.ExternalClass, .ExternalClass p, .ExternalClass span, .ExternalClass fo=
+nt, .ExternalClass td, .    ExternalClass div {line-height: 100%;}
+=09table, td{ border-collapse: collapse; margin: 0; mso-table-lspace: 0; ms=
+o-table-rspace: 0; padding: 0;}
+=09a{color:#0281C2;text-decoration:none;}
+=09a:hover{text-decoration:underline; opacity:0.7; transition:all .25s ease=
+-in-out}
+
+=09@media only screen and (max-width: 800px){
+=09=09table[class=3Dcontainer800]{width:100% !important;}
+=09=09table[class=3Dcontainer800_img]{width:50% !important;}
+=09=09table[class=3Dhalf-container800]{width:50% !important;}
+=09=09table[class=3Dpreheader]{width:90% !important;}
+=09=09td[class=3Dhide800]{ display:none!important}
+=09}
+
+=09@media only screen and (max-width: 640px){
+=09=09table[class=3Dfull], table[class=3Dcontainer800]{width:100%!important=
+;}
+=09=09table[class=3Dcontainer800], table[class=3Dcontainer600], table[class=
+=3Dcontainer590], table[class=3D  container500]{width:370px !important;}
+=09=09table[class=3Dcontainer186], table[class=3Dcontainer290], table[class=
+=3Dcontainer200]{width:320px !important   ;}
+=09=09table[class=3Dcontainer800_img], table[class=3Dhalf-container800]{wid=
+th:100% !important;}
+=09=09table[class=3Dhalf-container600], table[class=3Dcontainer120], td[cla=
+ss=3Dcontainer120]{width:49% !important   ;}
+=09=09table[class=3Dabout180]{width:250px !important;}
+=09=09table[class=3Dcontainer340]{width:370px !important;}
+=09=09td[class=3Dcenter]{text-align:center!important;vertical-align:middle!=
+important}
+=09=09img[class=3Dimg_scale], td[class=3Dimg_scale]{width:100%!important;he=
+ight:auto!important}
+=09=09td[class=3Dhide],table[class=3Dhide], br[class=3Dhide]{ display:none!=
+important}
+=09=09td[class=3Dshow]{display:block!important}
+=09=09td[class=3Dpadding_10]{padding: 0 10px!important}
+=09=09td[class=3Dpadding_20],td[class=3Dpadding_20_show]{padding: 0 20px!im=
+portant; height: auto !important}
+=09=09img[class=3Ddivider]{width:100%!important;height:1px!important}
+=09=09td[class=3Dmobile-width]{padding:0 25% !important}
+=09=09td[class=3Dmain-section-header], div[class=3Dmain-section-header]{fon=
+t-size:30px!important;}
+=09=09td[class=3Dmobile_para]{font-size:14px!important; line-height: 26px!i=
+mportant}
+=09}=20
+
+=09@media only screen and (max-width:480px){
+=09=09table[class=3Dcontainer800], table[class=3Dfull], table[class=3Dconta=
+iner600], table[class=3Dcontainer590],      table[class=3Dcontainer500]{wid=
+th:100% !important; height: auto !important}
+=09=09table[class=3Dcontainer186], table[class=3Dcontainer290], table[class=
+=3Dcontainer200]{width:200px !important   ;}
+=09=09table[class=3Dcontainer800_img], table[class=3Dhalf-container800], ta=
+ble[class=3Dcontainer120], td[class=3D container120]{width:100% !important;=
+}
+=09=09table[class=3Dhalf-container600], table[class=3Dcontainer120], td[cla=
+ss=3Dcontainer120]{width:49% !important   ;}
+=09=09table[class=3Dcontainer340]{width:260px !important;}
+=09=09table[class=3Dabout180]{width:140px !important;}
+=09=09td[class=3Dcenter], td[class=3Dalign-center]{text-align:center!import=
+ant;vertical-align:middle!important}
+=09=09img[class=3Dimg_scale], td[class=3Dimg_scale]{width:100%!important;he=
+ight:auto!important}
+=09=09td[class=3Dhide], br[class=3Dhide]{ display:none!important}
+=09=09td[class=3Dshow]{display:block!important}
+=09=09td[class=3Dpadding_20], td[class=3Dpadding_20_show]{padding:0 20px!im=
+portant}
+=09=09img[class=3Ddivider]{width:100%!important;height:1px!important}
+=09=09td[class=3Dmain-section-header], div[class=3Dmain-section-header]{fon=
+t-size:26px!important;}
+=09=09td[class=3Dmobile_para],div[class=3Dmobile_para]{font-size:14px!impor=
+tant;}
+=09}
+</style>
+</head>
+<body yahoo=3D"fix" style=3D"margin:0; padding:0; -webkit-text-size-adjust:=
+ 100%; -ms-text-size-adjust: 100%;">
+
+=09<!-- Main Header -->=20
+=09<table border=3D"0" width=3D"100%" cellpadding=3D"0" cellspacing=3D"0" b=
+gcolor=3D"#EEEEEE" data-module=3D"module1" data-thumb=3D"thumbnails/module1=
+.png" style=3D"background-color: #EEEEEE;" data-bgcolor=3D"Body bgcolor">
+=09=09<tbody>
+=09=09<tr>
+=09=09<td align=3D"center">
+=09=09=09<table border=3D"0" align=3D"center" width=3D"100%" style=3D"width=
+:100%;max-width: 800px;background-image: url(https://psa-partner.de/email_i=
+mages/210504_Olly_Lolly/bannerollylolly.gif);background-color: #ffffff;back=
+ground-repeat: no-repeat;background-position: top;background-size: 1100px;"=
+ cellpadding=3D"0" cellspacing=3D"0" bgcolor=3D"#0281C2" background=3D"imag=
+es/bg1.png" data-bg=3D"Background1" data-bgcolor=3D"Background1"><tbody>
+=09=09=09=09<!-- Main Hero -->
+=09=09=09=09<tr>
+=09=09=09=09<td align=3D"center" class=3D"padding_20_show">
+=09=09=09=09=09<table border=3D"0" align=3D"center" width=3D"600" cellpaddi=
+ng=3D"0" cellspacing=3D"0" class=3D"container600" data-bgcolor=3D"Hero Cent=
+er">
+=09=09=09=09=09</table>
+=09=09=09=09=09<br>
+=09=09=09=09=09<img editable=3D"true" src=3D"https://psa-partner.de/email_i=
+mages/210504_Olly_Lolly/PSA-Logo.png" alt=3D"img" width=3D"600" align=3D"le=
+ft" style=3D"width: 330px; padding-left: 30px">
+=09=09=09=09=09<table border=3D"0" align=3D"center" width=3D"100%" cellpadd=
+ing=3D"0" cellspacing=3D"0" class=3D"container600" data-bgcolor=3D"Hero Cen=
+ter">
+=09=09=09=09=09  <tbody>
+=09=09=09=09=09    <tr><td height=3D"0" style=3D"font-size: 130px;line-heig=
+ht: 0px;">&nbsp;</td></tr>
+
+=09=09=09=09=09    <tr><td height=3D"15" style=3D"font-size: 15px;line-heig=
+ht: 15px;">&nbsp;</td></tr>
+=09=09=09=09=09   =20
+=09=09=09=09=09    <tr>
+=09=09=09=09=09      <td align=3D"center"  style=3D"font-size: 80px;color: =
+#2F2F2F;padding: 260px 0px 0px 0px;Font-weight: 400;font-family: 'Open Sans=
+', sans-serif;">
+=09=09=09=09=09        <!-- =3D=3D=3D=3D=3D=3D=3D section text =3D=3D=3D=3D=
+=3D=3D -->
+=09=09=09=09=09        <div style=3D"line-height: 86%;" class=3D"main-secti=
+on-header">
+=09=09=09=09=09          <img src=3D"https://psa-partner.de/email_images/21=
+0504_Olly_Lolly/olly-lolly-covid-19-test-logo.png" alt=3D"Olly_Lolly_Logo" =
+width=3D"100%" style=3D"border: none; display: block; outline: none; width:=
+ 60%;" editable=3D"true"><span class=3D"text_container">
+=09=09=09=09=09             <b style=3D"font-size: 30px;"><b style=3D"color=
+: #2F2F2F;Font-weight: 800;">Der neue Covid-19-Lolly-Test</b></span>
+=09=09=09=09            </div>
+=09=09=09=09          </td>  =20
+=09=09=09=09        </tr>
+=09=09=09=09=09   =20
+=09=09=09=09=09    <tr><td height=3D"10" style=3D"font-size: 10px;line-heig=
+ht: 10px;">&nbsp;</td></tr>
+=09=09=09=09=09   =20
+=09=09=09=09=09    <tr>
+=09=09=09=09=09      <td align=3D"center" mc:edit=3D"big-title1" style=3D"c=
+olor: #ffffff;font-size:23px;font-family: 'Open Sans', sans-serif;font-weig=
+ht: 900;" data-color=3D"H3 #1a1c64" data-size=3D"H3 #ffffff" data-min=3D"12=
+" data-max=3D"28">
+=09=09=09=09=09        <!-- =3D=3D=3D=3D=3D=3D=3D section text =3D=3D=3D=3D=
+=3D=3D -->
+=09=09=09=09=09        <div style=3D"line-height: 160%;">
+=09=09=09=09=09          <span class=3D"text_container">
+=09=09=09=09=09            <multiline>Keine Tr=C3=A4nen. Kein Drama. Kinder=
+leicht.</multiline>
+=09=09=09=09              </span>
+=09=09=09=09            </div>
+=09=09=09=09          </td>  =20
+=09=09=09=09        </tr>
+=09=09=09=09=09   =20
+=09=09=09=09=09    <tr><td height=3D"10" style=3D"font-size: 10px; line-hei=
+ght: 0px;"></td></tr>
+=09=09=09=09=09   =20
+=09=09=09=09=09    <!-- button -->
+=09=09=09=09=09    <tr>
+=09=09=09=09=09      <td align=3D"center">
+=09=09=09=09=09        <table border=3D"0" align=3D"center" width=3D"" cell=
+padding=3D"0" cellspacing=3D"0" bgcolor=3D"#f25a6b" style=3D"box-shadow: 0p=
+x 4px 5px -5px #f25a6b;background-color: #f25a6b;border-radius: 10px;">
+=09=09=09=09=09          <tbody>
+=09=09=09=09=09            <tr>
+=09=09=09=09=09              <td align=3D"center" style=3D"padding-bottom: =
+20px;padding-top: 20px;color: #FFFFFF;font-size: 20px;font-family: 'Open Sa=
+ns', 'Calibri', sans-serif;font-weight: 700;padding-left: 40px;padding-righ=
+t: 40px;" mc:edit=3D"main-button" data-size=3D"Button Text" data-min=3D"12"=
+ data-max=3D"28">
+=09=09=09=09=09                <div class=3D"editable_text" style=3D"line-h=
+eight: 100%;">
+=09=09=09=09=09                  <span class=3D"text_container">
+=09=09=09=09=09                    <multiline>
+=09=09=09=09=09                      <a href=3D"https://a8wheki.nta4itk.moy=
+d3ur.zbae78c.g7vaem8c.t8ubsdik.ppe-healthcare-europe.com/d?q00002sy0b7xkg00=
+d0000iyy0000000000pvvnuy13" target=3D"_blank" style=3D"color: #FFFFFF;text-=
+decoration: none;" data-color=3D"Button Text">Mehr Info!</a>
+=09=09=09=09=09                      </multiline>
+=09=09=09=09                      </span>
+=09=09=09=09=09                  </div>
+=09=09=09=09=09                </td>
+=09=09=09=09                </tr>
+=09=09=09=09              </tbody>
+=09=09=09=09            </table>                             =20
+=09=09=09=09        =20
+=09=09=09=09=09    <!-- end section -->
+=09=09=09=09=09   =20
+=09=09=09=09=09    <tr><td height=3D"100" style=3D"font-size: 130px;line-he=
+ight: 10px;">&nbsp;</td></tr>
+
+<!-- 3 Col service -->
+<table border=3D"0" width=3D"100%" cellpadding=3D"0" cellspacing=3D"0" bgco=
+lor=3D"#FFFFFF" data-module=3D"module3" data-thumb=3D"thumbnails/module3.pn=
+g" style=3D"background-color: #EEEEEE;" data-bgcolor=3D"Body bgcolor">
+      <td align=3D"center"><table border=3D"0" align=3D"center" width=3D"10=
+0%" style=3D"background-color: #FFFFFF;width:100%;max-width: 800px;" cellpa=
+dding=3D"0" cellspacing=3D"0" data-bgcolor=3D"White-Bg">
+
+            <td align=3D"center" class=3D"padding_20_show"><table border=3D=
+"0" align=3D"center" width=3D"600" cellpadding=3D"0" cellspacing=3D"0" clas=
+s=3D"container600">
+           =20
+               =20
+                  <td align=3D"center"><table border=3D"0" align=3D"center"=
+ cellpadding=3D"0" cellspacing=3D"0">
+               =20
+                  </table></td>
+            =20
+                <tr>
+                  <td height=3D"10" style=3D"font-size: 10px;line-height: 1=
+0px;"></td>
+              =20
+                  <td align=3D"center"><table border=3D"0" align=3D"center"=
+ cellpadding=3D"0" cellspacing=3D"0">
+                    <tbody>
+                      <!-- Start Title -->
+                      <tr>
+                        <td align=3D"center" mc:edit=3D"big-title1" style=
+=3D"color: #1a1c64;font-size: 24px;font-family: 'Open Sans', 'Open Sans', s=
+ans-serif;font-weight: 700;" data-size=3D"H2 #1a1c64" data-max=3D"72" data-=
+color=3D"H2 #1a1c64">
+=09=09=09=09=09=09=09
+=09=09=09=09=09=09=09<!-- =3D=3D=3D=3D=3D=3D=3D section text =3D=3D=3D=3D=
+=3D=3D -->
+                          <div style=3D"line-height: 120%;"> <span class=3D=
+"text_container">
+                          </span></div></td>
+                      </tr>
+                    </tbody>
+                  </table></td>
+                  <span style=3D"    font-size: 30px;    color: #1a1c64;"  =
+data-max=3D"72"><strong>Sparen Sie <span style=3D"color:#f25a6b">5%</span> =
+bei Ihrem ersten Einkauf mit dem Gutscheincode <span style=3D"color:#f25a6b=
+">"NEU5"!</span></span><br><br>
+                  <td height=3D"20" style=3D"font-size: 18px;line-height: 3=
+0px;color: #1a1c64;text-align: center"><p><strong>So einfach wie Fiebermess=
+en</strong>. Nach 15 Minuten Ergebnis ablesen. Aufatmen.</p>
+                    <p><strong>ZUVERL=C3=84SSIG WIE DAS TESTST=C3=84BCHEN I=
+M RACHEN ODER DER NASE</strong> =E2=80=93 aber viel angenehmer.</p>
+                    <p>Kinderleicht zum Selbsttesten. <strong>Erkennt laut =
+Hersteller auch Virusmutationen.</strong></p></td>
+=09=09=09=09=09 =20
+                </tr>
+            </table><br></td>    =20
+=09=09=09<tr><td align=3D"center" class=3D"padding_20_show">
+=09=09=09=09<table class=3D"container600" width=3D"660" align=3D"center" bo=
+rder=3D"0" cellpadding=3D"0" cellspacing=3D"0"><tbody>
+=09=09=09=09=09<tr><td align=3D"center">
+=09=09=09=09=09=09<table class=3D"container590" width=3D"435" align=3D"left=
+" border=3D"0" cellpadding=3D"0" cellspacing=3D"0" style=3D"border-collapse=
+:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt;">
+=09=09=09=09=09=09=09<tbody>
+=09=09=09=09=09=09=09=09<tr>
+=09=09=09=09=09=09=09=09=09<td>
+=09=09=09=09=09=09=09=09=09=09<table class=3D"container590" width=3D"200" a=
+lign=3D"left" border=3D"0" cellpadding=3D"0" cellspacing=3D"0" style=3D"bor=
+der-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt;">
+=09=09=09=09=09=09=09=09=09=09=09<tbody>
+=09=09=09=09=09=09=09=09=09=09=09=09<tr>
+=09=09=09=09=09=09=09=09=09=09=09=09=09<td align=3D"center" style=3D"font-f=
+amily: 'Montserrat', sans-serif; font-size: 18px; font-weight: 300; color: =
+#516072; line-height: 24px;">
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09<img editable=3D"true" src=3D"htt=
+ps://psa-partner.de/email_images/210504_Olly_Lolly/Ablauf_1.png" alt=3D"1" =
+width=3D"400" height=3D"400" style=3D"height: 150;width: 150;display: block=
+;">
+=09=09=09=09=09=09=09=09=09=09=09=09=09</td>
+=09=09=09=09=09=09=09=09=09=09=09=09</tr>=20
+=09=09=09=09=09=09=09=09=09=09=09=09<tr>
+=09=09=09=09=09=09=09=09=09=09=09=09=09<td height=3D"20" style=3D"font-size=
+: 20px;line-height: 20px;">&nbsp;
+=09=09=09=09=09=09=09=09=09=09=09=09=09</td>
+=09=09=09=09=09=09=09=09=09=09=09=09</tr>
+=09=09=09=09=09=09=09=09=09=09=09=09<tr>
+=09=09=09=09=09=09=09=09=09=09=09=09  <td align=3D"center" mc:edit=3D"list-=
+title" style=3D"font-family: 'Open Sans', sans-serif;font-size: 18px;font-w=
+eight: 700;color: #1a1c64;" data-color=3D"H3 #454545" data-size=3D"H3 #4545=
+45" data-min=3D"12" data-max=3D"28">
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09<!-- =3D=3D=3D=3D=3D=3D=3D sectio=
+n text =3D=3D=3D=3D=3D=3D -->
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09<div class=3D"editable_text" styl=
+e=3D"line-height: 120%;">
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09<span class=3D"text_container"=
+>
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09<multiline>UNTER DIE ZUNGE<=
+/multiline>
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09</span>
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09</div>
+=09=09=09=09=09=09=09=09=09=09=09=09=09</td>
+=09=09=09=09=09=09=09=09=09=09=09=09</tr>
+=09=09=09=09=09=09=09=09=09=09=09=09<tr>
+=09=09=09=09=09=09=09=09=09=09=09=09=09<td height=3D"10" style=3D"font-size=
+: 1px; line-height: 10px;">&nbsp;
+=09=09=09=09=09=09=09=09=09=09=09=09=09</td>
+=09=09=09=09=09=09=09=09=09=09=09=09</tr>
+=09=09=09=09=09=09=09=09=09=09=09=09<tr>
+=09=09=09=09=09=09=09=09=09=09=09=09=09<td align=3D"center" mc:edit=3D"list=
+-title" style=3D"color:#000000;font-size: 14px;font-family: 'Open Sans', 'O=
+pen Sans', sans-serif;line-height: 18px;font-weight:0;" data-color=3D"Text =
+#999999" data-size=3D"Text #000000" data-min=3D"12" data-max=3D"28">
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09<!-- =3D=3D=3D=3D=3D=3D=3D sectio=
+n text =3D=3D=3D=3D=3D=3D -->
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09<div class=3D"editable_text" styl=
+e=3D"line-height: 160%;">
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09<span class=3D"text_container"=
+>
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09<multiline>
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09  OLLY-LOLLY=C2=AE  einfach=
+ in dem vorderen Mundbereich unter die Zunge legen.
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09</multiline>
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09</span>
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09</div>
+=09=09=09=09=09=09=09=09=09=09=09=09=09</td>
+=09=09=09=09=09=09=09=09=09=09=09=09</tr>
+=09=09=09=09=09=09=09=09=09=09=09</tbody>
+=09=09=09=09=09=09=09=09=09=09</table>
+
+=09=09=09=09=09=09=09=09=09=09<!-- SPACE -->
+=09=09=09=09=09=09=09=09=09=09<table class=3D"full" width=3D"1" align=3D"le=
+ft" border=3D"0" cellpadding=3D"0" cellspacing=3D"0" style=3D"border-collap=
+se:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt;">
+=09=09=09=09=09=09=09=09=09=09=09<tbody><tr>
+=09=09=09=09=09=09=09=09=09=09=09=09<td width=3D"1" height=3D"30" style=3D"=
+font-size: 30px; line-height: 30px;">
+=09=09=09=09=09=09=09=09=09=09=09=09</td>
+=09=09=09=09=09=09=09=09=09=09=09</tr>
+=09=09=09=09=09=09=09=09=09=09</tbody></table>
+=09=09=09=09=09=09=09=09=09=09<!-- END SPACE -->
+
+=09=09=09=09=09=09=09=09=09=09<table class=3D"container590" width=3D"200" a=
+lign=3D"right" border=3D"0" cellpadding=3D"0" cellspacing=3D"0" style=3D"bo=
+rder-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt;">
+=09=09=09=09=09=09=09=09=09=09=09<tbody>
+=09=09=09=09=09=09=09=09=09=09=09=09<tr>
+=09=09=09=09=09=09=09=09=09=09=09=09=09<td align=3D"center" style=3D"font-f=
+amily: 'Montserrat', sans-serif; font-size: 18px; font-weight: 300; color: =
+#516072; line-height: 24px;">
+=09=09=09=09=09=09=09=09=09=09=09=09=09  <img editable=3D"true" src=3D"http=
+s://psa-partner.de/email_images/210504_Olly_Lolly/Ablauf_2.png" alt=3D"1" w=
+idth=3D"400" height=3D"400" style=3D"height: 150;width: 150;display: block;=
+">
+=09=09=09=09=09=09=09=09=09=09=09=09=09</td>
+=09=09=09=09=09=09=09=09=09=09=09=09</tr>=20
+=09=09=09=09=09=09=09=09=09=09=09=09<tr>
+=09=09=09=09=09=09=09=09=09=09=09=09=09<td height=3D"20" style=3D"font-size=
+: 20px;line-height: 20px;">&nbsp;
+=09=09=09=09=09=09=09=09=09=09=09=09=09</td>
+=09=09=09=09=09=09=09=09=09=09=09=09</tr>
+=09=09=09=09=09=09=09=09=09=09=09=09<tr>
+=09=09=09=09=09=09=09=09=09=09=09=09  <td align=3D"center" mc:edit=3D"list-=
+title" style=3D"font-family: 'Open Sans', sans-serif;font-size: 18px;font-w=
+eight: 700;color: #1a1c64;" data-color=3D"H3 #454545" data-size=3D"H3 #4545=
+45" data-min=3D"12" data-max=3D"28">
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09<!-- =3D=3D=3D=3D=3D=3D=3D sectio=
+n text =3D=3D=3D=3D=3D=3D -->
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09<div class=3D"editable_text" styl=
+e=3D"line-height: 120%;">
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09<span class=3D"text_container"=
+>
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09<multiline>NACH 2 MIN</mult=
+iline>
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09</span>
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09</div>
+=09=09=09=09=09=09=09=09=09=09=09=09=09</td>
+=09=09=09=09=09=09=09=09=09=09=09=09</tr>
+=09=09=09=09=09=09=09=09=09=09=09=09<tr>
+=09=09=09=09=09=09=09=09=09=09=09=09=09<td height=3D"10" style=3D"font-size=
+: 1px; line-height: 10px;">&nbsp;
+=09=09=09=09=09=09=09=09=09=09=09=09=09</td>
+=09=09=09=09=09=09=09=09=09=09=09=09</tr>
+=09=09=09=09=09=09=09=09=09=09=09=09<tr>
+=09=09=09=09=09=09=09=09=09=09=09=09=09<td align=3D"center" mc:edit=3D"list=
+-title" style=3D"color:#000000;font-size: 14px;font-family: 'Open Sans', 'O=
+pen Sans', sans-serif;line-height: 20px;font-weight:400;" data-color=3D"Tex=
+t #000000" data-size=3D"Text #000000" data-min=3D"12" data-max=3D"28">
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09<!-- =3D=3D=3D=3D=3D=3D=3D sectio=
+n text =3D=3D=3D=3D=3D=3D -->
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09<div class=3D"editable_text" styl=
+e=3D"line-height: 160%;">
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09<span class=3D"text_container"=
+>
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09<multiline>
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09  Nach nur 2 Minuten OLLY-L=
+OLLY=C2=AE  aus dem Mund nehmen.
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09</multiline>
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09</span>
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09</div>
+=09=09=09=09=09=09=09=09=09=09=09=09=09</td>
+=09=09=09=09=09=09=09=09=09=09=09=09</tr>
+=09=09=09=09=09=09=09=09=09=09=09</tbody>
+=09=09=09=09=09=09=09=09=09=09</table>
+
+=09=09=09=09=09=09=09=09=09</td>
+=09=09=09=09=09=09=09=09</tr>
+=09=09=09=09=09=09=09</tbody>
+=09=09=09=09=09=09</table>
+
+=09=09=09=09=09=09<!-- SPACE -->
+=09=09=09=09=09=09<!-- END SPACE -->
+
+=09=09=09=09=09=09<table class=3D"container590" width=3D"200" align=3D"righ=
+t" border=3D"0" cellpadding=3D"0" cellspacing=3D"0" style=3D"border-collaps=
+e:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt;">
+=09=09=09=09=09=09=09<tbody>
+=09=09=09=09=09=09=09=09<tr>
+=09=09=09=09=09=09=09=09=09<td align=3D"center" style=3D"font-family: 'Mont=
+serrat', sans-serif; font-size: 18px; font-weight: 300; color: #516072; lin=
+e-height: 24px;">
+=09=09=09=09=09=09=09=09=09=09<img editable=3D"true" src=3D"https://psa-par=
+tner.de/email_images/210504_Olly_Lolly/Ablauf_3.png" alt=3D"1" width=3D"400=
+" height=3D"400" style=3D"width: 150;display: block;height: 150;">
+=09=09=09=09=09=09=09=09=09</td>
+=09=09=09=09=09=09=09=09</tr>=20
+=09=09=09=09=09=09=09=09<tr><td height=3D"20" style=3D"font-size: 20px;line=
+-height: 20px;">&nbsp;</td></tr>
+=09=09=09=09=09=09=09=09<tr><td align=3D"center" mc:edit=3D"list-title" sty=
+le=3D"font-family: 'Open Sans', sans-serif;font-size: 18px;font-weight: 700=
+;color: #1a1c64;" data-color=3D"H3 #1a1c64" data-size=3D"H3 #1a1c64" data-m=
+in=3D"12" data-max=3D"28">
+=09=09=09=09=09=09=09=09=09<!-- =3D=3D=3D=3D=3D=3D=3D section text =3D=3D=
+=3D=3D=3D=3D -->
+=09=09=09=09=09=09=09=09=09<div class=3D"editable_text" style=3D"line-heigh=
+t: 120%;">
+=09=09=09=09=09=09=09=09=09=09<span class=3D"text_container">
+=09=09=09=09=09=09=09=09=09=09=09<multiline>ERGEBNIS ABLESEN</multiline>
+=09=09=09=09=09=09=09=09=09=09</span>
+=09=09=09=09=09=09=09=09=09</div>
+=09=09=09=09=09=09=09=09</td>
+=09=09=09=09=09=09=09</tr>
+=09=09=09=09=09=09=09<tr>
+=09=09=09=09=09=09=09=09<td height=3D"10" style=3D"font-size: 1px; line-hei=
+ght: 10px;">&nbsp;
+=09=09=09=09=09=09=09=09</td>
+=09=09=09=09=09=09=09</tr>
+=09=09=09=09=09=09=09<tr>
+=09=09=09=09=09=09=09=09<td align=3D"center" mc:edit=3D"list-title" style=
+=3D"color:#000000;font-size: 14px;font-family: 'Open Sans', 'Open Sans', sa=
+ns-serif;line-height: 20px;font-weight:400;" data-color=3D"Text #000000" da=
+ta-size=3D"Text #000000" data-min=3D"12" data-max=3D"28">
+=09=09=09=09=09=09=09=09=09<!-- =3D=3D=3D=3D=3D=3D=3D section text =3D=3D=
+=3D=3D=3D=3D -->
+=09=09=09=09=09=09=09=09=09<div class=3D"editable_text" style=3D"line-heigh=
+t: 160%;">
+=09=09=09=09=09=09=09=09=09=09<span class=3D"text_container">
+=09=09=09=09=09=09=09=09=09=09=09<multiline>
+=09=09=09=09=09=09=09=09=09=09=09  Das Ergebnis nach 15 Minuten direkt am O=
+LLY-LOLLY=C2=AE  ablesen.
+=09=09=09=09=09=09=09=09=09=09=09</multiline>
+=09=09=09=09=09=09=09=09=09=09</span>
+=09=09=09=09=09=09=09=09=09</div>
+=09=09=09=09=09=09=09=09</td>
+=09=09=09=09=09=09=09</tr>
+=09=09=09=09=09=09</tbody>
+=09=09=09=09=09</table></td>
+=09=09=09=09</tr>
+=09=09=09</tbody>
+=09=09</table>
+=09</td>
+</tr>
+<tr><td height=3D"1" style=3D"font-size: 1px;line-height: 1px; background-c=
+olor: #ffffff;" data-bgcolor=3D"Divider">&nbsp;</td></tr>
+</table>
+</td>
+</table>
+<!-- end section -->
+
+<!-- Headline Text --><!-- end section -->
+
+<!-- 2 Img col -->
+<table border=3D"0" width=3D"100%" cellpadding=3D"0" cellspacing=3D"0" bgco=
+lor=3D"#FFFFFF" data-module=3D"module4" data-thumb=3D"thumbnails/module4.pn=
+g" style=3D"background-color: #EEEEEE;" data-bgcolor=3D"Body bgcolor">
+=09<tbody>
+=09<tr><td align=3D"center">
+=09=09<table border=3D"0" align=3D"center" width=3D"100%" style=3D"backgrou=
+nd-color: #FFFFFF;width:100%;max-width: 800px;" cellpadding=3D"0" cellspaci=
+ng=3D"0" data-bgcolor=3D"White-Bg"><tbody>
+
+=09=09=09<tr><td height=3D"60" style=3D"font-size: 60px;line-height: 60px;"=
+>&nbsp;</td></tr>
+
+=09=09=09<tr><td align=3D"center" class=3D"padding_20_show">
+=09=09=09=09<table border=3D"0" align=3D"center" width=3D"600" cellpadding=
+=3D"0" cellspacing=3D"0" class=3D"container600"><tbody>
+=09=09=09=09=09=09=09
+=09=09=09=09=09=09=09=09<td align=3D"center" bgcolor=3D"#FFFFFF">
+=09=09=09=09=09=09=09    <a href=3D"https://a8wheki.nta4itk.moyd3ur.zbae78c=
+.g7vaem8c.t8ubsdik.ppe-healthcare-europe.com/d?q00002t00b7xkg00d0000iyy0000=
+000000pvvzny13"><img src=3D"https://psa-partner.de/email_images/210504_Olly=
+_Lolly/ollylolly_video.gif" alt=3D"Olly_Lolly_Video" width=3D"700" style=3D=
+"border: none; display: block; outline: none; width: 100%;" editable=3D"tru=
+e"></a></td>
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09<tr><td align=3D"center">
+=09=09=09=09=09=09=09=09<table border=3D"0" width=3D"" align=3D"center" cel=
+lpadding=3D"0" cellspacing=3D"0" style=3D"mso-table-lspace: 0pt; mso-table-=
+rspace: 0pt;"><tbody>
+
+=09=09=09=09=09=09=09=09=09<tr><td height=3D"30" style=3D"font-size: 30px;l=
+ine-height: 30px;">&nbsp;</td></tr>
+
+=09=09=09=09=09=09=09=09=09<tr>
+=09=09=09=09=09=09=09=09=09=09<td align=3D"center" mc:edit=3D"list-title" s=
+tyle=3D"font-family: 'Open Sans', 'Arial', 'Calibri', sans-serif;font-size:=
+ 14px;font-weight: 500;color: #999999;" data-color=3D"Text #999999" data-si=
+ze=3D"Text #999999" data-min=3D"12" data-max=3D"28" class=3D"center">
+=09=09=09=09=09=09=09=09=09=09=09<!-- =3D=3D=3D=3D=3D=3D=3D section text =
+=3D=3D=3D=3D=3D=3D -->
+=09=09=09=09=09=09=09=09=09=09=09<div class=3D"editable_text" style=3D"line=
+-height: 190%;">
+=09=09=09=09=09=09=09=09=09=09=09=09<span class=3D"text_container">=09=09=
+=09=09=09=09=09=09=09=09=09=09</span>
+=09=09=09=09=09=09=09=09=09=09=09</div>
+=09=09=09=09=09=09=09=09=09=09</td>
+=09=09=09=09=09=09=09=09=09</tr>
+
+=09=09=09=09=09=09=09=09=09<tr><td align=3D"center">
+=09=09=09=09=09=09=09=09=09=09<table border=3D"0" align=3D"center" cellpadd=
+ing=3D"0" cellspacing=3D"0" class=3D"container590"><tbody>
+=09=09=09=09=09=09=09=09=09=09=09<tr><td align=3D"center">
+=09=09=09=09=09=09=09=09=09=09=09=09<a href=3D"#" target=3D"_blank">
+=09=09=09=09=09=09=09=09=09=09=09=09=09<table align=3D"center" border=3D"0"=
+ cellpadding=3D"0" cellspacing=3D"0"><tbody>
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09<tr><td align=3D"left" mc:edit=3D=
+"list-title" style=3D"font-family: 'Open Sans', 'Arial', 'Calibri', sans-se=
+rif;color: #1a1c64;font-size: 25px;font-weight: 700;" data-color=3D"Text #1=
+a1c64" data-size=3D"Text #1a1c64" data-min=3D"12" data-max=3D"28">
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09<!-- =3D=3D=3D=3D=3D=3D=3D sec=
+tion text =3D=3D=3D=3D=3D=3D -->
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09<div class=3D"editable_text" s=
+tyle=3D"line-height: 100%;">
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09<span class=3D"text_contain=
+er">
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09<multiline>Video: So fun=
+ktioniert der Olly-Lolly=C2=AE</multiline>
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09</span>
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09</div>
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09</td>
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09<td width=3D"5"></td>
+</tr>
+=09=09=09=09=09=09=09=09=09=09=09=09</tbody></table>
+=09=09=09=09=09=09=09=09=09=09=09</a>
+
+=09=09=09=09=09<table border=3D"0" width=3D"5" align=3D"left" cellpadding=
+=3D"0" cellspacing=3D"0" style=3D"border-collapse:collapse; mso-table-lspac=
+e:0pt; mso-table-rspace:0pt;" class=3D"container600">
+=09=09=09=09=09=09<tbody><tr><td width=3D"5" height=3D"40" style=3D"font-si=
+ze: 40px; line-height: 40px;"></td></tr>
+=09=09=09=09=09=09</tbody></table>
+
+=09=09=09=09=09=09<table border=3D"0" width=3D"270" align=3D"right" cellpad=
+ding=3D"0" cellspacing=3D"0" style=3D"" class=3D"container600"><tbody>
+=09=09=09=09=09=09=09<tr>
+=09=09=09=09=09=09=09=09<td align=3D"center" bgcolor=3D"#FFFFFF">&nbsp;</td=
+>
+=09=09=09=09=09=09=09</tr>
+=09=09=09=09=09=09=09<tr></tr>
+=09=09=09=09=09</tbody></table>
+=09=09=09=09</td>
+=09=09=09</tr>
+=09=09</tbody>
+=09</table>
+</td>
+</tr>
+<tr></tr>
+<tr><td height=3D"1" style=3D"font-size: 1px;line-height: 1px;background-co=
+lor: #ffffff;" data-bgcolor=3D"Divider">&nbsp;</td></tr>
+</tbody>
+</table>
+</td>
+</tr></tbody>
+<table border=3D"0" width=3D"100%" cellpadding=3D"0" cellspacing=3D"0" bgco=
+lor=3D"#FFFFFF" data-module=3D"module14" data-thumb=3D"thumbnails/module14.=
+png" style=3D"background-color: #EEEEEE;" data-bgcolor=3D"Body bgcolor">
+  <tbody>
+    <tr>
+      <td align=3D"center"><table border=3D"0" align=3D"center" width=3D"10=
+0%" bgcolor=3D"#FFFFFF" style=3D"background-color: #ffffff;width:100%;max-w=
+idth: 800px;" cellpadding=3D"0" cellspacing=3D"0" data-bgcolor=3D"White-Bg"=
+>
+        <tbody>
+          <tr>
+            <td height=3D"60" style=3D"font-size: 60px;line-height: 80px;">=
+&nbsp;</td>
+          </tr>
+          <tr>
+            <td align=3D"center" class=3D"padding_20_show"><table class=3D"=
+container600" width=3D"600" align=3D"center" border=3D"0" cellpadding=3D"0"=
+ cellspacing=3D"0">
+              <tbody>
+                <tr></tr>
+                <tr>
+                  <td><table class=3D"container590" align=3D"left" border=
+=3D"0" cellpadding=3D"0" cellspacing=3D"0" style=3D"border-collapse:collaps=
+e; mso-table-lspace:0pt; mso-table-rspace:0pt;">
+                    <tbody>
+                      <tr>
+                        <td align=3D"center"><a href=3D"https://a8wheki.nta=
+4itk.moyd3ur.zbae78c.g7vaem8c.t8ubsdik.ppe-healthcare-europe.com/d?q00002sy=
+0b7xkg00d0000iyy0000000000pvvnuy13"><img editable=3D"true" src=3D"https://p=
+sa-partner.de/email_images/210504_Olly_Lolly/olly-lolly-covid-19-lolly-anti=
+gen-test.jpg" alt=3D"Olly_Lolly_Packung" width=3D"1000" class=3D"img_scale"=
+ style=3D"width: 600px;"></a></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                    <!-- SPACE -->
+                    <table class=3D"full" width=3D"1" align=3D"left" border=
+=3D"0" cellpadding=3D"0" cellspacing=3D"0" style=3D"border-collapse:collaps=
+e; mso-table-lspace:0pt; mso-table-rspace:0pt;">
+                      <tbody>
+                        <tr>
+                          <td width=3D"1" height=3D"30" style=3D"font-size:=
+ 30px; line-height: 30px;"></td>
+                        </tr>
+                      </tbody>                    </table>
+                    <!-- END SPACE -->
+                    <table class=3D"container590" width=3D"480" align=3D"le=
+ft" border=3D"0" cellpadding=3D"0" cellspacing=3D"0" style=3D"border-collap=
+se:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt;">
+                      <tbody>
+                        <tr>
+                          <td align=3D"center" mc:edit=3D"list-title" style=
+=3D"font-family: 'Open Sans', 'Arial', 'Calibri', sans-serif;font-size: 28p=
+x;font-weight: 700;color: #1a1c64;" data-color=3D"Headline" data-size=3D"He=
+adline" data-min=3D"12" data-max=3D"28"><!-- =3D=3D=3D=3D=3D=3D=3D section =
+text =3D=3D=3D=3D=3D=3D -->
+                            <div class=3D"editable_text" style=3D"line-heig=
+ht: 120%;"> <span class=3D"text_container"><br><br>
+                              <multiline>Olly-Lolly=C2=AE  COVID-19 Lolly-T=
+est</multiline>
+                          </span> </div></td>
+                        </tr>
+                        <tr>
+                          <td height=3D"10" style=3D"font-size: 10px;line-h=
+eight: 10px;">&nbsp;</td>
+                        </tr>
+                        <tr>
+                          <td align=3D"center" mc:edit=3D"list-title" style=
+=3D"font-family: 'Open Sans', 'Arial', 'Calibri', sans-serif;color: #000000=
+;font-size: 24px;font-weight: 400;" data-color=3D"Headline" data-size=3D"He=
+adline" data-min=3D"12" data-max=3D"28"><!-- =3D=3D=3D=3D=3D=3D=3D section =
+text =3D=3D=3D=3D=3D=3D -->
+                            <div class=3D"editable_text" style=3D"line-heig=
+ht: 190%;"> <span class=3D"text_container">
+                               <li><strong>Einfach</strong> anzuwenden, <st=
+rong>vielseitig</strong> einsetzbar</li>
+=09=09=09=09=09=09=09=09<li><strong>Der ideale Lolly-Test f=C3=BCr Schulen,=
+ Kinderg=C3=A4rten, Pflegeeinrichtungen, Unternehmen aller Art </strong></l=
+i>
+=09=09=09=09=09=09=09=09<li>Geeignet f=C3=BCr Massenveranstaltungen</li>
+=09=09=09=09=09=09=09=09<li>Praktisch f=C3=BCr Betriebe aller Art</li>
+                          </span> </div></td>
+                        </tr>
+                        <tr>
+                          <td height=3D"10" style=3D"font-size: 10px;line-h=
+eight: 10px;">&nbsp;</td>
+                        </tr>
+                        <tr>
+                          <td align=3D"center" mc:edit=3D"list-title" style=
+=3D"font-family: 'Open Sans', 'Calibri', sans-serif;font-size: 24px;font-we=
+ight: 800;color: #f25a6b;line-height: 26px;" data-color=3D"Text #1a1c64" da=
+ta-size=3D"Text #999999" data-min=3D"12" data-max=3D"28"><!-- =3D=3D=3D=3D=
+=3D=3D=3D section text =3D=3D=3D=3D=3D=3D -->
+                            <div class=3D"editable_text" style=3D"line-heig=
+ht: 190%;"> <span class=3D"text_container">
+                              <multiline>
+                               <span style=3D"    font-size: 40px;    color=
+: #1a1c64;" data-color=3D"Price #1a1c64" data-size=3D"Price #1a1c64" data-m=
+ax=3D"72">ab <span style=3D"color:#f25a6b"> 4,45=E2=82=AC</span> pro St=C3=
+=BCck! <br><br>
+=09=09=09=09=09=09=09=09   <span style=3D"    font-size: 30px;    color: #1=
+a1c64;"  data-max=3D"72">Sparen Sie <span style=3D"color:#f25a6b">5%</span>=
+ bei Ihrem ersten Einkauf mit dem Gutscheincode <span style=3D"color:#f25a6=
+b">"NEU5"!</span></span>
+</multiline>
+                          </span> </div></td>
+                        </tr>
+                        <tr>
+                          <td height=3D"20" style=3D"font-size: 20px;line-h=
+eight: 20px;">&nbsp;</td>
+                        </tr>
+                        <tr>
+                          <td align=3D"center"><table border=3D"0" align=3D=
+"center" width=3D"" cellpadding=3D"0" cellspacing=3D"0" data-bgcolor=3D"Blu=
+e-Button" style=3D"box-shadow: 0px 4px 5px -5px #333333;background-color: #=
+f25a6b;border-radius: 10px;">
+                            <tbody>
+                              <tr>
+                                <td align=3D"center" style=3D"padding-botto=
+m: 20px;padding-top: 20px;color: #FFFFFF;font-size: 20px;font-family: 'Open=
+ Sans', 'Calibri', sans-serif;font-weight: 700;padding-left: 150px;padding-=
+right: 150px;" mc:edit=3D"main-button" data-size=3D"Button Text" data-min=
+=3D"12" data-max=3D"28"><div class=3D"editable_text" style=3D"line-height: =
+100%;"> <span class=3D"text_container">
+                                  <multiline> <a href=3D"https://a8wheki.nt=
+a4itk.moyd3ur.zbae78c.g7vaem8c.t8ubsdik.ppe-healthcare-europe.com/d?q00002s=
+y0b7xkg00d0000iyy0000000000pvvnuy13" target=3D"_blank" style=3D"color: #FFF=
+FFF;text-decoration: none;" data-color=3D"Button Text">Mehr Info</a> </mult=
+iline>
+                                </span> </div></td>
+                              </tr>
+                            </tbody>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td height=3D"0" style=3D" font-size: 60px;line-h=
+eight: 60px;"></td>
+     =20
+<!-- end section -->
+
+<!-- CTA Centered --><!-- end section -->
+
+<!-- Left Img -->
+<tr></tr>
+  <tr>
+      <td align=3D"center" class=3D"padding_20_show"><tbody><tr>
+        </tr><tr> </tr>
+        </tbody>
+          </td>
+      </tr>
+      <tr></tr>
+      <tr><td height=3D"1" style=3D"font-size: 1px;line-height: 1px;backgro=
+und-color: #EEEEEE;" data-bgcolor=3D"Divider">&nbsp;</td></tr>
+<!-- end section -->
+
+<!-- Right Img --><!-- end section -->
+
+<!-- Gallery -->
+
+<!-- end section -->
+
+<!-- 2 Col Service -->
+<table border=3D"0" width=3D"100%" cellpadding=3D"0" cellspacing=3D"0" bgco=
+lor=3D"#FFFFFF" data-module=3D"module9" data-thumb=3D"thumbnails/module9.pn=
+g" style=3D"background-color: #EEEEEE;" data-bgcolor=3D"Body bgcolor"><tbod=
+y>
+=09<tr><td align=3D"center">
+=09=09<table border=3D"0" align=3D"center" width=3D"100%" style=3D"backgrou=
+nd-color: #FFFFFF;width:100%;max-width: 800px;" cellpadding=3D"0" cellspaci=
+ng=3D"0" data-bgcolor=3D"White-Bg">
+=09=09=09<tbody>
+=09=09=09=09<tr><td height=3D"60" style=3D"font-size: 60px;line-height: 100=
+px;">&nbsp;</td></tr>
+=09=09=09=09<tr><td align=3D"center" class=3D"padding_20_show">
+=09=09=09=09=09<table border=3D"0" align=3D"center" width=3D"600" cellpaddi=
+ng=3D"0" cellspacing=3D"0" class=3D"container600"><tbody>
+=09=09=09=09=09=09<tr><td>
+=09=09=09=09=09=09=09<table class=3D"container590" width=3D"270" align=3D"l=
+eft" border=3D"0" cellpadding=3D"0" cellspacing=3D"0" style=3D"border-colla=
+pse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt;"><tbody>
+=09=09=09=09=09=09=09=09<tr>
+=09=09=09=09=09=09=09=09=09<td align=3D"left">
+=09=09=09=09=09=09=09=09=09=09<table border=3D"0" align=3D"right" cellpaddi=
+ng=3D"0" cellspacing=3D"0" class=3D"container590">  =20
+=09=09=09=09=09=09=09=09=09=09=09<tbody><tr>
+=09=09=09=09=09=09=09=09=09=09=09=09<td align=3D"center">
+=09=09=09=09=09=09=09=09=09=09=09=09=09<a href=3D"#" target=3D"_blank">
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09<table align=3D"center" border=3D=
+"0" cellpadding=3D"0" cellspacing=3D"0"><tbody>
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09<tr>
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09<td align=3D"right" style=
+=3D"font-family: 'Montserrat', sans-serif; font-size: 18px; font-weight: 30=
+0; color: #516072; line-height: 24px;">
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09<img editable=3D"true" s=
+rc=3D"https://psa-partner.de/email_images/210504_Olly_Lolly/herz.gif" alt=
+=3D"schmerzfrei_und_sicher" width=3D"80" height=3D"80" style=3D"display: bl=
+ock;">
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09</td>
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09</tr>
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09</tbody></table>
+=09=09=09=09=09=09=09=09=09=09=09=09=09</a>
+=09=09=09=09=09=09=09=09=09=09=09=09</td>
+=09=09=09=09=09=09=09=09=09=09=09</tr>
+=09=09=09=09=09=09=09=09=09=09</tbody></table>
+=09=09=09=09=09=09=09=09=09</td>
+=09=09=09=09=09=09=09=09</tr>=20
+
+=09=09=09=09=09=09=09=09<tr><td height=3D"20" style=3D"font-size: 20px;line=
+-height: 20px;">&nbsp;</td></tr>
+
+=09=09=09=09=09=09=09=09<tr>
+=09=09=09=09=09=09=09=09=09<td align=3D"right" mc:edit=3D"list-title" style=
+=3D"font-family: 'Open Sans', sans-serif;font-size: 18px;font-weight: 700;c=
+olor: #454545;" data-color=3D"H3 #454545" data-size=3D"H3 #454545" data-min=
+=3D"12" data-max=3D"28" class=3D"center">
+=09=09=09=09=09=09=09=09=09=09<!-- =3D=3D=3D=3D=3D=3D=3D section text =3D=
+=3D=3D=3D=3D=3D -->
+=09=09=09=09=09=09=09=09=09=09<div class=3D"editable_text" style=3D"line-he=
+ight: 120%;">
+=09=09=09=09=09=09=09=09=09=09=09<span class=3D"text_container">
+=09=09=09=09=09=09=09=09=09=09=09=09<multiline>Sichere und schmerzfreie Anw=
+endung</multiline>
+=09=09=09=09=09=09=09=09=09=09=09</span>
+=09=09=09=09=09=09=09=09=09=09</div>
+=09=09=09=09=09=09=09=09=09</td>
+=09=09=09=09=09=09=09=09</tr>
+=09=09=09=09=09=09=09=09<tr><td height=3D"10" style=3D"font-size: 1px; line=
+-height: 10px;">&nbsp;</td></tr>
+=09=09=09=09=09=09=09=09<tr>
+=09=09=09=09=09=09=09=09=09<td align=3D"right" mc:edit=3D"list-title" style=
+=3D"color:#000000;font-size: 14px;font-family: 'Open Sans', 'Open Sans', sa=
+ns-serif;line-height: 20px;font-weight:400;" data-color=3D"Text #000000" da=
+ta-size=3D"Text #000000" data-min=3D"12" data-max=3D"28" class=3D"center">
+=09=09=09=09=09=09=09=09=09=09<!-- =3D=3D=3D=3D=3D=3D=3D section text =3D=
+=3D=3D=3D=3D=3D -->
+=09=09=09=09=09=09=09=09=09=09<div class=3D"editable_text" style=3D"line-he=
+ight: 190%;">
+=09=09=09=09=09=09=09=09=09=09=09<span class=3D"text_container">
+=09=09=09=09=09=09=09=09=09=09=09=09<multiline>Die Testutensilien liegen ge=
+brauchsfertig und hygienisch einzeln verpackt vor. Mitgeliefert wird eine d=
+etaillierte Gebrauchsanweisung.</multiline>
+=09=09=09=09=09=09=09=09=09=09=09</span>
+=09=09=09=09=09=09=09=09=09=09</div>
+=09=09=09=09=09=09=09=09=09</td>
+=09=09=09=09=09=09=09=09</tr>
+=09=09=09=09=09=09=09</tbody>
+=09=09=09=09=09=09</table>
+
+=09=09=09=09=09=09<!-- SPACE -->
+=09=09=09=09=09=09<table class=3D"full" width=3D"1" align=3D"left" border=
+=3D"0" cellpadding=3D"0" cellspacing=3D"0" style=3D"border-collapse:collaps=
+e; mso-table-lspace:0pt; mso-table-rspace:0pt;">
+=09=09=09=09=09=09=09<tbody><tr>
+=09=09=09=09=09=09=09=09<td width=3D"1" height=3D"40" style=3D"font-size: 4=
+0px; line-height: 40px;"></td>
+=09=09=09=09=09=09=09</tr>
+=09=09=09=09=09=09</tbody></table>
+=09=09=09=09=09=09<!-- END SPACE -->
+
+=09=09=09=09=09=09<table class=3D"container590" width=3D"270" align=3D"righ=
+t" border=3D"0" cellpadding=3D"0" cellspacing=3D"0" style=3D"border-collaps=
+e:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt;"><tbody>
+=09=09=09=09=09=09=09<tr><td align=3D"left">
+=09=09=09=09=09=09=09=09<table border=3D"0" align=3D"left" cellpadding=3D"0=
+" cellspacing=3D"0" class=3D"container590"><tbody>
+=09=09=09=09=09=09=09=09=09<tr>
+=09=09=09=09=09=09=09=09=09=09<td align=3D"center">
+=09=09=09=09=09=09=09=09=09=09=09<a href=3D"#" target=3D"_blank">
+=09=09=09=09=09=09=09=09=09=09=09=09<table align=3D"center" border=3D"0" ce=
+llpadding=3D"0" cellspacing=3D"0"><tbody>
+=09=09=09=09=09=09=09=09=09=09=09=09=09<tr>
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09<td align=3D"right" style=3D"font=
+-family: 'Montserrat', sans-serif; font-size: 18px; font-weight: 300; color=
+: #516072; line-height: 24px;">
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09=09<img editable=3D"true" src=3D"=
+https://psa-partner.de/email_images/210504_Olly_Lolly/zuverl.gif" alt=3D"zu=
+verlaessigkeit" width=3D"80" height=3D"80" style=3D"display: block;">
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09</td>
+=09=09=09=09=09=09=09=09=09=09=09=09=09</tr>
+=09=09=09=09=09=09=09=09=09=09=09=09</tbody></table>
+=09=09=09=09=09=09=09=09=09=09=09</a>
+=09=09=09=09=09=09=09=09=09=09</td>
+=09=09=09=09=09=09=09=09=09</tr>
+=09=09=09=09=09=09=09=09</tbody></table>
+=09=09=09=09=09=09=09</td>
+=09=09=09=09=09=09</tr>=20
+=09=09=09=09=09=09<tr>
+=09=09=09=09=09=09=09<td height=3D"20" style=3D"font-size: 20px;line-height=
+: 20px;">&nbsp;
+=09=09=09=09=09=09=09</td>
+=09=09=09=09=09=09</tr>
+=09=09=09=09=09=09<tr>
+=09=09=09=09=09=09=09<td align=3D"left" mc:edit=3D"list-title" style=3D"fon=
+t-family: 'Open Sans', sans-serif;font-size: 18px;font-weight: 700;color: #=
+454545;" data-color=3D"H3 #454545" data-size=3D"H3 #454545" data-min=3D"12"=
+ data-max=3D"28" class=3D"center">
+=09=09=09=09=09=09=09=09<!-- =3D=3D=3D=3D=3D=3D=3D section text =3D=3D=3D=
+=3D=3D=3D -->
+=09=09=09=09=09=09=09=09<div class=3D"editable_text" style=3D"line-height: =
+120%;">
+=09=09=09=09=09=09=09=09=09<span class=3D"text_container">
+=09=09=09=09=09=09=09=09=09=09<multiline>Hohe Zuverl=C3=A4ssigkeit</multili=
+ne>
+=09=09=09=09=09=09=09=09=09</span>
+=09=09=09=09=09=09=09=09</div>
+=09=09=09=09=09=09=09</td>
+=09=09=09=09=09=09</tr>
+=09=09=09=09=09=09<tr>
+=09=09=09=09=09=09=09<td height=3D"10" style=3D"font-size: 1px; line-height=
+: 10px;">&nbsp;
+=09=09=09=09=09=09=09</td>
+=09=09=09=09=09=09</tr>
+=09=09=09=09=09=09<tr>
+=09=09=09=09=09=09=09<td align=3D"left" mc:edit=3D"list-title" style=3D"col=
+or:#000000;font-size: 14px;font-family: 'Open Sans', 'Open Sans', sans-seri=
+f;line-height: 20px;font-weight:400;" data-color=3D"Text #000000" data-size=
+=3D"Text #000000" data-min=3D"12" data-max=3D"28" class=3D"center">
+=09=09=09=09=09=09=09=09<!-- =3D=3D=3D=3D=3D=3D=3D section text =3D=3D=3D=
+=3D=3D=3D -->
+=09=09=09=09=09=09=09=09<div class=3D"editable_text" style=3D"line-height: =
+190%;">
+=09=09=09=09=09=09=09=09=09<span class=3D"text_container">
+=09=09=09=09=09=09=09=09=09=09<multiline>n der Regel eine Sensitivit=C3=A4t=
+ von deutlich mehr als 90 Prozent auf - das hei=C3=9Ft, mehr als 9 von 10 I=
+nfizierten werden erkannt. Die Spezifit=C3=A4t wird meist mit nahezu 99 Pro=
+zent angegeben</multiline>
+=09=09=09=09=09=09=09=09=09</span>
+=09=09=09=09=09=09=09=09</div>
+=09=09=09=09=09=09=09</td>
+=09=09=09=09=09=09</tr>
+=09=09=09=09=09</tbody>
+=09=09=09=09</table>
+=09=09=09</td>
+=09=09</tr>
+
+=09=09<tr><td height=3D"50" style=3D"font-size: 50px;line-height: 50px;"></=
+td></tr>
+
+=09=09<tr><td>
+=09=09=09<table class=3D"container590" width=3D"270" align=3D"left" border=
+=3D"0" cellpadding=3D"0" cellspacing=3D"0" style=3D"border-collapse:collaps=
+e; mso-table-lspace:0pt; mso-table-rspace:0pt;"><tbody>
+=09=09=09=09<tr><td align=3D"left">
+=09=09=09=09=09<table border=3D"0" align=3D"right" cellpadding=3D"0" cellsp=
+acing=3D"0" class=3D"container590"><tbody>
+=09=09=09=09=09=09<tr><td align=3D"center">
+=09=09=09=09=09=09=09<a href=3D"#" target=3D"_blank">
+=09=09=09=09=09=09=09=09<table align=3D"center" border=3D"0" cellpadding=3D=
+"0" cellspacing=3D"0"><tbody>
+=09=09=09=09=09=09=09=09=09<tr>
+=09=09=09=09=09=09=09=09=09=09<td align=3D"right" style=3D"font-family: 'Mo=
+ntserrat', sans-serif; font-size: 18px; font-weight: 300; color: #516072; l=
+ine-height: 24px;">
+=09=09=09=09=09=09=09=09=09=09=09<img editable=3D"true" src=3D"https://psa-=
+partner.de/email_images/210504_Olly_Lolly/uhr.gif" alt=3D"ergebnis" width=
+=3D"80" height=3D"80" style=3D"display: block;">
+=09=09=09=09=09=09=09=09=09=09</td>
+=09=09=09=09=09=09=09=09=09</tr>
+=09=09=09=09=09=09=09=09</tbody></table>
+=09=09=09=09=09=09=09</a>
+=09=09=09=09=09=09</td></tr>
+=09=09=09=09=09</tbody></table>
+=09=09=09=09</td>
+=09=09=09</tr>=20
+
+=09=09=09<tr><td height=3D"20" style=3D"font-size: 20px;line-height: 20px;"=
+>&nbsp;</td></tr>
+
+=09=09=09<tr>
+=09=09=09=09<td align=3D"right" mc:edit=3D"list-title" style=3D"font-family=
+: 'Open Sans', sans-serif;font-size: 18px;font-weight: 700;color: #454545;"=
+ data-color=3D"H3 #454545" data-size=3D"H3 #454545" data-min=3D"12" data-ma=
+x=3D"28" class=3D"center">
+=09=09=09=09=09<!-- =3D=3D=3D=3D=3D=3D=3D section text =3D=3D=3D=3D=3D=3D -=
+->
+=09=09=09=09=09<div class=3D"editable_text" style=3D"line-height: 120%;">
+=09=09=09=09=09=09<span class=3D"text_container">
+=09=09=09=09=09=09=09<multiline>Ergebnis innerhalb weniger Minuten</multili=
+ne>
+=09=09=09=09=09=09</span>
+=09=09=09=09=09</div>
+=09=09=09=09</td>
+=09=09=09</tr>
+=09=09=09<tr>
+=09=09=09=09<td height=3D"10" style=3D"font-size: 1px; line-height: 10px;">=
+&nbsp;
+=09=09=09=09</td>
+=09=09=09</tr>
+=09=09=09<tr>
+=09=09=09=09<td align=3D"right" mc:edit=3D"list-title" style=3D"color:#0000=
+00;font-size: 14px;font-family: 'Open Sans', 'Open Sans', sans-serif;line-h=
+eight: 20px;font-weight:400;" data-color=3D"Text #000000" data-size=3D"Text=
+ #000000" data-min=3D"12" data-max=3D"28" class=3D"center">
+=09=09=09=09=09<!-- =3D=3D=3D=3D=3D=3D=3D section text =3D=3D=3D=3D=3D=3D -=
+->
+=09=09=09=09=09<div class=3D"editable_text" style=3D"line-height: 190%;">
+=09=09=09=09=09=09<span class=3D"text_container">
+=09=09=09=09=09=09=09<multiline>Anders als bei PCR-Labortests liegt das Erg=
+ebnis bereits innerhalb von 10 bis 15 Minuten vor. Das ist wichtig, um pote=
+nziell infizierte Personen sofort zu erkennen und die erforderlichen weiter=
+en Schritte einzuleiten.</multiline>
+=09=09=09=09=09=09</span>
+=09=09=09=09=09</div>
+=09=09=09=09</td>
+=09=09=09</tr>
+=09=09</tbody>
+=09</table>
+
+=09<!-- SPACE -->
+=09<table class=3D"full" width=3D"1" align=3D"left" border=3D"0" cellpaddin=
+g=3D"0" cellspacing=3D"0" style=3D"border-collapse:collapse; mso-table-lspa=
+ce:0pt; mso-table-rspace:0pt;">
+=09=09<tbody><tr>
+=09=09=09<td width=3D"1" height=3D"40" style=3D"font-size: 40px; line-heigh=
+t: 40px;"></td>
+=09=09</tr>
+=09</tbody></table>
+=09<!-- END SPACE -->
+
+=09<table class=3D"container590" width=3D"270" align=3D"right" border=3D"0"=
+ cellpadding=3D"0" cellspacing=3D"0" style=3D"border-collapse:collapse; mso=
+-table-lspace:0pt; mso-table-rspace:0pt;"><tbody>
+=09=09<tr><td align=3D"left">
+=09=09=09<table border=3D"0" align=3D"left" cellpadding=3D"0" cellspacing=
+=3D"0" class=3D"container590"><tbody>
+=09=09=09=09<tr><td align=3D"center">
+=09=09=09=09=09<a href=3D"#" target=3D"_blank">
+=09=09=09=09=09=09<table align=3D"center" border=3D"0" cellpadding=3D"0" ce=
+llspacing=3D"0"><tbody>
+=09=09=09=09=09=09=09<tr>
+=09=09=09=09=09=09=09=09<td align=3D"right" style=3D"font-family: 'Montserr=
+at', sans-serif; font-size: 18px; font-weight: 300; color: #516072; line-he=
+ight: 24px;">
+=09=09=09=09=09=09=09=09=09<img editable=3D"true" src=3D"https://psa-partne=
+r.de/email_images/210504_Olly_Lolly/box.gif" alt=3D"lagertemperatur" width=
+=3D"80" height=3D"80" style=3D"display: block;">
+=09=09=09=09=09=09=09=09</td>
+=09=09=09=09=09=09=09</tr>
+=09=09=09=09=09=09</tbody></table>
+=09=09=09=09=09</a>
+=09=09=09=09</td>
+=09=09=09</tr>
+=09=09</tbody></table>
+=09</td>
+</tr>=20
+
+<tr><td height=3D"20" style=3D"font-size: 20px;line-height: 20px;">&nbsp;</=
+td></tr>
+
+<tr>
+=09<td align=3D"left" mc:edit=3D"list-title" style=3D"font-family: 'Open Sa=
+ns', sans-serif;font-size: 18px;font-weight: 700;color: #454545;" data-colo=
+r=3D"H3 #454545" data-size=3D"H3 #454545" data-min=3D"12" data-max=3D"28" c=
+lass=3D"center">
+=09=09<!-- =3D=3D=3D=3D=3D=3D=3D section text =3D=3D=3D=3D=3D=3D -->
+=09=09<div class=3D"editable_text" style=3D"line-height: 120%;">
+=09=09=09<span class=3D"text_container">
+=09=09=09=09<multiline>Einfache Lagerung bei Zimmertemperatur</multiline>
+=09=09=09</span>
+=09=09</div>
+=09</td>
+</tr>
+<tr>
+=09<td height=3D"10" style=3D"font-size: 1px; line-height: 10px;">&nbsp;
+=09</td>
+</tr>
+<tr>
+=09<td align=3D"left" mc:edit=3D"list-title" style=3D"color:#000000;font-si=
+ze: 14px;font-family: 'Open Sans', 'Open Sans', sans-serif;line-height: 20p=
+x;font-weight:400;" data-color=3D"Text #000000" data-size=3D"Text #000000" =
+data-min=3D"12" data-max=3D"28" class=3D"center">
+=09=09<!-- =3D=3D=3D=3D=3D=3D=3D section text =3D=3D=3D=3D=3D=3D -->
+=09=09<div class=3D"editable_text" style=3D"line-height: 190%;">
+=09=09=09<span class=3D"text_container">
+=09=09=09=09<multiline>Antigentests m=C3=BCssen in der Regel nicht gek=C3=
+=BChlt werden. Das macht ihre Verteilung und Lagerung denkbar unkompliziert=
+.</multiline>
+=09=09=09</span>
+=09=09</div>
+=09</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table></td>
+</tr>
+<tr><td height=3D"60" style=3D"font-size: 60px;line-height: 60px;">&nbsp;</=
+td></tr>
+<tr><td height=3D"1" style=3D"font-size: 1px;line-height: 1px;background-co=
+lor: #EEEEEE;" data-bgcolor=3D"Divider">&nbsp;</td></tr>
+</tbody>
+</table>
+</td>
+</tr></tbody>
+</table>
+<!-- end section -->
+
+
+
+=09=09=09=09<!-- Footer -->
+=09=09=09=09
+=09=09=09=09<table border=3D"0" width=3D"100%" cellpadding=3D"0" cellspacin=
+g=3D"0" bgcolor=3D"#FFFFFF" data-module=3D"module5" data-thumb=3D"thumbnail=
+s/module5.png" style=3D"background-color: #EEEEEE;" data-bgcolor=3D"Body bg=
+color">
+=09=09=09=09  <tbody>
+=09=09=09=09    <tr>
+=09=09=09=09      <td align=3D"center"><table border=3D"0" align=3D"center"=
+ width=3D"100%" style=3D"width: 100%;max-width: 800px;background-image: url=
+(https://psa-partner.de/email_images/210504_Olly_Lolly/grosshandel_back.png=
+);    background-color: #283842;    background-repeat: no-repeat;    backgr=
+ound-position: top center;    background-size: cover;" bgcolor=3D"#283842" =
+background=3D"images/bg1.png" cellpadding=3D"0" cellspacing=3D"0" data-bgco=
+lor=3D"White-Bg">
+=09=09=09=09        <tbody>
+=09=09=09=09          <tr>
+=09=09=09=09            <td align=3D"center" class=3D"padding_20_show"><tab=
+le border=3D"0" align=3D"center" width=3D"600" cellpadding=3D"0" cellspacin=
+g=3D"0" class=3D"container500" data-bgcolor=3D"Hero Center">
+=09=09=09=09              <tbody>
+=09=09=09=09                <tr>
+=09=09=09=09                  <td height=3D"70" style=3D"font-size: 70px; l=
+ine-height: 70px;">&nbsp;</td>
+=09=09=09                    </tr>
+=09=09=09=09                <tr>
+=09=09=09=09                  <td align=3D"center" mc:edit=3D"big-title1" s=
+tyle=3D"letter-spacing: 2px;font-size: 24px;color: #FFFFFF;font-weight: 300=
+;font-family: 'Open Sans', 'Open Sans', sans-serif;" class=3D"main-section-=
+header" data-color=3D"H2 white" data-size=3D"H2 white" data-min=3D"12" data=
+-max=3D"28"><!-- =3D=3D=3D=3D=3D=3D=3D section text =3D=3D=3D=3D=3D=3D -->
+=09=09=09=09                    <div style=3D"line-height: 120%;" class=3D"=
+main-section-header"> <span class=3D"text_container">
+=09=09=09=09                      <multiline><span style=3D"font-weight: 70=
+0;">Lolly-Speicheltest</span> bei <span style=3D"font-weight: 700;">PSA</sp=
+an> zu <span style=3D"font-weight: 700;">attraktiven Gro=C3=9Fhandels-Kondi=
+tionen</span>kaufen</multiline>
+=09=09=09=09                      </span> </div></td>
+=09=09=09                    </tr>
+=09=09=09=09                <tr>
+=09=09=09=09                  <td height=3D"70" style=3D"font-size: 70px; l=
+ine-height: 70px;">&nbsp;</td>
+=09=09=09                    </tr>
+=09=09=09                  </tbody>
+=09=09=09=09              </table></td>
+=09=09=09              </tr>
+=09=09=09            </tbody>
+=09=09=09=09        </table></td>
+=09=09=09        </tr>
+=09=09=09      </tbody>
+=09=09=09    </table>
+=09=09=09=09<table border=3D"0" width=3D"100%" cellpadding=3D"0" cellspacin=
+g=3D"0" bgcolor=3D"#FFFFFF" data-module=3D"module3" data-thumb=3D"thumbnail=
+s/module3.png" style=3D"background-color: #EEEEEE;" data-bgcolor=3D"Body bg=
+color">
+=09=09=09=09  <tbody>
+=09=09=09=09    <tr>
+=09=09=09=09      <td align=3D"center"><table border=3D"0" align=3D"center"=
+ width=3D"100%" style=3D"background-color: #FFFFFF;width:100%;max-width: 80=
+0px;" cellpadding=3D"0" cellspacing=3D"0" data-bgcolor=3D"White-Bg">
+=09=09=09=09        <tbody>
+=09=09=09=09          <tr> </tr>
+=09=09=09=09          <tr>
+=09=09=09=09            <td align=3D"center" class=3D"padding_20_show"><tab=
+le border=3D"0" align=3D"center" width=3D"600" cellpadding=3D"0" cellspacin=
+g=3D"0" class=3D"container600">
+=09=09=09=09              <tbody>
+=09=09=09=09                <tr>
+=09=09=09=09                  <td align=3D"center"><table border=3D"0" alig=
+n=3D"center" cellpadding=3D"0" cellspacing=3D"0">
+=09=09=09=09                    <tbody>
+=09=09=09=09                      <tr> </tr>
+=09=09=09                        </tbody>
+=09=09=09=09                    </table></td>
+=09=09=09                    </tr>
+=09=09=09=09                <tr>
+=09=09=09=09                  <td height=3D"10" style=3D"font-size: 10px;li=
+ne-height: 10px;"></td>
+=09=09=09                    </tr>
+=09=09=09=09                <tr>
+=09=09=09=09                  <td align=3D"center"><table border=3D"0" alig=
+n=3D"center" cellpadding=3D"0" cellspacing=3D"0">
+=09=09=09=09                    <tbody>
+=09=09=09=09                      <!-- Start Title -->
+=09=09=09=09                      <tr>
+=09=09=09=09                        <td align=3D"center" mc:edit=3D"big-tit=
+le1" style=3D"color: #1a1c64;font-size: 24px;font-family: 'Open Sans', 'Ope=
+n Sans', sans-serif;font-weight: 700;" data-size=3D"H2 #1a1c64" data-max=3D=
+"72" data-color=3D"H2 #1a1c64"><!-- =3D=3D=3D=3D=3D=3D=3D section text =3D=
+=3D=3D=3D=3D=3D -->
+=09=09=09=09                          <div style=3D"line-height: 120%;"> <s=
+pan class=3D"text_container"> </span></div></td>
+=09=09=09                          </tr>
+=09=09=09                        </tbody>
+=09=09=09=09                    </table></td>
+=09=09=09                    </tr>
+=09=09=09=09                <tr>
+=09=09=09=09                  <td height=3D"20" style=3D"font-size: 18px;li=
+ne-height: 30px;color: #1a1c64;text-align: center"><p>Die neuartigen Lolli-=
+Speicheltests erm=C3=B6glichen es, <strong>einfach, dezentral und kosteng=
+=C3=BCnstig auf das Coronavirus zu testen</strong>. - sei es in Unternehmen=
+, Betreuungseinrichtungen, privaten Vereinen oder =C3=B6ffentlichen Institu=
+tionen. Als Gro=C3=9Fh=C3=A4ndler unterst=C3=BCtzen wir Sie gerne bei der B=
+eschaffung der ben=C3=B6tigten Testmaterialien.</p>
+=09=09=09=09                  <p>Bitte beachten Sie, dass wir<strong>&nbsp;=
+ausschlie=C3=9Flich gewerbliche Kunden</strong> wie etwa medizinische Einri=
+chtungen, Beh=C3=B6rden oder Bildungsst=C3=A4tten beliefern. Je nach Produk=
+t gelten dabei bestimmte Mindest-Bestellmengen. Sie ben=C3=B6tigen regelm=
+=C3=A4=C3=9Fig eine gr=C3=B6=C3=9Fere Anzahl an Covid-19-Schnelltests / Cor=
+ona-Lolly-Tests? Unser breites Beschaffungsnetzwerk im In- und Ausland erm=
+=C3=B6glicht es uns, auch Gro=C3=9Fmengen zuverl=C3=A4ssig in kurzer Zeit z=
+u liefern. Gerne unterbreiten wir Ihnen ein individuelles Angebot!</p></td>=
+<br>
+=09=09=09                    </tr><br>
+=09=09=09                  </tbody>
+=09=09=09=09              </table>
+=09=09=09=09              <br></td>
+=09=09=09              </tr>
+=09=09=09            </tbody>
+=09=09=09=09        </table></td>
+=09=09=09        </tr>
+=09=09=09      </tbody>
+=09=09=09    </table>
+=09=09=09=09=09=09 =20
+=09=09=09=09   <tr>
+                          <td align=3D"left"><table border=3D"0" align=3D"l=
+eft" width=3D"" cellpadding=3D"0" cellspacing=3D"0" data-bgcolor=3D"Blue-Bu=
+tton" style=3D"box-shadow: 0px 4px 5px -5px #333333;background-color: #f25a=
+6b;border-radius: 10px;">
+                            <tbody>
+                              <tr>
+                                <td align=3D"center" style=3D"padding-botto=
+m: 20px;padding-top: 20px;color: #FFFFFF;font-size: 20px;font-family: 'Open=
+ Sans', 'Calibri', sans-serif;font-weight: 700;padding-left: 130px;padding-=
+right: 130px;" mc:edit=3D"main-button" data-size=3D"Button Text" data-min=
+=3D"12" data-max=3D"28"><div class=3D"editable_text" style=3D"line-height: =
+100%;"> <span class=3D"text_container">
+                                  <multiline> <a href=3D"https://a8wheki.nt=
+a4itk.moyd3ur.zbae78c.g7vaem8c.t8ubsdik.ppe-healthcare-europe.com/d?q00002t=
+i0b7xkg00d0000iyy0000000000pv6uvq13" target=3D"_blank" style=3D"color: #FFF=
+FFF;text-decoration: none;" data-color=3D"Button Text">Jetzt Gro=C3=9Fhande=
+ls-Anfrage stellen</a> </multiline>
+                                </span> </div></td>
+                              </tr>
+                            </tbody>
+=09=09=09=09=09=09=09=20
+=09=09=09=09<table border=3D"0" width=3D"100%" cellpadding=3D"0" cellspacin=
+g=3D"0" bgcolor=3D"#EEEEEE" data-module=3D"module20" data-thumb=3D"thumbnai=
+ls/module20.png" style=3D"background-color: #EEEEEE;" data-bgcolor=3D"Body =
+bgcolor"><tbody>
+=09=09=09=09=09<tr><td align=3D"center">
+=09=09=09=09=09=09<table border=3D"0" align=3D"center" width=3D"100%" bgcol=
+or=3D"#516072" style=3D"width:100%;max-width: 800px;background-color: #FFFF=
+FF;" cellpadding=3D"0" cellspacing=3D"0" class=3D"" data-bgcolor=3D"Footer-=
+Bg">
+=09=09=09=09=09=09=09<tbody>
+=09=09=09=09=09=09
+=09=09=09=09=09=09=09=09<tr> </tr>
+=09=09=09=09=09=09=09=09<tr></tr>
+=09=09=09=09=09=09=09</tbody>
+=09=09=09=09=09=09</table>
+=09=09=09=09=09</td>
+=09=09=09=09</tr></tbody>
+</table>
+=09=09=09=09=09=09=09  <br>
+=09=09=09=09=09=09=09  <br>
+=09=09=09<!-- end section -->
+=09=09<div style=3D"background-color:transparent;">
+<div class=3D"block-grid two-up" style=3D"min-width: 320px; max-width: 520p=
+x; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word=
+; Margin: 0 auto; background-color: transparent;">
+<div style=3D"border-collapse: collapse;display: table;width: 100%;backgrou=
+nd-color:transparent;">
+<!--[if (mso)|(IE)]><table width=3D"100%" cellpadding=3D"0" cellspacing=3D"=
+0" border=3D"0" style=3D"background-color:transparent;"><tr><td align=3D"ce=
+nter"><table cellpadding=3D"0" cellspacing=3D"0" border=3D"0" style=3D"widt=
+h:520px"><tr class=3D"layout-full-width" style=3D"background-color:transpar=
+ent"><![endif]-->
+<!--[if (mso)|(IE)]><td align=3D"center" width=3D"260" style=3D"background-=
+color:transparent;width:260px; border-top: 0px solid transparent; border-le=
+ft: 0px solid transparent; border-bottom: 0px solid transparent; border-rig=
+ht: 0px solid transparent;" valign=3D"top"><table width=3D"100%" cellpaddin=
+g=3D"0" cellspacing=3D"0" border=3D"0"><tr><td style=3D"padding-right: 0px;=
+ padding-left: 0px; padding-top:5px; padding-bottom:5px;"><![endif]-->
+<div class=3D"col num6" style=3D"display: table-cell; vertical-align: top; =
+max-width: 320px; min-width: 258px; width: 260px;">
+<div class=3D"col_cont" style=3D"width:100% !important;">
+<!--[if (!mso)&(!IE)]><!-->
+<div style=3D"border-top:0px solid transparent; border-left:0px solid trans=
+parent; border-bottom:0px solid transparent; border-right:0px solid transpa=
+rent; padding-top:5px; padding-bottom:5px; padding-right: 0px; padding-left=
+: 0px;">
+<!--<![endif]-->
+<!--[if mso]><table width=3D"100%" cellpadding=3D"0" cellspacing=3D"0" bord=
+er=3D"0"><tr><td style=3D"padding-right: 10px; padding-left: 10px; padding-=
+top: 10px; padding-bottom: 10px; font-family: Arial, sans-serif"><![endif]-=
+->
+<div style=3D"color:#555555;font-family:'Open Sans', 'Helvetica Neue', Helv=
+etica, Arial, sans-serif;line-height:1.2;padding-top:10px;padding-right:10p=
+x;padding-bottom:10px;padding-left:10px;">
+<div class=3D"txtTinyMce-wrapper" style=3D"line-height: 1.2; font-size: 12p=
+x; color: #555555; font-family: 'Open Sans', 'Helvetica Neue', Helvetica, A=
+rial, sans-serif; mso-line-height-alt: 14px;">
+<p style=3D"font-size: 8px; line-height: 1.2; word-break: break-word; mso-l=
+ine-height-alt: 10px; margin: 0;"><span style=3D"font-size: 8px;">PPE HEALT=
+HCARE EUROPE</span></p>
+<p style=3D"font-size: 8px; line-height: 1.2; word-break: break-word; mso-l=
+ine-height-alt: 10px; margin: 0;"><span style=3D"font-size: 8px;">81 Skippe=
+r Way, Suite 373</span></p>
+<p style=3D"font-size: 8px; line-height: 1.2; word-break: break-word; mso-l=
+ine-height-alt: 10px; margin: 0;"><span style=3D"font-size: 8px;">St. Neots=
+, England, PE19 6LT</span></p>
+</div>
+</div>
+<!--[if mso]></td></tr></table><![endif]-->
+<!--[if (!mso)&(!IE)]><!-->
+</div>
+<!--<![endif]-->
+</div>
+</div>
+<!--[if (mso)|(IE)]></td></tr></table><![endif]-->
+<!--[if (mso)|(IE)]></td><td align=3D"center" width=3D"260" style=3D"backgr=
+ound-color:transparent;width:260px; border-top: 0px solid transparent; bord=
+er-left: 0px solid transparent; border-bottom: 0px solid transparent; borde=
+r-right: 0px solid transparent;" valign=3D"top"><table width=3D"100%" cellp=
+adding=3D"0" cellspacing=3D"0" border=3D"0"><tr><td style=3D"padding-right:=
+ 0px; padding-left: 0px; padding-top:5px; padding-bottom:5px;"><![endif]-->
+<div class=3D"col num6" style=3D"display: table-cell; vertical-align: top; =
+max-width: 320px; min-width: 258px; width: 260px;">
+<div class=3D"col_cont" style=3D"width:100% !important;">
+<!--[if (!mso)&(!IE)]><!-->
+<div style=3D"border-top:0px solid transparent; border-left:0px solid trans=
+parent; border-bottom:0px solid transparent; border-right:0px solid transpa=
+rent; padding-top:5px; padding-bottom:5px; padding-right: 0px; padding-left=
+: 0px;">
+<!--<![endif]-->
+<!--[if mso]><table width=3D"100%" cellpadding=3D"0" cellspacing=3D"0" bord=
+er=3D"0"><tr><td style=3D"padding-right: 10px; padding-left: 10px; padding-=
+top: 10px; padding-bottom: 10px; font-family: Arial, sans-serif"><![endif]-=
+->
+<div style=3D"color:#555555;font-family:'Open Sans', 'Helvetica Neue', Helv=
+etica, Arial, sans-serif;line-height:1.2;padding-top:10px;padding-right:10p=
+x;padding-bottom:10px;padding-left:10px;">
+<div class=3D"txtTinyMce-wrapper" style=3D"line-height: 1.2; font-size: 12p=
+x; color: #555555; font-family: 'Open Sans', 'Helvetica Neue', Helvetica, A=
+rial, sans-serif; mso-line-height-alt: 14px;">
+<p style=3D"font-size: 8px; line-height: 1.2; word-break: break-word; mso-l=
+ine-height-alt: 10px; margin: 0;"><span style=3D"font-size: 8px;">CEO: Kaey=
+ Kondee</span></p>
+<p style=3D"font-size: 8px; line-height: 1.2; word-break: break-word; mso-l=
+ine-height-alt: 10px; margin: 0;"><span style=3D"font-size: 8px;">Company n=
+umber: 13243983</span></p>
+<p style=3D"font-size: 8px; line-height: 1.2; word-break: break-word; mso-l=
+ine-height-alt: 10px; margin: 0;"><span style=3D"font-size: 8px;">1044131</=
+span>=C2=A0</p>
+</div>
+</div>
+<!--[if mso]></td></tr></table><![endif]-->
+<!--[if (!mso)&(!IE)]><!-->
+</div>
+<!--<![endif]-->
+</div>
+</div>
+<!--[if (mso)|(IE)]></td></tr></table><![endif]-->
+<!--[if (mso)|(IE)]></td></tr></table></td></tr></table><![endif]-->
+</div>
+</div>
+</div>
+<center>Aus unserem Verteiler <a href=3D"https://a8wheki.nta4itk.moyd3ur.zb=
+ae78c.g7vaem8c.t8ubsdik.ppe-healthcare-europe.com/d?q00002tq0b7xkg00k0000iy=
+y0000000000pvq3ji13" >austragen</a>.</center>
+<img src=3D"https://a8wheki.nta4itk.moyd3ur.zbae78c.g7vaem8c.t8ubsdik.ppe-h=
+ealthcare-europe.com/d/d.png?q00002ty0b7xkg00h0000iyy0000000000pv3vkq13" al=
+t=3D"" border=3D"0" /></body></html>

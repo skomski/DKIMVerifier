@@ -1,0 +1,34 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "CryptorRSA",
+        "repositoryURL": "https://github.com/Kitura/BlueRSA",
+        "state": {
+          "branch": "master",
+          "revision": "440f78db26d8bb073f29590f1c7bd31004da09ae",
+          "version": null
+        }
+      },
+      {
+        "package": "RegularExpressions",
+        "repositoryURL": "https://github.com/Peter-Schorn/RegularExpressions",
+        "state": {
+          "branch": "master",
+          "revision": "0bd4269744f621931721a833b8ad228639d681f3",
+          "version": null
+        }
+      },
+      {
+        "package": "swift-argument-parser",
+        "repositoryURL": "https://github.com/apple/swift-argument-parser",
+        "state": {
+          "branch": null,
+          "revision": "986d191f94cec88f6350056da59c2e59e83d1229",
+          "version": "0.4.3"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
