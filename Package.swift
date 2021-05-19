@@ -18,11 +18,12 @@ let package = Package(
         .package(name: "RegularExpressions", url: "https://github.com/Peter-Schorn/RegularExpressions", .branch("master")),
         .package(name: "CryptorRSA", url: "https://github.com/Kitura/BlueRSA", .branch("master")),
         .package(name: "swift-argument-parser", url: "https://github.com/apple/swift-argument-parser", from: "0.4.0"),
+        .package(name: "swift-crypto", url: "https://github.com/apple/swift-crypto", from: "1.1.6")
     ],
     targets: [
         .target(
             name: "DKIMVerifier",
-            dependencies: ["RegularExpressions", "CryptorRSA"]),
+            dependencies: ["RegularExpressions", "CryptorRSA", .product(name: "Crypto", package: "swift-crypto")]),
         .target(
             name: "DKIMVerifierTool",
             dependencies: ["DKIMVerifier",

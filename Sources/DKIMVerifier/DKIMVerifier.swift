@@ -1,65 +1,65 @@
 import Foundation
-import Foundation
-import CryptoKit
 import RegularExpressions
 import CryptorRSA
-import dnssd
+import Crypto
 
 extension String {
     func trailingTrim(_ characterSet : CharacterSet) -> String {
         if let range = rangeOfCharacter(from: characterSet, options: [.anchored, .backwards]) {
-            return self.substring(to: range.lowerBound).trailingTrim(characterSet)
+            return String(self[..<range.lowerBound]).trailingTrim(characterSet)
         }
         return self
     }
 }
 
 public struct DKIMVerifier {
-    public init() {
-        
+    var dnsLoopupTxtFunction: (String) -> String? = {(domainName) in "fail"}
+
+    public init(dnsLoopupTxtFunction: @escaping (String) -> String?) {
+        self.dnsLoopupTxtFunction = dnsLoopupTxtFunction
     }
 
-    typealias DNSLookupHandler = ([String: String]?) -> Void
+    // typealias DNSLookupHandler = ([String: String]?) -> Void
 
-    func queryDNSTXTEntry(domainName: String) -> String? {
-        var result: [String: String] = [:]
-        var recordHandler: DNSLookupHandler = {
-            (record) -> Void in
-            if (record != nil) {
-                for (k, v) in record! {
-                    result.updateValue(v, forKey: k)
-                }
-            }
-        }
+    // func queryDNSTXTEntry(domainName: String) -> String? {
+    //     var result: [String: String] = [:]
+    //     var recordHandler: DNSLookupHandler = {
+    //         (record) -> Void in
+    //         if (record != nil) {
+    //             for (k, v) in record! {
+    //                 result.updateValue(v, forKey: k)
+    //             }
+    //         }
+    //     }
 
-        let callback: DNSServiceQueryRecordReply = {
-            (sdRef, flags, interfaceIndex, errorCode, fullname, rrtype, rrclass, rdlen, rdata, ttl, context) -> Void in
-            guard let handlerPtr = context?.assumingMemoryBound(to: DNSLookupHandler.self) else {
-                return
-            }
-            let handler = handlerPtr.pointee
-            if (errorCode != kDNSServiceErr_NoError) {
-                return
-            }
-            guard let txtPtr = rdata?.assumingMemoryBound(to: UInt8.self) else {
-                return
-            }
-            let txt = String(cString: txtPtr.advanced(by: 1))
-            var record: [String: String] = [:]
-            record["result"] = txt
-            handler(record)
-        }
+    //     let callback: DNSServiceQueryRecordReply = {
+    //         (sdRef, flags, interfaceIndex, errorCode, fullname, rrtype, rrclass, rdlen, rdata, ttl, context) -> Void in
+    //         guard let handlerPtr = context?.assumingMemoryBound(to: DNSLookupHandler.self) else {
+    //             return
+    //         }
+    //         let handler = handlerPtr.pointee
+    //         if (errorCode != kDNSServiceErr_NoError) {
+    //             return
+    //         }
+    //         guard let txtPtr = rdata?.assumingMemoryBound(to: UInt8.self) else {
+    //             return
+    //         }
+    //         let txt = String(cString: txtPtr.advanced(by: 1))
+    //         var record: [String: String] = [:]
+    //         record["result"] = txt
+    //         handler(record)
+    //     }
         
-        let serviceRef: UnsafeMutablePointer<DNSServiceRef?> = UnsafeMutablePointer.allocate(capacity: MemoryLayout<DNSServiceRef>.size)
-        let code = DNSServiceQueryRecord(serviceRef, kDNSServiceFlagsTimeout, 0, domainName, UInt16(kDNSServiceType_TXT), UInt16(kDNSServiceClass_IN), callback, &recordHandler)
-        if (code != kDNSServiceErr_NoError) {
-            return nil
-        }
-        DNSServiceProcessResult(serviceRef.pointee)
-        DNSServiceRefDeallocate(serviceRef.pointee)
+    //     let serviceRef: UnsafeMutablePointer<DNSServiceRef?> = UnsafeMutablePointer.allocate(capacity: MemoryLayout<DNSServiceRef>.size)
+    //     let code = DNSServiceQueryRecord(serviceRef, kDNSServiceFlagsTimeout, 0, domainName, UInt16(kDNSServiceType_TXT), UInt16(kDNSServiceClass_IN), callback, &recordHandler)
+    //     if (code != kDNSServiceErr_NoError) {
+    //         return nil
+    //     }
+    //     DNSServiceProcessResult(serviceRef.pointee)
+    //     DNSServiceRefDeallocate(serviceRef.pointee)
         
-        return result["result"]
-    }
+    //     return result["result"]
+    // }
 
     enum DKIMError: Error {
         case invalidCharactersInRFC822MessageHeader(lineNumber: Int)
@@ -192,7 +192,7 @@ public struct DKIMVerifier {
 
         // check if the calculated body hash matches the deposited body hash in the DKIM Header
         let provided_hash = tag_value_list["bh"]!
-        let calculated_hash = Data(SHA256.hash(data: body.data(using: .ascii)!)).base64EncodedString()
+        let calculated_hash = Data(Crypto.SHA256.hash(data: body.data(using: .ascii)!)).base64EncodedString()
 
         guard provided_hash == calculated_hash else {
             throw DKIMVerifier.DKIMError.bodyHashDoesNotMatch(message: provided_hash + " not equal to " + calculated_hash)
@@ -201,17 +201,15 @@ public struct DKIMVerifier {
         // use the defined selector and domain from the DKIM header to query the DNS public key entry
         let include_headers : [String] = try tag_value_list["h"]!.regexSplit(#"\s*:\s*"#).map({ $0.lowercased() })
         let domain = tag_value_list["s"]! + "._domainkey." + tag_value_list["d"]!
-        let record = queryDNSTXTEntry(domainName: domain)
+
+        // use the provided dns loopkup function
+        let record = self.dnsLoopupTxtFunction(domain)
 
         guard record != nil else {
             throw DKIMError.invalidDNSEntry(message: "DNS Entry is empty for domain: \(domain)")
         }
 
         let dns_tag_value_list = try parseTagValueList(raw_list: record!)
-
-        //let key_raw = try String(contentsOf: URL(fileURLWithPath: DKIMVerifier().testkeydns_entry), encoding: .ascii)
-        //let dns_tag_value_list : [String : String] = try parseTagValueList(raw_list: key_raw)
-        //print(dns_tag_value_list)
 
         let base64key = dns_tag_value_list["p"]!
         //let pubKeyData : Data = base64key.data(using: .ascii)!
