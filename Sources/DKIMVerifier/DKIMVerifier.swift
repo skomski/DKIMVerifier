@@ -13,6 +13,23 @@ extension String {
 }
 
 public struct DKIMVerifier {
+    struct KeyValue : Equatable {
+        var key: String
+        var value: String
+
+        public init(key: String, value: String) {
+            self.key = key
+            self.value = value
+        }
+
+        static func == <T:StringProtocol> (s: KeyValue, tuple:(T,T)) -> Bool
+        {
+          return (s.key == tuple.0) && (s.value == tuple.1)
+        }
+    }
+    typealias OrderedKeyValueArray = [KeyValue]
+    typealias TagValueDictionary = [String : String]
+
     var dnsLoopupTxtFunction: (String) -> String? = {(domainName) in "fail"}
 
     public init(dnsLoopupTxtFunction: @escaping (String) -> String?) {
@@ -61,17 +78,17 @@ public struct DKIMVerifier {
     //     return result["result"]
     // }
 
-    enum DKIMError: Error {
-        case invalidCharactersInRFC822MessageHeader(lineNumber: Int)
+    enum DKIMError: Error, Equatable {
+        case tagValueListParsingError(message: String)
+        case RFC822MessageParsingError(message: String)
         case invalidRFC822Headers(message: String)
         case invalidEntryInDKIMHeader(message: String)
-        case invalidTagListInDKIMHeader(tag: String)
         case bodyHashDoesNotMatch(message: String)
         case invalidDNSEntry(message: String)
     }
 
-    func parseTagValueList(raw_list: String) throws -> Dictionary<String, String> {
-        var tags : [String: String] = [:]
+    static func parseTagValueList(raw_list: String) throws -> TagValueDictionary {
+        var tags : TagValueDictionary = [:]
         
         let trimmed_raw_list = raw_list.trimmingCharacters(in: .whitespacesAndNewlines)
         let tag_specs = trimmed_raw_list.split(separator: ";", omittingEmptySubsequences: true)
@@ -79,22 +96,22 @@ public struct DKIMVerifier {
         for tag_spec in tag_specs {
             let splitted = tag_spec.split(separator: "=", maxSplits: 1)
             if splitted.count != 2 {
-                throw DKIMError.invalidTagListInDKIMHeader(tag: String(splitted[0]))
+                throw DKIMError.tagValueListParsingError(message: "no value for key: " + String(splitted[0]))
             }
             let key = splitted[0].trimmingCharacters(in: .whitespacesAndNewlines)
             let value = splitted[1].trimmingCharacters(in: .whitespacesAndNewlines)
             
             do {
-                    if try key.regexMatch(#"^[a-zA-Z](\w)*"#) == nil {
-                        throw DKIMError.invalidTagListInDKIMHeader(tag: String(key))
-                   }
+                if try key.regexMatch(#"^[a-zA-Z](\w)*"#) == nil {
+                    throw DKIMError.tagValueListParsingError(message: "invalid characters in key: " + String(key))
+                }
             }
             catch {
-                throw DKIMError.invalidTagListInDKIMHeader(tag: key)
+                throw DKIMError.tagValueListParsingError(message: "regexError for key: " + key)
             }
             
             if tags[key] != nil {
-                throw DKIMError.invalidTagListInDKIMHeader(tag: key)
+                throw DKIMError.tagValueListParsingError(message: "duplicate key: " + key)
             }
             tags[key] = value
         }
@@ -103,12 +120,12 @@ public struct DKIMVerifier {
     }
 
     // separates header and body for a RFC822Message and parses the headers into a dictionary
-    func parseRFC822Message(message: String) throws -> (Dictionary<String, String>, String) {
-        var headers : [String: String] = [:]
+    static func parseRFC822Message(message: String) throws -> (OrderedKeyValueArray, String) {
+        var headers : OrderedKeyValueArray = []
 
         let lines = try message.regexSplit(#"\r?\n"#)
         var i = 0
-        var lastHeader = ""
+
         while i < lines.count {
             if lines[i].isEmpty {
                 i += 1
@@ -116,22 +133,21 @@ public struct DKIMVerifier {
             }
             
             if [Character("\t"),Character(" ")].contains(lines[i][lines[i].startIndex])  {
-                if headers[lastHeader] == nil {
-                    throw DKIMError.invalidCharactersInRFC822MessageHeader(lineNumber: i)
+                if headers.isEmpty {
+                    throw DKIMError.RFC822MessageParsingError(message: "value for unknown header")
                 }
-                headers[lastHeader]! += lines[i] + "\r\n"
+                headers[headers.endIndex - 1].value += lines[i] + "\r\n"
             } else {
                 do {
                     let match = try lines[i].regexMatch(#"([\x21-\x7e]+?):"#)
                     if match == nil {
-                        throw DKIMError.invalidCharactersInRFC822MessageHeader(lineNumber: 0)
+                        throw DKIMError.RFC822MessageParsingError(message: "invalid header in line: " + String(i))
                     }
 
                     let header_name = match!.groups[0]!.match
-                    lastHeader = header_name
-                    headers[header_name] = String(lines[i][lines[i].index(header_name.endIndex, offsetBy: 1)...]) + "\r\n"
+                    headers += [KeyValue(key: header_name, value: String(lines[i][lines[i].index(header_name.endIndex, offsetBy: 1)...]) + "\r\n")]
                 } catch {
-                    throw DKIMError.invalidCharactersInRFC822MessageHeader(lineNumber: i)
+                    throw DKIMError.RFC822MessageParsingError(message: "regex error in line:" + String(i))
                 }
             }
             
@@ -143,44 +159,44 @@ public struct DKIMVerifier {
     }
 
     // generates the canonicalization data needed for signature
-    func generateSignedData(headers: [String: String], includeHeaders: [String]) throws -> String {
+    static func generateSignedData(headers: OrderedKeyValueArray, includeHeaders: [String]) throws -> String {
         var headers = headers
         
         var finalString : String = String()
         for includeHeader in includeHeaders {
-            let result = headers.first(where: {$0.key.lowercased() == includeHeader});
-            if result != nil  {
-                headers.removeValue(forKey: result!.key)
-                finalString += result!.key + ":" + result!.value
+            let index = headers.lastIndex(where: {$0.key.lowercased() == includeHeader});
+            if index != nil  {
+                let result = headers.remove(at: index!)
+                finalString += result.key + ":" + result.value
             }
         }
-        let result = headers.first(where: {$0.key.lowercased() == "dkim-signature"});
+        let index = headers.lastIndex(where: {$0.key.lowercased() == "dkim-signature"});
 
         // remove the deposited signature (b\n=\nblalala to b=)
         // no leading crlf
         let FWS = #"(?:(?:\s*\r?\n)?\s+)?"#
         let RE_BTAG = #"([;\s]b"# + FWS + #"=)(?:"# + FWS + #"[a-zA-Z0-9+/=])*(?:\r?\n\Z)?"#
-        let without_b = try result!.value.regexSub(RE_BTAG, replacer: {(in, m) in m.groups[0]!.match})
+        let without_b = try headers[index!].value.regexSub(RE_BTAG, replacer: {(in, m) in m.groups[0]!.match})
 
-        finalString += result!.key + ":" + without_b.trailingTrim(.whitespacesAndNewlines)
+        finalString += headers[index!].key + ":" + without_b.trailingTrim(.whitespacesAndNewlines)
         return finalString
     }
 
     
     public func verify(email_raw: String) throws -> Bool {
         // seperate headers from body
-        let (headers, body) = try parseRFC822Message(message: email_raw)
+        let (headers, body) = try DKIMVerifier.parseRFC822Message(message: email_raw)
         
         guard !headers.isEmpty else {
             throw DKIMError.invalidRFC822Headers(message: "no headers")
         }
         
-        guard headers["DKIM-Signature"] != nil else {
+        guard headers.contains(where: {$0.key.lowercased() == "dkim-signature"}) else {
             throw DKIMError.invalidRFC822Headers(message: "no dkim signature")
         }
         
-        let dkim_header_field : String = headers["DKIM-Signature"]!
-        let tag_value_list : [String : String] = try parseTagValueList(raw_list: dkim_header_field)
+        let dkim_header_field : String = headers.last(where: {$0.key.lowercased() == "dkim-signature"})!.value
+        let tag_value_list : [String : String] = try DKIMVerifier.parseTagValueList(raw_list: dkim_header_field)
         
         guard tag_value_list["c"] == "simple/simple" else {
             throw DKIMError.invalidEntryInDKIMHeader(message: "canonicalization algorithm is not simple/simple - other currently not implemented")
@@ -209,14 +225,14 @@ public struct DKIMVerifier {
             throw DKIMError.invalidDNSEntry(message: "DNS Entry is empty for domain: \(domain)")
         }
 
-        let dns_tag_value_list = try parseTagValueList(raw_list: record!)
+        let dns_tag_value_list = try DKIMVerifier.parseTagValueList(raw_list: record!)
 
         let base64key = dns_tag_value_list["p"]!
         //let pubKeyData : Data = base64key.data(using: .ascii)!
         let key = try CryptorRSA.createPublicKey(withBase64: base64key)
 
         // generate the signed data from the headers without the signature
-        let raw_signeddata = try generateSignedData(headers: headers, includeHeaders: include_headers)
+        let raw_signeddata = try DKIMVerifier.generateSignedData(headers: headers, includeHeaders: include_headers)
         let signeddata = try CryptorRSA.createPlaintext(with: raw_signeddata, using: .ascii)
         
         // extract the signature from the dkim header
