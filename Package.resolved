@@ -2,24 +2,6 @@
   "object": {
     "pins": [
       {
-        "package": "CryptorRSA",
-        "repositoryURL": "https://github.com/Kitura/BlueRSA",
-        "state": {
-          "branch": "master",
-          "revision": "440f78db26d8bb073f29590f1c7bd31004da09ae",
-          "version": null
-        }
-      },
-      {
-        "package": "OpenSSL",
-        "repositoryURL": "https://github.com/Kitura/OpenSSL.git",
-        "state": {
-          "branch": null,
-          "revision": "80b04f33b086fc90e28d9ae159d43705fb348e16",
-          "version": "2.2.200"
-        }
-      },
-      {
         "package": "RegularExpressions",
         "repositoryURL": "https://github.com/Peter-Schorn/RegularExpressions",
         "state": {
@@ -41,9 +23,9 @@
         "package": "swift-crypto",
         "repositoryURL": "https://github.com/apple/swift-crypto",
         "state": {
-          "branch": null,
-          "revision": "3bea268b223651c4ab7b7b9ad62ef9b2d4143eb6",
-          "version": "1.1.6"
+          "branch": "main",
+          "revision": "22fd38919566816705c57d5f4dd5a97a4edcf25e",
+          "version": null
         }
       }
     ]
