@@ -190,6 +190,29 @@ public struct DKIMVerifier {
     return finalString
   }
 
+  enum DKIMEncryption {
+    case RSA_SHA256
+    case Ed25519_SHA256
+  }
+
+  static func checkRSA_SHA256_Signature(encodedKey: Data, signature: Data, data: Data) throws
+    -> Bool
+  {
+    let key = try _RSA.Signing.PublicKey.init(derRepresentation: encodedKey)
+    let signature = _RSA.Signing.RSASignature.init(rawRepresentation: signature)
+
+    return key.isValidSignature(
+      signature, for: data,
+      padding: _RSA.Signing.Padding.insecurePKCS1v1_5)
+  }
+
+  static func checkEd25519_SHA256_Signature(encodedKey: Data, signature: Data, data: Data) throws
+    -> Bool
+  {
+    let key = try Crypto.Curve25519.Signing.PublicKey.init(rawRepresentation: encodedKey)
+    return key.isValidSignature(signature, for: Data(Crypto.SHA256.hash(data: data)))
+  }
+
   public func verify(email_raw: String) throws -> Bool {
     // seperate headers from body
     let (headers, body) = try DKIMVerifier.parseRFC822Message(message: email_raw)
@@ -213,19 +236,27 @@ public struct DKIMVerifier {
       )
     }
 
-    guard tag_value_list["a"] == "rsa-sha256" else {
+    let encryption_method: DKIMEncryption
+    if tag_value_list["a"] == "rsa-sha256" {
+      encryption_method = DKIMEncryption.RSA_SHA256
+    } else if tag_value_list["a"] == "ed25519-sha256" {
+      encryption_method = DKIMEncryption.Ed25519_SHA256
+    } else {
       throw DKIMError.invalidEntryInDKIMHeader(
-        message: "signature algorithm is not rsa.sha256 - other currently not implemented")
+        message:
+          "signature algorithm is not rsa.sha256 or ed25519-sha256 - other currently not supported")
     }
 
     // check if the calculated body hash matches the deposited body hash in the DKIM Header
     let provided_hash = tag_value_list["bh"]!
+    //print(Optional(body))
     let calculated_hash = Data(Crypto.SHA256.hash(data: body.data(using: .ascii)!))
       .base64EncodedString()
 
     guard provided_hash == calculated_hash else {
       throw DKIMVerifier.DKIMError.bodyHashDoesNotMatch(
-        message: provided_hash + " not equal to " + calculated_hash)
+        message: "provided hash " + provided_hash + " not equal to calculated hash "
+          + calculated_hash)
     }
 
     // use the defined selector and domain from the DKIM header to query the DNS public key entry
@@ -243,26 +274,61 @@ public struct DKIMVerifier {
 
     let dns_tag_value_list = try DKIMVerifier.parseTagValueList(raw_list: record!)
 
-    let base64key = dns_tag_value_list["p"]!
-    //let pubKeyData : Data = base64key.data(using: .ascii)!
-    guard let encodedKey = Data(base64Encoded: base64key, options: [])
-    else {
-
-      throw DKIMError.invalidDNSEntry(message: "invalid base64 rsa key")
+    guard let public_key_base64 = dns_tag_value_list["p"] else {
+      throw DKIMError.invalidDNSEntry(message: "no p entry")
     }
-    //let key = try CryptorRSA.createPublicKey(withBase64: base64key)
-    let key = try _RSA.Signing.PublicKey.init(derRepresentation: encodedKey)
+
+    guard let dns_encryption_type = dns_tag_value_list["k"] else {
+      throw DKIMError.invalidDNSEntry(message: "no k entry")
+    }
+
+    switch encryption_method {
+    case DKIMEncryption.Ed25519_SHA256:
+      guard dns_encryption_type == "ed25519" else {
+        throw DKIMError.invalidDNSEntry(message: "email encryption different from dns encryption")
+      }
+    case DKIMEncryption.RSA_SHA256:
+      guard dns_encryption_type == "rsa" else {
+        throw DKIMError.invalidDNSEntry(message: "email encryption different from dns encryption")
+      }
+    }
+
+    guard let public_key_data = Data(base64Encoded: public_key_base64)
+    else {
+      throw DKIMError.invalidDNSEntry(message: "invalid base64 key")
+    }
 
     // generate the signed data from the headers without the signature
-    let raw_signeddata = try DKIMVerifier.generateSignedData(
+    let raw_signed_string = try DKIMVerifier.generateSignedData(
       headers: headers, includeHeaders: include_headers)
 
-    // extract the signature from the dkim header
-    let b_valid: String = try tag_value_list["b"]!.regexSub(#"\s+"#, replacer: { num, m in "" })
-    let signature = _RSA.Signing.RSASignature.init(rawRepresentation: Data(base64Encoded: b_valid)!)
+    // print(Optional(raw_signed_string))
 
-    return key.isValidSignature(
-      signature, for: Data(raw_signeddata.data(using: .ascii)!),
-      padding: _RSA.Signing.Padding.insecurePKCS1v1_5)
+    guard let raw_signed_data = raw_signed_string.data(using: .ascii) else {
+      throw DKIMError.invalidEntryInDKIMHeader(message: "could not convert to ascii")
+
+    }
+
+    guard let dkim_signature = tag_value_list["b"] else {
+      throw DKIMError.invalidEntryInDKIMHeader(message: "no b entry")
+    }
+
+    // extract the signature from the dkim header
+    let dkim_signature_clean: String = try dkim_signature.regexSub(
+      #"\s+"#, replacer: { num, m in "" })
+    //    print(Optional(raw_signed_string))
+    //    print(Optional(dkim_signature_clean))
+    guard let dkim_signature_data = Data(base64Encoded: dkim_signature_clean) else {
+      throw DKIMError.invalidEntryInDKIMHeader(message: "invalid base64 in b entry")
+    }
+
+    switch encryption_method {
+    case DKIMEncryption.RSA_SHA256:
+      return try DKIMVerifier.checkRSA_SHA256_Signature(
+        encodedKey: public_key_data, signature: dkim_signature_data, data: raw_signed_data)
+    case DKIMEncryption.Ed25519_SHA256:
+      return try DKIMVerifier.checkEd25519_SHA256_Signature(
+        encodedKey: public_key_data, signature: dkim_signature_data, data: raw_signed_data)
+    }
   }
 }
