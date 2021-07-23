@@ -14,6 +14,7 @@ final class DKIMVerifierTests: XCTestCase {
     forResource: "rfc6376.signed.ed25519", ofType: "msg")!
   static public var rfc6376_signed_relaxed_path: String = Bundle.module.path(
     forResource: "rfc6376.signed.relaxed", ofType: "msg")!
+  static public var mubi_path: String = Bundle.module.path(forResource: "mubi", ofType: "eml")!
 
   func testTrailingTrimTests() {
     XCTAssertEqual(" sads ".trailingTrim(.whitespacesAndNewlines), " sads")
@@ -74,6 +75,28 @@ final class DKIMVerifierTests: XCTestCase {
         true)
     } catch {
       XCTFail("RFC6376Ed25519RelaxedTest email should verify: \(error)")
+    }
+  }
+
+  func testMubiEmail() {
+    let TxtAnswerFunction = {
+      (domain: String) in
+      Optional(
+        """
+        k=rsa; t=s;
+        p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCmp+fPfv02EvoCedCK5ZEFAvSgMuY4Trib7M/h5rp8ZXM3qVhRRAs8Qi1iPsdZLQ0uzYLQo9Kkz3d+7tN/xjrMRMZ3IQJ7RsyPxStpLyWCn8z6CYYbgWNG7IgPwCBafjk0achPWaGwdRfyW0R9V5QTF/E7urCocVvA4833omytewIDAQAB
+        """
+      )
+    }
+    do {
+      let email_raw = try String(
+        contentsOf: URL(fileURLWithPath: DKIMVerifierTests.mubi_path),
+        encoding: .ascii)
+      XCTAssertEqual(
+        try DKIMVerifier.verify(dnsLoopupTxtFunction: TxtAnswerFunction, email_raw: email_raw),
+        true)
+    } catch {
+      XCTFail("Mubi email should verify: \(error)")
     }
   }
 

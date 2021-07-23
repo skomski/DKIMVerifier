@@ -234,8 +234,8 @@ public func verify(dnsLoopupTxtFunction: @escaping (String) -> String?, email_ra
   // extract the signature from the dkim header
   let dkim_signature_clean: String = try dkim_signature.regexSub(
     #"\s+"#, replacer: { num, m in "" })
-  //    print(Optional(raw_signed_string))
-  //    print(Optional(dkim_signature_clean))
+  // print(raw_signed_string)
+  // print(Optional(dkim_signature_clean))
   guard let dkim_signature_data = Data(base64Encoded: dkim_signature_clean) else {
     throw DKIMError.invalidEntryInDKIMHeader(message: "invalid base64 in signature ('b') entry")
   }

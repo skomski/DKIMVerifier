@@ -1,0 +1,493 @@
+Delivered-To: bummel@skomski.com
+Received: by 2002:a05:6830:349d:0:0:0:0 with SMTP id c29csp1163070otu;
+        Fri, 23 Jul 2021 03:00:37 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJzRdl2Gao6IhczEoIcaIlLyD79B1UnQpYsHiuAfQSqPDyrVB9wNmdNwA7ayHk+fZOmsQprl
+X-Received: by 2002:a05:6402:270d:: with SMTP id y13mr4663795edd.66.1627034437041;
+        Fri, 23 Jul 2021 03:00:37 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1627034437; cv=none;
+        d=google.com; s=arc-20160816;
+        b=Ewx/24c2RcZHfzfqhvfJk7TLwW/2luM0G9mRBGHEMpTjNOZW73/WYFUuWDO0i0iGqM
+         4CEwVlHBW8DOuR5SUKuI/TyqqnpnHxDLeDcFJLe1EFEdmr//j2hQvyaWHVmwpwIziWwb
+         RFoOvw8eyW+ePndH3i5SFD/iVRtX578nyx0I++ldtWa3GbtEzyhrDsVWywGL+c7in4QK
+         iTNzBYgc1yTSdQo5CmyQZBAzgRsoZg0tNbmjHW0k558GQFcAnc18UL727YZXoHWFOC/5
+         8FRCrxTnR9/AYxq5bBZ7VD/nNpzG4mTTOX2zDnBd8Hc9E5bDEsoBiPTQFjFDMboVCgyJ
+         TZqg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20160816;
+        h=content-transfer-encoding:to:mime-version:subject:message-id:from
+         :date:dkim-signature;
+        bh=N4PH/paLl/DD8WNsoooYd4IdHhNsKiX81+ejaKN7sUw=;
+        b=ffY0lvVrve0xbZaoIQtNZYu84hU69VIbBSR9O2XeiiIRuQccB0pP2dD6FcYW7GJQI8
+         Af+r55vT/o6wRVUahpcXsXa+tvHHumuXYC/l5Bf3qvbZVzBCjh/3aqaoS5ttsx8sPuq0
+         35KI6C8xWq1rmKyI4YEfcbmqQRUk+cPnKVOGH78MtZp/70h/WZR41aFrLT/dGyRY2qon
+         qKd8JTMbxCY4QwvUYeRINvjuh5A3kDKHKQ94TjtFfJtp2rADeqEspLBF0ohPKc5UNuK0
+         nUfjUEvnPPcLMSAqVtSc5G4oSNVO7+0aLpScD93hCYJZ4fBJAVQM5ucas9ZRVxNr3WoG
+         r6cw==
+ARC-Authentication-Results: i=1; mx.google.com;
+       dkim=pass header.i=@mubi.com header.s=s2 header.b=B2118dIF;
+       spf=pass (google.com: domain of bounces+14357-7563-bummel=skomski.com@mail.mubi.com designates 167.89.101.238 as permitted sender) smtp.mailfrom="bounces+14357-7563-bummel=skomski.com@mail.mubi.com";
+       dmarc=pass (p=REJECT sp=REJECT dis=NONE) header.from=mubi.com
+Return-Path: <bounces+14357-7563-bummel=skomski.com@mail.mubi.com>
+Received: from o4.email.mubi.com (o4.email.mubi.com. [167.89.101.238])
+        by mx.google.com with ESMTPS id oy5si32621579ejb.482.2021.07.23.03.00.36
+        for <bummel@skomski.com>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 23 Jul 2021 03:00:37 -0700 (PDT)
+Received-SPF: pass (google.com: domain of bounces+14357-7563-bummel=skomski.com@mail.mubi.com designates 167.89.101.238 as permitted sender) client-ip=167.89.101.238;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@mubi.com header.s=s2 header.b=B2118dIF;
+       spf=pass (google.com: domain of bounces+14357-7563-bummel=skomski.com@mail.mubi.com designates 167.89.101.238 as permitted sender) smtp.mailfrom="bounces+14357-7563-bummel=skomski.com@mail.mubi.com";
+       dmarc=pass (p=REJECT sp=REJECT dis=NONE) header.from=mubi.com
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mubi.com;
+	h=from:subject:mime-version:to:content-type:content-transfer-encoding;
+	s=s2; bh=N4PH/paLl/DD8WNsoooYd4IdHhNsKiX81+ejaKN7sUw=;
+	b=B2118dIF83FeWpA+17v4AlleU+Vve/Noa8bmJMOScB6F8KGv6rKpMjPntcghWdB4nR+c
+	+uWQLmSHBxQdF8f3Ws5Y1/J/4fbiqTaJCosVDi3cp6L1fMViX+p62BEfEBtLQWTAf/90FA
+	tnfx4JYY0oXs2QZkLATNYAhKVt2ZaEir4=
+Received: by filterdrecv-c4477898c-htlw7 with SMTP id filterdrecv-c4477898c-htlw7-1-60FA933F-65
+        2021-07-23 10:00:31.41261317 +0000 UTC m=+573067.056597425
+Received: from prod_sidekiq_1 (unknown)
+	by geopod-ismtpd-canary-0 (SG)
+	with ESMTP id bGKOOjs0QdafqtE1OsR-OQ
+	for <dummy@email.com>;
+	Fri, 23 Jul 2021 10:00:31.382 +0000 (UTC)
+Received: from ubuntu by prod_sidekiq_1 with local (Exim 4.86_2)
+	(envelope-from <hola@mubi.com>)
+	id 1m6ryp-0001y2-5A
+	for dummy@email.com; Fri, 23 Jul 2021 10:00:31 +0000
+Date: Fri, 23 Jul 2021 10:00:35 +0000 (UTC)
+From: MUBI <hola@mubi.com>
+Message-ID: <60fa933ee588e_51993ff64f3347505237e5@prod_sidekiq_1.mail>
+Subject: Burning Down the House: "Stop Making Sense"
+Mime-Version: 1.0
+X-SG-EID: 
+ =?us-ascii?Q?manRGTkmI6cvW3E91604wLwfXLCEbc=2F26vLxUbKkbytGP0TrFUCqnFtckoZJya?=
+ =?us-ascii?Q?zmdprIgREUaZGeS=2FQpNXTQ=2FluQxhaaw9CN=2FjEYl?=
+ =?us-ascii?Q?y88oGKfpXP14kzZH6txIqBk=2Fl0vXWvWzKuiHpFn?=
+ =?us-ascii?Q?M0XJAs5IF0Iv5gGiXn0f4bEuP9WYNj7LAi27iSN?=
+ =?us-ascii?Q?RRIxGNf3ETfUf4FqBNYfUZF50f6n5+w1mEL5Hy2?=
+ =?us-ascii?Q?wVmnTNzxUEO21hL5w=3D?=
+X-SG-ID: 
+ =?us-ascii?Q?N2C25iY2uzGMFz6rgvQsb0NXwyP9nZPliyXX9gReJKz2ayj7D8X25urPEBPAJ8?=
+ =?us-ascii?Q?+Ih0o6MmwY6wVITPNXp1uc7Q=3D=3D?=
+To: bummel@skomski.com
+X-Entity-ID: A3P9sMqfikegqM8jONmc3g==
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+<!DOCTYPE html>=0D
+<html xmlns=3D"http://www.w3.org/1999/xhtml">=0D
+<head>=0D
+<meta content=3D"text/html; charset=3DUTF-8" http-equiv=3D"Content-Type">=0D
+<!--[if !mso]>=0D
+<meta content=3D'IE=3Dedge' http-equiv=3D'X-UA-Compatible'>=0D
+<![endif]-->=0D
+<meta content=3D"width=3Ddevice-width, initial-scale=3D1.0" name=3D"viewpor=
+t">=0D
+<title></title>=0D
+<!--[if (gte mso 9)|(IE)]>=0D
+<style>=0D
+  table { border-collapse: collapse; }=0D
+</style>=0D
+<![endif]-->=0D
+=0D
+=0D
+<style>body {=0D
+margin: 0 !important; padding: 0; background-color: #f3f3f3;=0D
+}=0D
+img {=0D
+border: 0;=0D
+}=0D
+@media screen and (max-width: 480px) {=0D
+  .btn-group__td {=0D
+    display: block !important;=0D
+  }=0D
+  .btn-group__a {=0D
+    display: block !important;=0D
+  }=0D
+  .btn-group__td--last {=0D
+    padding: 17px 0px 0px 0px !important;=0D
+  }=0D
+}=0D
+@media screen and (max-width: 415px) {=0D
+  table[class=3Dbutton-table] {=0D
+    width: 100% !important;=0D
+  }=0D
+}=0D
+</style>=0D
+</head>=0D
+<body style=3D"margin: 0; padding: 0;" bgcolor=3D"#f3f3f3">=0D
+<span class=3D"preheader" style=3D"display: none !important; mso-hide: all;=
+">One of the greatest concert films ever made, Stop Making Sense is an exhi=
+larating, joyful ride with Talking Heads at their innovative best. Directed=
+ by Oscar-winner Jonathan Demme and led by the extraterrestrial gyrations o=
+f frontman David Byrne, this legendary show is a feast for the eyes and ear=
+s.</span>=0D
+<center class=3D"wrapper" style=3D"width: 100%; table-layout: fixed; -webki=
+t-text-size-adjust: 100%; -ms-text-size-adjust: 100%;">=0D
+<table align=3D"center" border=3D"0" cellpadding=3D"0" cellspacing=3D"0" cl=
+ass=3D"head" style=3D"border-spacing: 0; font-family: sans-serif; color: #3=
+33333; width: 100%;" bgcolor=3D"#ffffff">=0D
+<tr>=0D
+<td style=3D"padding: 0;">=0D
+<div class=3D"webkit" style=3D"max-width: 600px; margin: 0 auto;">=0D
+<!--[if (gte mso 9)|(IE)]>=0D
+<table width=3D'600' align=3D'center'><tr><td>=0D
+<![endif]-->=0D
+<table class=3D"outer" style=3D"border-spacing: 0; font-family: sans-serif;=
+ color: #333333; width: 100%; max-width: 600px; margin: 0 auto;" bgcolor=3D=
+"#ffffff">=0D
+<tr>=0D
+<td style=3D"height: 50px; padding: 0;" align=3D"left">=0D
+<img alt=3D"One of the greatest concert films ever made, Stop Making Sense =
+is an exhilarating, joyful ride with Talking Heads at their innovative best=
+. Directed by Oscar-winner Jonathan Demme and led by the extraterrestrial g=
+yrations of frontman David Byrne, this legendary show is a feast for the ey=
+es and ears." height=3D"17" src=3D"https://assets.mubicdn.net/email/v5/mubi=
+-logo-h34.png" style=3D"padding: 3px 15px 0; border: 0;">=0D
+</td>=0D
+<td style=3D"height: 30px; padding: 10px 2% 5px;" align=3D"right">=0D
+<span class=3D"fotd-text" style=3D"color: #222; font-size: 12px; font-weigh=
+t: 600;">=0D
+Film of the Day=0D
+</span>=0D
+</td>=0D
+</tr>=0D
+</table>=0D
+<!--[if (gte mso 9)|(IE)]>=0D
+</td></tr></table>=0D
+<![endif]-->=0D
+</div>=0D
+</td>=0D
+</tr>=0D
+</table>=0D
+<div class=3D"webkit" style=3D"max-width: 600px; margin: 0 auto;">=0D
+<!--[if (gte mso 9)|(IE)]>=0D
+<table width=3D'600' align=3D'center'><tr><td>=0D
+<![endif]-->=0D
+<table align=3D"center" border=3D"0" cellpadding=3D"0" cellspacing=3D"0" cl=
+ass=3D"outer" style=3D"border-spacing: 0; font-family: sans-serif; color: #=
+333333; width: 100%; max-width: 600px; margin: 0 auto;" bgcolor=3D"#ffffff"=
+>=0D
+<tr>=0D
+<td class=3D"one-column" style=3D"padding: 0;">=0D
+<center>=0D
+<table width=3D"100%" style=3D"border-spacing: 0; font-family: sans-serif; =
+color: #333333;">=0D
+<tr>=0D
+<td class=3D"full-width-image" style=3D"padding: 0 0 0px;">=0D
+<a href=3D"https://email.mubi.com/uni/ls/click?upn=3D-2Fkl8e0topHmCO-2B60pn=
+zIXr2bqn-2FKc8JLVTpayiZ4WCVW-2BJ3p-2B4uiMKGjqoQXfQxLQiR1dNaIVQN0HfaMrsVNUjR=
+uUs7R2JSGPhkh3W-2FtokAUTCq4xAGZvU4cT-2BkhcelTpl5swHsIrZCCJmPLpaDu2U5fBOkfR1=
+qrIcO7q5enfRICtet2LkX-2Fm3EFA5ioxkbg9h0zBPONiOaWP0NQEyr0HY5JGTxH2jQCqtBzOrw=
+afxmkZRTteCFCMCpJzH2HYJpg3YFf_qrZWdw4RY7LRkrKd87iMcvbGPwF-2FOQZDeco1faiDJcn=
+cb7oo07bq2Sn0xZuLdYmumCUXsJpdehTpj3-2BiaBVDhsh5IczXJ7gl9xSnk-2Fx8xoRGpSZ49x=
+SAtskRe6YosnWrEnNhi83JRT1l7oh8GsGPyCT9mdGg5Q0z6yhUfeB5hAQSvw3Hsw1GIvfNYcAkm=
+DD8ryKJGkenn1ae3v687F3mHOU3hwvTTwOP84oxZRJlZc5DL1c5MYDpmIqBNvzDBvq4" style=
+=3D"display: block; color: #001489; text-decoration: underline;" universal=
+=3D"true"><img alt=3D"" src=3D"https://assets.mubicdn.net/images/film/17532=
+/image-w1504_overlaid.jpg?1626285003" width=3D"600" style=3D"width: 100%; m=
+ax-width: 600px; height: auto; margin-bottom: 0px; border: 0;"></a>=0D
+</td>=0D
+</tr>=0D
+<tr>=0D
+<td height=3D"12" style=3D"padding: 0;"></td>=0D
+</tr>=0D
+<tr>=0D
+<td class=3D"inner contents" style=3D"padding: 0px 5%;" align=3D"left">=0D
+<p class=3D"h1" style=3D"font-family: Helvetica, Arial, Lucida Grande, sans=
+-serif; -webkit-font-smoothing: antialiased; line-height: 30px; font-size: =
+30px; font-weight: bold; margin: 0px 0; padding: 0px;">=0D
+<a href=3D"https://email.mubi.com/uni/ls/click?upn=3D-2Fkl8e0topHmCO-2B60pn=
+zIXr2bqn-2FKc8JLVTpayiZ4WCVW-2BJ3p-2B4uiMKGjqoQXfQxLQiR1dNaIVQN0HfaMrsVNUjR=
+uUs7R2JSGPhkh3W-2FtokAUTCq4xAGZvU4cT-2BkhcelTpl5swHsIrZCCJmPLpaDu2U5fBOkfR1=
+qrIcO7q5enfRICtet2LkX-2Fm3EFA5ioxkbg9h0zBPONiOaWP0NQEyr0HY5JGTxH2jQCqtBzOrw=
+afxmkZRTteCFCMCpJzH2HYJpg-bNy_qrZWdw4RY7LRkrKd87iMcvbGPwF-2FOQZDeco1faiDJcn=
+cb7oo07bq2Sn0xZuLdYmuF8SLeJG402BlxC7CX3tyPIQBlMIv5VezLSfUV3sB296AYMnOJZgap9=
+M-2FLt1VUO0pkg09EiwrCUGjBFiz430G9uVaQ6jRSagDQl959mI-2FwhyYQP1Dd6Bmk9OH7MkSv=
+kTEgFaQZjNZ68p2UuHOxzJgJm9Q2WwSk2Oy1LYmQuW8o4LA5H7yG-2Bi6DoXIkXQwKevX" univ=
+ersal=3D"true" style=3D"color: #333; text-decoration: none;">=0D
+Stop Making Sense=0D
+</a>=0D
+</p>=0D
+<p class=3D"h2" style=3D"font-family: Helvetica, Arial, Lucida Grande, sans=
+-serif; -webkit-font-smoothing: antialiased; line-height: 16px; font-size: =
+14px; font-weight: regular; color: grey; margin: 0 0 20px; padding: 7px 0px=
+ 0px;">=0D
+Jonathan Demme, 1984=0D
+</p>=0D
+<p style=3D"font-family: Helvetica, Arial, Lucida Grande, sans-serif; -webk=
+it-font-smoothing: antialiased; line-height: 20px; font-size: 15px; margin:=
+ 0 0 20px;">One of the greatest concert films ever made, <em>Stop Making Se=
+nse</em> is an exhilarating, joyful ride with Talking Heads at their innova=
+tive best. Directed by Oscar-winner Jonathan Demme and led by the extraterr=
+estrial gyrations of frontman David Byrne, this legendary show is a feast f=
+or the eyes and ears.</p>=0D
+</td>=0D
+</tr>=0D
+<tr>=0D
+<td class=3D"inner" style=3D"padding: 0px 5% 10px;">=0D
+<table class=3D"btn-group" style=3D"border-spacing: 0; font-family: sans-se=
+rif; color: #333333;">=0D
+<tr>=0D
+<td class=3D"btn-group__td" style=3D"white-space: nowrap; padding: 0;" bgco=
+lor=3D"#001489">=0D
+<a class=3D"btn-group__a btn-primary" href=3D"https://email.mubi.com/ls/cli=
+ck?upn=3D-2Fkl8e0topHmCO-2B60pnzIXr2bqn-2FKc8JLVTpayiZ4WCVW-2BJ3p-2B4uiMKGj=
+qoQXfQxLQiR1dNaIVQN0HfaMrsVNUjRuUs7R2JSGPhkh3W-2FtokAUTCq4xAGZvU4cT-2Bkhcel=
+Tpl5swHsIrZCCJmPLpaDu2U5fBOkfR1qrIcO7q5enfRICtet2LkX-2Fm3EFA5ioxkbg9h0zBPON=
+iOaWP0NQEyr0HY5JGTxH2jQCqtBzOrwafxmkZRTteCFCMCpJzH2HYJpglqWQ_qrZWdw4RY7LRkr=
+Kd87iMcvbGPwF-2FOQZDeco1faiDJcncb7oo07bq2Sn0xZuLdYmuvagAsF94FVLj4Lq3WJWIHiu=
+9Wt1XWXq1Z2WhXtSJ8rY3Lw6S2w1mWrH5Z0S0JLSdoVQZKV7YHrFwV-2BFkmxS5CF6VGzQZ37oD=
+cv6WafEynw9ATJU8EQ9vhH-2FhoEWt7aJL6tgaHnKjAKO1I9HiQ-2BfWdcIxWOyo-2FnP7ki-2F=
+tAWiV-2B4SvwlizsBgO6P-2FH5Ohl-2F9P7" style=3D"color: #fff; text-decoration:=
+ none; font-size: 12px; font-family: Helvetica, Arial, sans-serif; line-hei=
+ght: 2; font-weight: bold; text-align: center; cursor: pointer; display: in=
+line-block; text-transform: uppercase; background-color: #001489; padding: =
+2px 11px; border: 1px solid #001489;">=0D
+<span>=E2=96=BA=C2=A0</span>=0D
+Watch Now=0D
+</a>=0D
+</td>=0D
+<td class=3D"btn-group__td btn-group__td--last" style=3D"white-space: nowra=
+p; padding: 0px 0px 0px 17px;">=0D
+<a class=3D"btn-group__a btn-secondary" href=3D"https://email.mubi.com/ls/c=
+lick?upn=3D-2Fkl8e0topHmCO-2B60pnzIXr2bqn-2FKc8JLVTpayiZ4WCVov-2FrKxnMncTAI=
+LtdqZuH05MPKVJ1LA0Mx2t7h2kqaL-2F-2F2j0dL7mtCYugu8yrRVH4qUN9OMGni8ghSbk9zpV8=
+78pTBBXKbRJhierYkVUxX-2BAiXS8p1Z3PtpzVPMc0SXwG3iHqNk4-2Bip-2FIyobnVIgm3tz3L=
+I8yfc6xoS7-2FLXsLNv-2BuQZsQjIPheCtM8NkZZNeWx3yZ2vSrZE1T8fxg6mB-2Bm9yadH8fcj=
+lHvtskOxQGwXWcU3BdBK5PRPeA6jbPgtj4Ujj-2Fb5dVEj-2B2BV8vSolYcns81sIfBguH2-2F7=
+sFaxsJpQ-3D-3Dw6wZ_qrZWdw4RY7LRkrKd87iMcvbGPwF-2FOQZDeco1faiDJcncb7oo07bq2S=
+n0xZuLdYmukgADQw908ZD9QeKQVzT-2FFkpTv9ZTfRkIDOuSC2tptVdg5dEmYpXimWvb9mbbC2R=
+m9DjwtCWa8PUmPhnsQToP-2BuyhXnTuNJbClkseIwcY4q2rH4qdT-2B095Xkc7wtmGKCYbOMCos=
+an8-2BpHnsWhfWfQUG2gMg8ksCq-2FQsDQQU1hqUEOCJXbQWj2wY8K8Rabgd0M" style=3D"co=
+lor: #001489; text-decoration: none; font-size: 12px; font-family: Helvetic=
+a, Arial, sans-serif; line-height: 2; font-weight: bold; text-align: center=
+; cursor: pointer; display: inline-block; text-transform: uppercase; backgr=
+ound-color: transparent; padding: 2px 11px; border: 1px solid #001489;">=0D
+<span style=3D"font-size: 14px; line-height: 1;">+=C2=A0</span>=0D
+Watchlist=0D
+</a>=0D
+</td>=0D
+</tr>=0D
+</table>=0D
+</td>=0D
+</tr>=0D
+<tr>=0D
+<td height=3D"12" style=3D"padding: 0;"></td>=0D
+</tr>=0D
+</table>=0D
+</center>=0D
+</td>=0D
+</tr>=0D
+</table>=0D
+<table border=3D"0" cellpadding=3D"0" cellspacing=3D"0" style=3D"border-spa=
+cing: 0; font-family: sans-serif; color: #333333;">=0D
+<tr>=0D
+<td style=3D"padding: 0;">=0D
+<p style=3D"font-family: Helvetica, Arial, Lucida Grande, sans-serif; -webk=
+it-font-smoothing: antialiased; line-height: 20px; margin: 0;">=C2=A0</p>=0D
+</td>=0D
+</tr>=0D
+</table>=0D
+<table align=3D"center" border=3D"0" cellpadding=3D"0" cellspacing=3D"0" cl=
+ass=3D"outer" style=3D"border-spacing: 0; font-family: sans-serif; color: #=
+333333; width: 100%; max-width: 600px; margin: 0 auto;" bgcolor=3D"#ffffff"=
+>=0D
+<tr>=0D
+<td bgcolor=3D"#f3f3f3" class=3D"one-column" style=3D"padding: 0;">=0D
+<center>=0D
+<table width=3D"100%" style=3D"border-spacing: 0; font-family: sans-serif; =
+color: #333333;">=0D
+<tr>=0D
+<td class=3D"inner contents" style=3D"padding: 0px 5% 10px;" align=3D"left"=
+>=0D
+<center>=0D
+<p class=3D"h3" style=3D"font-family: Helvetica, Arial, Lucida Grande, sans=
+-serif; -webkit-font-smoothing: antialiased; line-height: 26px; font-size: =
+14px; font-weight: bold; margin: 0 0 0px; padding: 20px 0px 0px;">Sharing i=
+s caring</p>=0D
+<p style=3D"font-size: 14px; font-family: Helvetica, Arial, Lucida Grande, =
+sans-serif; -webkit-font-smoothing: antialiased; line-height: 20px; margin:=
+ 0 0 20px;">=0D
+Get free MUBI when you tell your friends. Plus, if you successfully refer 5=
+ friends you'll receive a special gift from us.=0D
+<a href=3D"https://email.mubi.com/ls/click?upn=3D-2Fkl8e0topHmCO-2B60pnzIXq=
+3-2B99h-2Bv1a5YFtGdQgcXLET1xnVnrTftdkVYNpmXR1PsVbSx00D7bsahme4gKgsWZFBie7KW=
+lERxzZxHhgsXKGmFgs0U4XxDcySCre1jAqTv6bAafbd1NYfNEw70OYZh5Z2GOG-2FdHnbrfeZKx=
+i10nfDzL-2B2P22XnzumJZT8e6hcjIVhblgFtUHtZCtO-2FO5hvQ-3D-3D1c8V_qrZWdw4RY7LR=
+krKd87iMcvbGPwF-2FOQZDeco1faiDJcncb7oo07bq2Sn0xZuLdYmuv6krt4Ikji8mEeHjT7th4=
+sV-2Bq9b0krd-2FTF7m7RVrWBGYFXR5kaNK0qbn5dtIPURZjK2-2F4NoFkddEefmLBgCuiB4hap=
+Dc77n7ENpq6uWSi8Rzgzk-2Be8BV35kkC4tRogSTWfKTRBytW7YW5wn0C-2FK1dRvqQYfl9pHIg=
+T88WYx1GPfFDLyWzpfyJb0nFajEtpse" style=3D"color: #001489; text-decoration: =
+underline;">=0D
+Tell your friends now=0D
+</a>=0D
+</p>=0D
+</center>=0D
+</td>=0D
+</tr>=0D
+</table>=0D
+</center>=0D
+</td>=0D
+</tr>=0D
+</table>=0D
+<table align=3D"center" border=3D"0" cellpadding=3D"0" cellspacing=3D"0" cl=
+ass=3D"outer" style=3D"border-spacing: 0; font-family: sans-serif; color: #=
+333333; width: 100%; max-width: 600px; margin: 0 auto;" bgcolor=3D"#ffffff"=
+>=0D
+<tr>=0D
+<td bgcolor=3D"#f3f3f3" class=3D"one-column" style=3D"padding: 0;">=0D
+<center>=0D
+<table width=3D"100%" style=3D"border-spacing: 0; font-family: sans-serif; =
+color: #333333;">=0D
+<tr>=0D
+<td class=3D"inner contents" style=3D"padding: 0px 5% 10px;" align=3D"left"=
+>=0D
+<center>=0D
+<div style=3D"width: 250px; padding-top: 20px; padding-bottom: 20px;">=0D
+<a href=3D"https://email.mubi.com/ls/click?upn=3DADr77ArsDWcXNZ2M-2Bkq1i06Y=
+ME2vZj6kxNJKgtHPNEYcYARMEVJLFwqpk2Kfm25F4qlQcUIwrYMTiMKh4WjEFS3GCJg0qcny1wC=
+kBWmk7cM4r1-2F58dywvwjzdwReyPNreK18xMxD6rSsSwJmudbJzQ-3D-3DrShU_qrZWdw4RY7L=
+RkrKd87iMcvbGPwF-2FOQZDeco1faiDJcncb7oo07bq2Sn0xZuLdYmu53zJwRo5aI-2BAfQTDDa=
+n8r-2FNj-2FJEOKPEOwAL5DaDUimbqcmt9uNEdcIKK9GxaM6ccchrfZ8A-2FmWp82tePnUgS2p8=
+nlP3p9QX2Bt6PqK08VmBtlcsFCc-2BZCbSYBVZ3WdymM0KUGshGzTLRHJdMtvFVbucu2Hw8zoED=
+indqqBGNXc7H2W-2B68s3FffJHR-2FovFRoo" style=3D"color: #001489; text-decorat=
+ion: underline;"><img height=3D"24" src=3D"https://assets.mubicdn.net/email=
+/v4/social_facebook.png" style=3D"padding-right: 12px; border: 0;" width=3D=
+"24"></a>=0D
+<a href=3D"https://email.mubi.com/ls/click?upn=3DADr77ArsDWcXNZ2M-2Bkq1izRU=
+9YDp6NPpGD8PUZzTmqcvNnAj-2Bur0cGBPb0TOiM46gmZMPdxKMIE-2BePh-2B3j1fWhcbK8-2B=
+8j3Q3a03HL4z8rKP26dFU2J89ibgcKnt-2Fhl5JMu1-2F67ww-2FhUxyjLJUmtDJw-3D-3Dckc9=
+_qrZWdw4RY7LRkrKd87iMcvbGPwF-2FOQZDeco1faiDJcncb7oo07bq2Sn0xZuLdYmulw3jgokA=
+UiN9Uq-2ByuAUi1SOOqy3EqAS2lw-2B7aPyNxTWjR3euUNXjcw0UGhaJk-2BILHvuLY7aW2Cp38=
+LhUARzqiZv21Tgp2ayIZsficH2ALZ6oyJgIdXM9WsH5R5B56o-2Fk3R-2B8YVVPjyIobTmc24Um=
+ROzkyeZ5gc-2BOM-2BrhPt2d5gtvOU0KREKiLsMnhz1fWzga" style=3D"color: #001489; =
+text-decoration: underline;"><img height=3D"24" src=3D"https://assets.mubic=
+dn.net/email/v4/social_twitter.png" style=3D"padding: 0px 12px; border: 0;"=
+ width=3D"24"></a>=0D
+<a href=3D"https://email.mubi.com/ls/click?upn=3D1W8Cv1RT24Lo1IK1HnGq0XqbtM=
+3rxeBfOLIwgIzcYprWYWVkFIlJ7-2FEVfZsGfbk8KvYL04v-2B9tu-2BPr3xYDnyEOMcQgy6bTQ=
+ZE3KhUCgvbrs6WUlYQQ6J4F4NRVE1-2BhvbcvvMbvZjnJczNRaWP1wVXg-3D-3DKCrp_qrZWdw4=
+RY7LRkrKd87iMcvbGPwF-2FOQZDeco1faiDJcncb7oo07bq2Sn0xZuLdYmuA4w0cYgFPB1opsAU=
+Oadq2TD-2FrFw04QCrji8IBihl83h-2FbqqeIkmjUsw2B3UY4BEq0dtPylK-2FduRxe6xc6gPTH=
+Bhq6QTZyNrWkUUq4YrYsbFrYXwfoRL8iGG7SOIFxzYT1ALJ4dRXZzBKRtIhjXnC-2Bry8cZD4ef=
+nb0P4up-2FRkjxS3DbgZxjxeW-2BxlSDH4xjTj" style=3D"color: #001489; text-decor=
+ation: underline;"><img height=3D"24" src=3D"https://assets.mubicdn.net/ema=
+il/v4/social_instagram.png" style=3D"padding: 0px 12px; border: 0;" width=
+=3D"24"></a>=0D
+</div>=0D
+</center>=0D
+</td>=0D
+</tr>=0D
+</table>=0D
+</center>=0D
+</td>=0D
+</tr>=0D
+</table>=0D
+<table align=3D"center" border=3D"0" cellpadding=3D"0" cellspacing=3D"0" cl=
+ass=3D"outer" style=3D"border-spacing: 0; font-family: sans-serif; color: #=
+333333; width: 100%; max-width: 600px; margin: 0 auto;" bgcolor=3D"#ffffff"=
+>=0D
+<tr>=0D
+<td bgcolor=3D"#f3f3f3" class=3D"one-column" style=3D"padding: 0;">=0D
+<center>=0D
+<table width=3D"100%" style=3D"border-spacing: 0; font-family: sans-serif; =
+color: #333333;">=0D
+<tr>=0D
+<td class=3D"inner contents" style=3D"padding: 0px 5% 10px;" align=3D"left"=
+>=0D
+<center>=0D
+<div style=3D"padding-bottom: 20px;">=0D
+<p class=3D"unsubscribe" style=3D"font-family: Helvetica, Arial, Lucida Gra=
+nde, sans-serif; -webkit-font-smoothing: antialiased; line-height: 20px; fo=
+nt-size: 12px !important; color: #aaaaaa; font-weight: normal !important; m=
+argin: 0 0 20px;">=0D
+You are receiving the daily newsletter. Prefer to have it all rolled up in =
+a weekly digest?=0D
+<a href=3D"https://email.mubi.com/ls/click?upn=3D-2Fkl8e0topHmCO-2B60pnzIXp=
+o6DhYo0b3gDSuh4kEXCuwycO6MDqt62wzYpf9OXaNXIiFoWCAx94evZV3ZhvzzmbVQaVbAeySyg=
+ZfgC6IfNaFwkUHxNQnkJ0DKfJJSZ58PIzyp4XFUDIz9XuqvnMmttPIYuX8Cvj5Gr6GBV7EeaxQw=
+eJQR5kGBipMSIaIAG0Rn0AB5rfqIoWi-2BkBv969Vu1HMpmV9CHGYtX6tERnUfC0O5YuzxoJJgm=
+m7-2FZ2iMl-2F8OTdGvXd7oxw-2FBEh82aFGxMLin0nbBF42enlKDhls5ET4-3DmrtD_qrZWdw4=
+RY7LRkrKd87iMcvbGPwF-2FOQZDeco1faiDJcncb7oo07bq2Sn0xZuLdYmu2OYUVVGcOhRL2DAe=
+WQNu08rAAf1BH3rLRYMlZE2QZDtQ-2BL1hX3zhzg7NgY6vKfGP9-2BDHuu0BpW2Zwk9Mw9LKf7L=
+ZNQqDVnPyh2WPaXGeGXs-2BlXydte5-2Fn26SkoWkf-2BGvCNIAJwGUg9YclkG5LwaxylcMYk8-=
+2B1vazpCqMZlS78DGQUAcwr7c8Ba8gc2IHQbRN" style=3D"color: #aaaaaa; text-decor=
+ation: underline;">Click here to switch</a> to our weekly version or <a hre=
+f=3D"https://email.mubi.com/ls/click?upn=3D-2Fkl8e0topHmCO-2B60pnzIXpo6DhYo=
+0b3gDSuh4kEXCuwycO6MDqt62wzYpf9OXaNXIiFoWCAx94evZV3ZhvzzmbVQaVbAeySygZfgC6I=
+fNaFwkUHxNQnkJ0DKfJJSZ58PIzyp4XFUDIz9XuqvnMmttKN9Ifmi4ph2XkJdASt8tSCYybD3KD=
+V0Dgrso6Lm7RzfObQdRTodzWLKDJ-2BDgrSWd6OM8vbd6Mkzndh1HhpeYoJFj-2FjSOynTcciz1=
+eQkfh1AHg3Xv1Z3vRQkW0yVSCOkEQ-3D-3DDuRV_qrZWdw4RY7LRkrKd87iMcvbGPwF-2FOQZDe=
+co1faiDJcncb7oo07bq2Sn0xZuLdYmulHnE2U44EH0vFFR2Khv-2FB0aPPwZPkUy8Fi0j9yvaE3=
+8ym3ablwyKLhqgAVkb-2BjhPe-2BBcUMxZi0Hk17vBThoH8p4ysdhc70EWyPpxQ3JaVIPCtq28L=
+oZtwP-2B5B458e-2Ff-2FfwXARy48Wwgu82WWtnbEdIkVAT20NFcuZKQO-2FacKgIB-2FgZWMDB=
+u-2B4nFKphwpbD4k" style=3D"color: #aaaaaa; text-decoration: underline;">uns=
+ubscribe</a>.=0D
+</p>=0D
+</div>=0D
+</center>=0D
+</td>=0D
+</tr>=0D
+</table>=0D
+</center>=0D
+</td>=0D
+</tr>=0D
+</table>=0D
+<table align=3D"center" border=3D"0" cellpadding=3D"0" cellspacing=3D"0" cl=
+ass=3D"outer" style=3D"border-spacing: 0; font-family: sans-serif; color: #=
+333333; width: 100%; max-width: 600px; margin: 0 auto;" bgcolor=3D"#ffffff"=
+>=0D
+<tr>=0D
+<td bgcolor=3D"#f3f3f3" class=3D"one-column" style=3D"padding: 0;">=0D
+<center>=0D
+<table width=3D"100%" style=3D"border-spacing: 0; font-family: sans-serif; =
+color: #333333;">=0D
+<tr>=0D
+<td style=3D"padding: 0;">=0D
+<center>=0D
+<div style=3D"padding-bottom: 40px;">=0D
+<a href=3D"https://email.mubi.com/ls/click?upn=3DtR-2F7WYRHCuh-2BFv48rSQAJq=
+XMeHeDMSW-2FJ148wPQSMJBFysr5KJ0OJdvMLb-2B4zGZ-2BUK9IskrBWi-2Ba-2F0VkSYAhEYr=
+COShZ44-2BDm6snGGXBBjqkFKpqyadYibQJd4KHJHaXkDqRASzwvEhBgXaClFwrHw-3D-3DArSp=
+_qrZWdw4RY7LRkrKd87iMcvbGPwF-2FOQZDeco1faiDJcncb7oo07bq2Sn0xZuLdYmuIxSbi1qo=
+ObIMHq6w51gcRocamcQYP-2BEqU2hlQGR10xd9Spo8KtDU-2B7qnNlcziLmGCiHHGk-2BQY58dn=
+-2FhDoouoFc24TUKqZv1gWwrMOduP2TVXTLrcxGV61P2pYlgY0vcQLt-2BGgSKJxOrnsFktfDs5=
+DhDDpaR7IiOhhZ-2B-2BnlzZczWWbiimS-2Bd-2FDWRCvOfmiG5V" style=3D"color: #0014=
+89; text-decoration: underline;"><img src=3D"https://assets.mubicdn.net/ema=
+il/v4/app_itunes.png" style=3D"padding: 0px 6px; border: 0;" width=3D"120">=
+</a>=0D
+<a href=3D"https://email.mubi.com/ls/click?upn=3Dp3fLAfxYlinCrJW0EyMQMU67CK=
+RW-2BUp3CLsl-2FgZRQC5BNwP4AhDCWeAjQAgPEYatsS0-2BOjmzIzMRRFrYr6frSG1g6g24VXI=
+x3MPnmRfsGdtwhZtbU5bZYDr7-2FBdWnlNp0slSwS-2Ff5ydpnlgSfR8OdiDUUOrv3W4n9o1BVe=
+gbt70PLOW72C-2F5YfTFBWlWCmgysZL3_qrZWdw4RY7LRkrKd87iMcvbGPwF-2FOQZDeco1faiD=
+Jcncb7oo07bq2Sn0xZuLdYmuum64LmhbqtfnWd4DmpDGmcX0bduIRlEaS0LYH4u-2BHUiXl1sn9=
+hf-2FyALuBQv2iojcZawf4a91jGJqMRYNDZ6qeFNVN2Aya4sgb-2BdCCOZW2kwPdb-2F-2BuNlO=
+5iru86YSlZbMu4rFxoLX4y2oMI72QQdHfbosZBaRYhh2OjmpLhzfbs-2FBhJdfXW2cdzCFaaN9U=
+HMe" style=3D"color: #001489; text-decoration: underline;"><img src=3D"http=
+s://assets.mubicdn.net/email/v5/app_googleplay.png" style=3D"padding: 0px 6=
+px; border: 0;" width=3D"120"></a>=0D
+</div>=0D
+</center>=0D
+</td>=0D
+</tr>=0D
+</table>=0D
+</center>=0D
+</td>=0D
+</tr>=0D
+</table>=0D
+<!--[if (gte mso 9)|(IE)]>=0D
+</td></tr></table>=0D
+<![endif]-->=0D
+</div>=0D
+</center>=0D
+<img src=3D"https://email.mubi.com/wf/open?upn=3DtOc4cvb77WnNp7kgk7bGk6yAdP=
+0xv-2B4Xat0bjowZSor-2Bn44hNpjOZs-2Fmm7my9klJ-2F-2Bu9gXoHwWgQZL-2Fh8Ekan-2Ft=
+MlGWdVHhUUU6Iny1ydQYUwqF2S1ccjkk5QkFaf5TzOC2FzeQ3I9Er3WPR2HLwGmjRgA8N-2Bi9z=
+L2m-2Baz2dmoMRtyC3NilUnNDU-2FPaBcsT-2FOGon0xCRAfDrptn9-2FALs2Fd07DcRNS4ZEvE=
+msoalxYsqGGTWHb9gybe9ROFDdi9j" alt=3D"" width=3D"1" height=3D"1" border=3D"=
+0" style=3D"height:1px !important;width:1px !important;border-width:0 !impo=
+rtant;margin-top:0 !important;margin-bottom:0 !important;margin-right:0 !im=
+portant;margin-left:0 !important;padding-top:0 !important;padding-bottom:0 =
+!important;padding-right:0 !important;padding-left:0 !important;"/></body>=0D
+</html>=0D
