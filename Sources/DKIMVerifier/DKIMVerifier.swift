@@ -150,17 +150,16 @@ public func verify(dnsLoopupTxtFunction: @escaping (String) -> String?, email_ra
 
   switch canonicalization_header_method {
   case DKIMCanonicalization.Simple:
-    break
+    headers = try SimpleCanonicalizationHeaderAlgorithm.canonicalize(headers: headers)
   case DKIMCanonicalization.Relaxed:
-    throw DKIMError.invalidEntryInDKIMHeader(message: "relaxed not implemented")
+    headers = try RelaxedCanonicalizationHeaderAlgorithm.canonicalize(headers: headers)
   }
 
   switch canonicalization_body_method {
   case DKIMCanonicalization.Simple:
     body = try SimpleCanonicalizationBodyAlgorithm.canonicalize(body: body)
-    break
   case DKIMCanonicalization.Relaxed:
-    throw DKIMError.invalidEntryInDKIMHeader(message: "relaxed not implemented")
+    body = try RelaxedCanonicalizationBodyAlgorithm.canonicalize(body: body)
   }
 
   // check if the calculated body hash matches the deposited body hash in the DKIM Header

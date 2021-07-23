@@ -12,6 +12,8 @@ final class DKIMVerifierTests: XCTestCase {
   static public var spam_eml: String = Bundle.module.path(forResource: "spam", ofType: "eml")!
   static public var rfc6376_signed_ed25519_path: String = Bundle.module.path(
     forResource: "rfc6376.signed.ed25519", ofType: "msg")!
+  static public var rfc6376_signed_relaxed_path: String = Bundle.module.path(
+    forResource: "rfc6376.signed.relaxed", ofType: "msg")!
 
   func testTrailingTrimTests() {
     XCTAssertEqual(" sads ".trailingTrim(.whitespacesAndNewlines), " sads")
@@ -53,6 +55,25 @@ final class DKIMVerifierTests: XCTestCase {
         true)
     } catch {
       XCTFail("RFC6376Ed25519Test email should verify: \(error)")
+    }
+  }
+
+  func testRFC6376Ed25519RelaxedTestEmail() {
+    let TxtAnswerFunction = {
+      (domain: String) in
+      Optional(
+        "v=DKIM1; k=ed25519; p=11qYAYKxCrfVS/7TyWQHOg7hcvPapiMlrwIaaPcHURo="
+      )
+    }
+    do {
+      let email_raw = try String(
+        contentsOf: URL(fileURLWithPath: DKIMVerifierTests.rfc6376_signed_relaxed_path),
+        encoding: .ascii)
+      XCTAssertEqual(
+        try DKIMVerifier.verify(dnsLoopupTxtFunction: TxtAnswerFunction, email_raw: email_raw),
+        true)
+    } catch {
+      XCTFail("RFC6376Ed25519RelaxedTest email should verify: \(error)")
     }
   }
 
