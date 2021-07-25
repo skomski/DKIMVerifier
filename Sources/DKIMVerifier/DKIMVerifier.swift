@@ -96,7 +96,8 @@ func checkEd25519_SHA256_Signature(encodedKey: Data, signature: Data, data: Data
   return key.isValidSignature(signature, for: Data(Crypto.SHA256.hash(data: data)))
 }
 
-public func verify(dnsLoopupTxtFunction: @escaping (String) -> String?, email_raw: String) throws
+public func verify(dnsLoopupTxtFunction: @escaping (String) throws -> String?, email_raw: String)
+  throws
   -> Bool
 {
   // seperate headers from body
@@ -184,7 +185,7 @@ public func verify(dnsLoopupTxtFunction: @escaping (String) -> String?, email_ra
       DKIMTagNames.SDID.rawValue]!
 
   // use the provided dns loopkup function
-  let record = dnsLoopupTxtFunction(domain)
+  let record = try dnsLoopupTxtFunction(domain)
 
   guard record != nil else {
     throw DKIMError.invalidDNSEntry(message: "DNS Entry is empty for domain: \(domain)")
@@ -195,6 +196,8 @@ public func verify(dnsLoopupTxtFunction: @escaping (String) -> String?, email_ra
   guard let public_key_base64 = dns_tag_value_list[DNSEntryTagNames.PublicKey.rawValue] else {
     throw DKIMError.invalidDNSEntry(message: "no p entry")
   }
+
+  // print(Optional(public_key_base64))
 
   //    guard let dns_encryption_type = dns_tag_value_list[DNSEntryTagNames.KeyType.rawValue] else {
   //      throw DKIMError.invalidDNSEntry(message: "no k entry")
