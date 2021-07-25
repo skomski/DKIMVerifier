@@ -11,7 +11,7 @@ struct DKIMVerifierTool: ParsableCommand {
       let email_raw = try String(contentsOf: URL(fileURLWithPath: email_path), encoding: .ascii)
       //let dns_raw = try String(contentsOf: URL(fileURLWithPath: dns_path), encoding: .ascii)
       print(
-        try DKIMVerifier.verify(
+        DKIMVerifier.verify(
           dnsLoopupTxtFunction: DKIMVerifier.queryDNSTXTEntry,
           email_raw: email_raw))
     } catch {

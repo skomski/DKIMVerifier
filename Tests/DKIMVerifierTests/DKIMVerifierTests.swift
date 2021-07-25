@@ -7,6 +7,8 @@ final class DKIMVerifierTests: XCTestCase {
     forResource: "rfc6376", ofType: "msg")!
   static public var rfc6376_signed_path: String = Bundle.module.path(
     forResource: "rfc6376.signed.rsa", ofType: "msg")!
+  static public var rfc6376_signed_sha1_path: String = Bundle.module.path(
+    forResource: "rfc6376.signed.sha1", ofType: "msg")!
   static public var testkeydns_entry: String = Bundle.module.path(
     forResource: "testkeydnsentry", ofType: "txt")!
   static public var spam_eml: String = Bundle.module.path(forResource: "spam", ofType: "eml")!
@@ -33,10 +35,32 @@ final class DKIMVerifierTests: XCTestCase {
       let email_raw = try String(
         contentsOf: URL(fileURLWithPath: DKIMVerifierTests.rfc6376_signed_path), encoding: .ascii)
       XCTAssertEqual(
-        try DKIMVerifier.verify(dnsLoopupTxtFunction: rfcDnsEntryFunction, email_raw: email_raw),
-        true)
+        DKIMVerifier.verify(dnsLoopupTxtFunction: rfcDnsEntryFunction, email_raw: email_raw),
+        DKIMVerifier.DKIMResult.init(
+          status: DKIMVerifier.DKIMStatus.Valid))
     } catch {
       XCTFail("test rsa email should verify: \(error)")
+    }
+  }
+
+  func testRFC6376Sha1TestEmail() {
+    let TxtAnswerFunction = {
+      (domain: String) in
+      Optional(
+        "v=DKIM1; g=*; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC6aakWzruYAKX9OdOdSHMemqVdGQurNYLC1H7O/T2LQIHVbkKF6KKjlgFM7lr8skfZMhJe/KRGMvVjCV5ZakZIGeP3Hi1qXCEvmjS4ElpMPMPyPrZigt95ipqywPYZJWHbRiJ085VdkSCtLUvo5sypA0nTJeynEouAN+/wBaCO6QIDAQAB"
+      )
+    }
+    do {
+      let email_raw = try String(
+        contentsOf: URL(fileURLWithPath: DKIMVerifierTests.rfc6376_signed_sha1_path),
+        encoding: .ascii)
+      XCTAssertEqual(
+        DKIMVerifier.verify(dnsLoopupTxtFunction: TxtAnswerFunction, email_raw: email_raw),
+        DKIMVerifier.DKIMResult.init(
+          status: DKIMVerifier.DKIMStatus.Valid_Insecure(
+            Set<DKIMRisks>.init(arrayLiteral: DKIMRisks.UsingSHA1))))
+    } catch {
+      XCTFail("RFC6376Sha1Test email should verify: \(error)")
     }
   }
 
@@ -52,8 +76,9 @@ final class DKIMVerifierTests: XCTestCase {
         contentsOf: URL(fileURLWithPath: DKIMVerifierTests.rfc6376_signed_ed25519_path),
         encoding: .ascii)
       XCTAssertEqual(
-        try DKIMVerifier.verify(dnsLoopupTxtFunction: TxtAnswerFunction, email_raw: email_raw),
-        true)
+        DKIMVerifier.verify(dnsLoopupTxtFunction: TxtAnswerFunction, email_raw: email_raw),
+        DKIMVerifier.DKIMResult.init(
+          status: DKIMVerifier.DKIMStatus.Valid))
     } catch {
       XCTFail("RFC6376Ed25519Test email should verify: \(error)")
     }
@@ -71,8 +96,9 @@ final class DKIMVerifierTests: XCTestCase {
         contentsOf: URL(fileURLWithPath: DKIMVerifierTests.rfc6376_signed_relaxed_path),
         encoding: .ascii)
       XCTAssertEqual(
-        try DKIMVerifier.verify(dnsLoopupTxtFunction: TxtAnswerFunction, email_raw: email_raw),
-        true)
+        DKIMVerifier.verify(dnsLoopupTxtFunction: TxtAnswerFunction, email_raw: email_raw),
+        DKIMVerifier.DKIMResult.init(
+          status: DKIMVerifier.DKIMStatus.Valid))
     } catch {
       XCTFail("RFC6376Ed25519RelaxedTest email should verify: \(error)")
     }
@@ -93,8 +119,9 @@ final class DKIMVerifierTests: XCTestCase {
         contentsOf: URL(fileURLWithPath: DKIMVerifierTests.mubi_path),
         encoding: .ascii)
       XCTAssertEqual(
-        try DKIMVerifier.verify(dnsLoopupTxtFunction: TxtAnswerFunction, email_raw: email_raw),
-        true)
+        DKIMVerifier.verify(dnsLoopupTxtFunction: TxtAnswerFunction, email_raw: email_raw),
+        DKIMVerifier.DKIMResult.init(
+          status: DKIMVerifier.DKIMStatus.Valid))
     } catch {
       XCTFail("Mubi email should verify: \(error)")
     }
@@ -111,8 +138,9 @@ final class DKIMVerifierTests: XCTestCase {
       let email_raw = try String(
         contentsOf: URL(fileURLWithPath: DKIMVerifierTests.spam_eml), encoding: .ascii)
       XCTAssertEqual(
-        try DKIMVerifier.verify(dnsLoopupTxtFunction: spamTxtAnswerFunction, email_raw: email_raw),
-        true)
+        DKIMVerifier.verify(dnsLoopupTxtFunction: spamTxtAnswerFunction, email_raw: email_raw),
+        DKIMVerifier.DKIMResult.init(
+          status: DKIMVerifier.DKIMStatus.Valid))
     } catch {
       XCTFail("spam email should verify: \(error)")
     }
