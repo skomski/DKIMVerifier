@@ -13,6 +13,7 @@ enum DKIMError: Error, Equatable {
 }
 
 enum DKIMEncryption {
+  case RSA_SHA1
   case RSA_SHA256
   case Ed25519_SHA256
 }
@@ -78,24 +79,6 @@ func generateSignedData(headers: OrderedKeyValueArray, includeHeaders: [String])
   return finalString
 }
 
-func checkRSA_SHA256_Signature(encodedKey: Data, signature: Data, data: Data) throws
-  -> Bool
-{
-  let key = try _RSA.Signing.PublicKey.init(derRepresentation: encodedKey)
-  let signature = _RSA.Signing.RSASignature.init(rawRepresentation: signature)
-
-  return key.isValidSignature(
-    signature, for: data,
-    padding: _RSA.Signing.Padding.insecurePKCS1v1_5)
-}
-
-func checkEd25519_SHA256_Signature(encodedKey: Data, signature: Data, data: Data) throws
-  -> Bool
-{
-  let key = try Crypto.Curve25519.Signing.PublicKey.init(rawRepresentation: encodedKey)
-  return key.isValidSignature(signature, for: Data(Crypto.SHA256.hash(data: data)))
-}
-
 public func verify(dnsLoopupTxtFunction: @escaping (String) throws -> String?, email_raw: String)
   throws
   -> Bool
@@ -143,10 +126,12 @@ public func verify(dnsLoopupTxtFunction: @escaping (String) throws -> String?, e
     encryption_method = DKIMEncryption.RSA_SHA256
   } else if raw_encryption_method == "ed25519-sha256" {
     encryption_method = DKIMEncryption.Ed25519_SHA256
+  } else if raw_encryption_method == "rsa-sha1" {
+    encryption_method = DKIMEncryption.RSA_SHA1
   } else {
     throw DKIMError.invalidEntryInDKIMHeader(
       message:
-        "signature algorithm is not rsa.sha256 or ed25519-sha256 - other currently not supported")
+        "signature algorithm is not rsa-sha256, ed25519-sha256 or rsa-sha1 - other not supported")
   }
 
   switch canonicalization_header_method {
@@ -166,8 +151,15 @@ public func verify(dnsLoopupTxtFunction: @escaping (String) throws -> String?, e
   // check if the calculated body hash matches the deposited body hash in the DKIM Header
   let provided_hash = tag_value_list[DKIMTagNames.BodyHash.rawValue]!
   //print(Optional(body))
-  let calculated_hash = Data(Crypto.SHA256.hash(data: body.data(using: .ascii)!))
-    .base64EncodedString()
+  let calculated_hash: String
+  switch encryption_method {
+  case DKIMEncryption.RSA_SHA1:
+    calculated_hash = Data(Crypto.Insecure.SHA1.hash(data: body.data(using: .ascii)!))
+      .base64EncodedString()
+  case DKIMEncryption.RSA_SHA256, DKIMEncryption.Ed25519_SHA256:
+    calculated_hash = Data(Crypto.SHA256.hash(data: body.data(using: .ascii)!))
+      .base64EncodedString()
+  }
 
   guard provided_hash == calculated_hash else {
     throw DKIMError.bodyHashDoesNotMatch(
@@ -244,6 +236,9 @@ public func verify(dnsLoopupTxtFunction: @escaping (String) throws -> String?, e
   }
 
   switch encryption_method {
+  case DKIMEncryption.RSA_SHA1:
+    return try DKIMVerifier.checkRSA_SHA1_Signature(
+      encodedKey: public_key_data, signature: dkim_signature_data, data: raw_signed_data)
   case DKIMEncryption.RSA_SHA256:
     return try DKIMVerifier.checkRSA_SHA256_Signature(
       encodedKey: public_key_data, signature: dkim_signature_data, data: raw_signed_data)
