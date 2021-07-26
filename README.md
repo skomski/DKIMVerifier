@@ -40,6 +40,16 @@ public enum DKIMRisks: Equatable {
   // more coming...
 }
 
+public enum DKIMError: Error, Equatable {
+  case TagValueListParsingError(message: String)
+  case RFC822MessageParsingError(message: String)
+  case InvalidRFC822Headers(message: String)
+  case InvalidEntryInDKIMHeader(message: String)
+  case BodyHashDoesNotMatch(message: String)
+  case InvalidDNSEntry(message: String)
+  case UnexpectedError(message: String)
+}
+
 public struct DKIMInfo: Equatable {
   var version: String?
   var sdid: String?
