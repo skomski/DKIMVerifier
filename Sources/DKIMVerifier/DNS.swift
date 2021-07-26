@@ -1,4 +1,7 @@
 import Foundation
+
+#if os(macOS)  || os(iOS) || os(watchOS) || os(tvOS)
+
 import dnssd
 
 struct DNSResult {
@@ -54,3 +57,11 @@ public func queryDNSTXTEntry(domainName: String) throws -> String? {
   }
   return result.entry
 }
+
+#else
+
+public func queryDNSTXTEntry(domainName: String) throws -> String? {
+  return nil
+}
+
+#endif
