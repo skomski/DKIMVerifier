@@ -13,7 +13,7 @@ struct DKIMVerifierTool: ParsableCommand {
       print(
         DKIMVerifier.verify(
           dnsLoopupTxtFunction: DKIMVerifier.queryDNSTXTEntry,
-          email_raw: email_raw))
+          email_raw: email_raw).status)
     } catch {
       print("failure: \(error)")
     }

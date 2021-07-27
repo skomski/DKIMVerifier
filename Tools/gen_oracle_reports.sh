@@ -1,26 +1,27 @@
 #! /bin/bash
 
+# Usage: ./Tools/gen_oracle_reports.sh ../../emails 50 > oracle_log.csv
+
+swift build | true
+
+echo "filename,dkimpy,mailauth,dkimverifier"
+
+emails_location=$1
+count_emails=$2
+
 counter=0
-for filename in ../../../emails//*.eml; do
+for filename in $emails_location/*.eml; do
     [ -e "$filename" ] || continue
-    echo "$filename"
-    echo -n "dkimverify: "
-    cat "$filename" | python3 ../../dkimpy/dkim/dkimverify.py
-    echo -n "mailauth: "
-    cat "$filename" | mailauth report | jq .dkim.results[0].info
-    echo -n "dkimverifier: "
-    swift run DKIMVerifierTool "$filename" 2>1
-    echo "----------------"
+    printf "$filename" | sed -e 's/"/""/g' | xargs -0 -I{} printf "\"{}\","
+    cat "$filename" | dkimverify 2>&1 | sed '$!d' | tr -d '\n' | sed -e 's/"/""/g' | xargs -0 -I{} printf "\"{}\""
+    printf ","
+    cat "$filename" | mailauth report | jq .dkim.results[0].info | tr -d '\n' | sed 's:^.\(.*\).$:\1:' | sed -e 's/"/""/g' | xargs -0 -I{} printf "\"{}\""
+    printf ","
+    swift run --skip-build DKIMVerifierTool "$filename" | tr -d '\n' | sed -e 's/"/""/g' | xargs -0 -I{} printf "\"{}\""
+    echo ""
     ((counter++))
-    if [ $counter -eq 25 ]
+    if [ $counter -eq $count_emails ]
     then
       break
     fi
 done
-
-
-# cat filesnames.txt | gxargs -d'\n' -t -n1 sh -c 'cat "$0" | mailauth report | jq .dkim.results[0].info' &> dkim_report_mailauth.txt
-# #gfind ../../../emails/ -name "*.eml" -type f -exec sh -c 'echo "$1";cat "$1" | python3 ../dkimpy/dkim/dkimverify.py' sh {} \; &> dkim_report_dkimpy.txt
-# gfind ../../../emails/ -name "*.eml" -type f | head -n 10 | gxargs -d'\n' -t -n1 sh -c 'cat "$0" | python3 ../../dkimpy/dkim/dkimverify.py'  &> dkim_report_dkimpy.txt
-# #gfind ../../../emails/ -name "*.eml" -type f -exec sh -c 'echo "$1"; swift run DKIMVerifierTool "$1"' sh {} \; &> dkim_report_dkimverifier.txt
-# gfind ../../../emails/ -name "*.eml" -type f | head -n 10 | gxargs -d'\n' -t -n1 sh -c 'swift run DKIMVerifierTool "$0"'  &> dkim_report_dkimverifier.txt
