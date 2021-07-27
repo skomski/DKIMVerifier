@@ -76,8 +76,8 @@ public struct DKIMInfo: Equatable {
 }
 
 public struct DKIMResult: Equatable {
-  var status: DKIMStatus
-  var info: DKIMInfo?
+  public var status: DKIMStatus
+  public var info: DKIMInfo?
 
   init() {
     status = DKIMStatus.Error(DKIMError.NoErrorSet)
@@ -212,10 +212,10 @@ public func verify(dnsLoopupTxtFunction: @escaping (String) throws -> String?, e
   let calculated_hash: String
   switch encryption_method {
   case DKIMEncryption.RSA_SHA1:
-    calculated_hash = Data(Crypto.Insecure.SHA1.hash(data: body.data(using: .ascii)!))
+    calculated_hash = Data(Crypto.Insecure.SHA1.hash(data: body.data(using: .utf8)!))
       .base64EncodedString()
   case DKIMEncryption.RSA_SHA256, DKIMEncryption.Ed25519_SHA256:
-    calculated_hash = Data(Crypto.SHA256.hash(data: body.data(using: .ascii)!))
+    calculated_hash = Data(Crypto.SHA256.hash(data: body.data(using: .utf8)!))
       .base64EncodedString()
   }
 
@@ -336,9 +336,9 @@ public func verify(dnsLoopupTxtFunction: @escaping (String) throws -> String?, e
 
   // print(Optional(raw_signed_string))
 
-  guard let raw_signed_data = raw_signed_string.data(using: .ascii) else {
+  guard let raw_signed_data = raw_signed_string.data(using: .utf8) else {
     result.status = DKIMStatus.Error(
-      DKIMError.invalidEntryInDKIMHeader(message: "could not convert to ascii"))
+      DKIMError.invalidEntryInDKIMHeader(message: "could not encode using utf8"))
     return result
 
   }
