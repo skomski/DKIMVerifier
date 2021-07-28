@@ -92,6 +92,17 @@ public struct DKIMResult: Equatable {
 
 var dnsLoopupTxtFunction: (String) -> String? = { (domainName) in "fail" }
 
+func validate_dkim_fields(email_headers: OrderedKeyValueArray, email_body: String, dkim_fields: TagValueDictionary) throws -> Set<DKIMRisks>
+{
+  var risks : Set<DKIMRisks>  = Set<DKIMRisks>.init()
+  
+  if dkim_fields[DKIMTagNames.BodyLength.rawValue] != nil {
+    risks.insert(DKIMRisks.UsingLengthParameter)
+  }
+  
+  return risks
+}
+
 public func verify(dnsLoopupTxtFunction: @escaping (String) throws -> String?, email_raw: String)
   -> DKIMResult
 {
@@ -124,9 +135,20 @@ public func verify(dnsLoopupTxtFunction: @escaping (String) throws -> String?, e
   // TODO: multiple dkim signatures, validate in order
   let dkim_header_field: String = headers.last(where: { $0.key.lowercased() == "dkim-signature" }
   )!.value
-  let tag_value_list: [String: String]
+  let tag_value_list: TagValueDictionary
   do {
     tag_value_list = try parseTagValueList(raw_list: dkim_header_field)
+  } catch let error as DKIMError {
+    result.status = DKIMStatus.Error(error)
+    return result
+  } catch {
+    result.status = DKIMStatus.Error(DKIMError.UnexpectedError(message: error.localizedDescription))
+    return result
+  }
+  
+  // validate dkim fields and add possible risks
+  do {
+    risks = risks.union(try validate_dkim_fields(email_headers: headers, email_body: body, dkim_fields: tag_value_list))
   } catch let error as DKIMError {
     result.status = DKIMStatus.Error(error)
     return result

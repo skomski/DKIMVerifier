@@ -31,6 +31,10 @@ final class DKIMVerifierTests: XCTestCase {
         case _ where emailFilePath.contains("unsigned"):
           expected_result = DKIMVerifier.DKIMResult.init(
             status: DKIMVerifier.DKIMStatus.NoSignature)
+        case _ where emailFilePath.contains("sha1_length"):
+          expected_result = DKIMVerifier.DKIMResult.init(
+            status: DKIMVerifier.DKIMStatus.Valid_Insecure(
+              Set.init([DKIMVerifier.DKIMRisks.UsingSHA1, DKIMVerifier.DKIMRisks.UsingLengthParameter])))
         case _ where emailFilePath.contains("sha1"):
           expected_result = DKIMVerifier.DKIMResult.init(
             status: DKIMVerifier.DKIMStatus.Valid_Insecure(
@@ -50,6 +54,6 @@ final class DKIMVerifierTests: XCTestCase {
     }
 
     XCTAssertEqual(counter, emailFilePaths.count)
-    XCTAssertEqual(counter, 7)
+    XCTAssertEqual(counter, 8)
   }
 }
