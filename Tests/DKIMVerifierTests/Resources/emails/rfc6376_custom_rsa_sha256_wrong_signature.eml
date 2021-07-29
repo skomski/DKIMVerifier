@@ -1,0 +1,18 @@
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=custom.com;
+ i=@custom.com; q=dns/txt; s=test; t=1627567838; h=from : to : subject
+ : date : message-id : from;
+ bh=4bLNXImK9drULnmePzZNEBleUanJCX5PIsDIFoH4KTQ=;
+ b=BrUDOcZxEEyhDKnwXYez1qu5QQYFWLb1hjQZKKLtDOnZqWHmFMD7rgWmdcGh6E0O7H3oq
+ hQAMxUphCHlATRtOhiV8pJS3jrZebGG8Cm8Jnsf0ROp4yGgzXYFMqEeV1YeeAU64ea61cPg
+ WBM1AkEYOI6cKN7d8FEfJN0hXTs07qQ=
+From: Joe SixPack <joe@football.example.com>
+To: Suzie Q <suzie@shopping.example.net>
+Subject: ERRORDEADBEEF
+Date: Fri, 11 Jul 2003 21:00:37 -0700 (PDT)
+Message-ID: <20030712040037.46341.5F8J@football.example.com>
+
+Hi.
+
+We lost the game.  Are you hungry yet?
+
+Joe.

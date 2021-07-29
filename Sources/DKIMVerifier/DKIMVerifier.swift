@@ -9,6 +9,7 @@ public enum DKIMError: Error, Equatable {
   case InvalidRFC822Headers(message: String)
   case InvalidEntryInDKIMHeader(message: String)
   case BodyHashDoesNotMatch(message: String)
+  case SignatureDoesNotMatch
   case InvalidDNSEntry(message: String)
   case UnexpectedError(message: String)
 }
@@ -63,11 +64,11 @@ public enum DKIMStatus: Equatable {
   case Error(DKIMError)
 }
 
-public enum DKIMRisks: Equatable {
+public enum DKIMRisks: Hashable, Equatable {
   case UsingLengthParameter  // only verified to a specific body length
   case UsingSHA1  // insecure hashing algorithm
   case SDIDNotEqualToSender  // third-party signature, From: Sender different to DKIM Domain
-  case FewHeaderFieldsSigned  // only From: field required, but more fields are better else manipulation possible
+  case ImportantHeaderFieldNotSigned(name: String)  // only From: field required, but more fields are better else manipulation possible
   // Subject, Content-Type, Reply-To,... should be signed
 }
 
@@ -219,6 +220,32 @@ func validate_dkim_fields(
     throw error
   } catch {
     throw DKIMError.UnexpectedError(message: error.localizedDescription)
+  }
+
+  guard signedHeaderFields.contains("from") else {
+    throw
+      DKIMError.InvalidEntryInDKIMHeader(message: "signed header fields missing from: field (h)")
+  }
+
+  // print(email_headers.map({$0.key}))
+  // print(signedHeaderFields)
+
+  if email_headers.contains(where: { $0.key.lowercased() == "subject" })
+    && !signedHeaderFields.contains("subject")
+  {
+    risks.insert(DKIMRisks.ImportantHeaderFieldNotSigned(name: "subject"))
+  }
+
+  if email_headers.contains(where: { $0.key.lowercased() == "date" })
+    && !signedHeaderFields.contains("date")
+  {
+    risks.insert(DKIMRisks.ImportantHeaderFieldNotSigned(name: "date"))
+  }
+
+  if email_headers.contains(where: { $0.key.lowercased() == "reply-to" })
+    && !signedHeaderFields.contains("reply-to")
+  {
+    risks.insert(DKIMRisks.ImportantHeaderFieldNotSigned(name: "reply-to"))
   }
 
   guard let domainSelectorString = dkimFields[DKIMTagNames.DomainSelector.rawValue] else {
@@ -523,10 +550,14 @@ public func verify(dnsLoopupTxtFunction: @escaping (String) throws -> String?, e
     return result
   }
 
-  if signature_result && risks.count > 0 {
-    result.status = DKIMStatus.Valid_Insecure(risks)
+  if signature_result {
+    if risks.count > 0 {
+      result.status = DKIMStatus.Valid_Insecure(risks)
+    } else {
+      result.status = DKIMStatus.Valid
+    }
   } else {
-    result.status = DKIMStatus.Valid
+    result.status = DKIMStatus.Invalid(DKIMError.SignatureDoesNotMatch)
   }
 
   return result
