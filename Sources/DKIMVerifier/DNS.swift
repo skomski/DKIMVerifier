@@ -22,7 +22,7 @@ import Foundation
         return
       }
       if errorCode != kDNSServiceErr_NoError {
-        resultPtr.pointee.error = DKIMError.invalidDNSEntry(message: "dns error")
+        resultPtr.pointee.error = DKIMError.InvalidDNSEntry(message: "dns error")
         return
       }
       guard let txtPtr = rdata?.bindMemory(to: CChar.self, capacity: Int(rdlen)) else {
@@ -36,7 +36,7 @@ import Foundation
         position += 1
         guard let partTxt = String(data: data[position..<position + lengthLeft], encoding: .utf8)
         else {
-          resultPtr.pointee.error = DKIMError.invalidDNSEntry(message: "invalid utf8")
+          resultPtr.pointee.error = DKIMError.InvalidDNSEntry(message: "invalid utf8")
           return
         }
         resultPtr.pointee.entry.append(partTxt)

@@ -81,7 +81,7 @@ final class HelpersTests: XCTestCase {
     ) { error in
       XCTAssertEqual(
         error as! DKIMVerifier.DKIMError,
-        DKIMVerifier.DKIMError.tagValueListParsingError(message: "duplicate key: help"))
+        DKIMVerifier.DKIMError.TagValueListParsingError(message: "duplicate key: help"))
     }
 
     XCTAssertThrowsError(
@@ -89,7 +89,7 @@ final class HelpersTests: XCTestCase {
     ) { error in
       XCTAssertEqual(
         error as! DKIMVerifier.DKIMError,
-        DKIMVerifier.DKIMError.tagValueListParsingError(message: "no value for key: help"))
+        DKIMVerifier.DKIMError.TagValueListParsingError(message: "no value for key: help"))
     }
 
     XCTAssertThrowsError(
@@ -97,7 +97,7 @@ final class HelpersTests: XCTestCase {
     ) { error in
       XCTAssertEqual(
         error as! DKIMVerifier.DKIMError,
-        DKIMVerifier.DKIMError.tagValueListParsingError(message: "no value for key: help"))
+        DKIMVerifier.DKIMError.TagValueListParsingError(message: "no value for key: help"))
     }
   }
 }

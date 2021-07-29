@@ -35,7 +35,7 @@ internal func parseTagValueList(raw_list: String) throws -> TagValueDictionary {
   for tag_spec in tag_specs {
     let splitted = tag_spec.split(separator: "=", maxSplits: 1)
     if splitted.count != 2 {
-      throw DKIMError.tagValueListParsingError(
+      throw DKIMError.TagValueListParsingError(
         message: "no value for key: " + String(splitted[0]))
     }
     let key = splitted[0].trimmingCharacters(in: .whitespacesAndNewlines)
@@ -43,15 +43,15 @@ internal func parseTagValueList(raw_list: String) throws -> TagValueDictionary {
 
     do {
       if try key.regexMatch(#"^[a-zA-Z](\w)*"#) == nil {
-        throw DKIMError.tagValueListParsingError(
+        throw DKIMError.TagValueListParsingError(
           message: "invalid characters in key: " + String(key))
       }
     } catch {
-      throw DKIMError.tagValueListParsingError(message: "regexError for key: " + key)
+      throw DKIMError.TagValueListParsingError(message: "regexError for key: " + key)
     }
 
     if tags[key] != nil {
-      throw DKIMError.tagValueListParsingError(message: "duplicate key: " + key)
+      throw DKIMError.TagValueListParsingError(message: "duplicate key: " + key)
     }
     tags[key] = value
   }

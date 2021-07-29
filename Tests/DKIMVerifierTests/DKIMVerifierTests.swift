@@ -36,7 +36,7 @@ final class DKIMVerifierTests: XCTestCase {
         case _ where emailFilePath.contains("error_invalid_without_header"):
           expected_result = DKIMVerifier.DKIMResult.init(
             status: DKIMVerifier.DKIMStatus.Error(
-              DKIMVerifier.DKIMError.invalidRFC822Headers(message: "invalid email without header")))
+              DKIMVerifier.DKIMError.InvalidRFC822Headers(message: "invalid email without header")))
           error_emails += 1
         case _ where emailFilePath.contains("unsigned"):
           expected_result = DKIMVerifier.DKIMResult.init(

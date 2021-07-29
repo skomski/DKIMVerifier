@@ -4,13 +4,12 @@ import RegularExpressions
 import _CryptoExtras
 
 public enum DKIMError: Error, Equatable {
-  case tagValueListParsingError(message: String)
+  case TagValueListParsingError(message: String)
   case RFC822MessageParsingError(message: String)
-  case invalidRFC822Headers(message: String)
-  case invalidEntryInDKIMHeader(message: String)
-  case bodyHashDoesNotMatch(message: String)
-  case invalidDNSEntry(message: String)
-  case NoErrorSet
+  case InvalidRFC822Headers(message: String)
+  case InvalidEntryInDKIMHeader(message: String)
+  case BodyHashDoesNotMatch(message: String)
+  case InvalidDNSEntry(message: String)
   case UnexpectedError(message: String)
 }
 
@@ -80,7 +79,7 @@ public struct DKIMResult: Equatable {
   public var info: DKIMInfo?
 
   init() {
-    status = DKIMStatus.Error(DKIMError.NoErrorSet)
+    status = DKIMStatus.Error(DKIMError.UnexpectedError(message: "initial status"))
     info = DKIMInfo.init()
   }
 
@@ -124,7 +123,7 @@ public func verify(dnsLoopupTxtFunction: @escaping (String) throws -> String?, e
 
   guard !headers.isEmpty else {
     result.status = DKIMStatus.Error(
-      DKIMError.invalidRFC822Headers(message: "invalid email without header"))
+      DKIMError.InvalidRFC822Headers(message: "invalid email without header"))
     return result
   }
 
@@ -183,7 +182,7 @@ public func verify(dnsLoopupTxtFunction: @escaping (String) throws -> String?, e
     canonicalization_body_method = DKIMCanonicalization.Simple
   default:
     result.status = DKIMStatus.Error(
-      DKIMError.invalidEntryInDKIMHeader(
+      DKIMError.InvalidEntryInDKIMHeader(
         message:
           "invalid canonicalization value \(canonicalization_value!) provided ('c')")
     )
@@ -201,7 +200,7 @@ public func verify(dnsLoopupTxtFunction: @escaping (String) throws -> String?, e
     risks.insert(DKIMRisks.UsingSHA1)
   } else {
     result.status = DKIMStatus.Error(
-      DKIMError.invalidEntryInDKIMHeader(
+      DKIMError.InvalidEntryInDKIMHeader(
         message:
           "invalid signature algorithm provided \(raw_encryption_method ?? "none") ('a') (rsa-sha256, ed25519-sha256, rsa-sha1 supported"
       )
@@ -246,7 +245,7 @@ public func verify(dnsLoopupTxtFunction: @escaping (String) throws -> String?, e
 
   guard provided_hash == calculated_hash else {
     result.status = DKIMStatus.Invalid(
-      DKIMError.bodyHashDoesNotMatch(
+      DKIMError.BodyHashDoesNotMatch(
         message: "provided hash " + provided_hash + " not equal to calculated hash "
           + calculated_hash))
     return result
@@ -254,19 +253,19 @@ public func verify(dnsLoopupTxtFunction: @escaping (String) throws -> String?, e
 
   guard let signed_header_fields = tag_value_list[DKIMTagNames.SignedHeaderFields.rawValue] else {
     result.status = DKIMStatus.Error(
-      DKIMError.invalidEntryInDKIMHeader(message: "missing required signed header field (h)"))
+      DKIMError.InvalidEntryInDKIMHeader(message: "missing required signed header field (h)"))
     return result
   }
 
   guard let domain_selector = tag_value_list[DKIMTagNames.DomainSelector.rawValue] else {
     result.status = DKIMStatus.Error(
-      DKIMError.invalidEntryInDKIMHeader(message: "missing required domain selector field (d)"))
+      DKIMError.InvalidEntryInDKIMHeader(message: "missing required domain selector field (d)"))
     return result
   }
 
   guard let sdid = tag_value_list[DKIMTagNames.SDID.rawValue] else {
     result.status = DKIMStatus.Error(
-      DKIMError.invalidEntryInDKIMHeader(message: "missing required sdid field (s)"))
+      DKIMError.InvalidEntryInDKIMHeader(message: "missing required sdid field (s)"))
     return result
   }
 
@@ -293,7 +292,7 @@ public func verify(dnsLoopupTxtFunction: @escaping (String) throws -> String?, e
     let tempRecord = try dnsLoopupTxtFunction(domain)
     guard tempRecord != nil else {
       result.status = DKIMStatus.Error(
-        DKIMError.invalidDNSEntry(message: "DNS Entry is empty for domain: \(domain)"))
+        DKIMError.InvalidDNSEntry(message: "DNS Entry is empty for domain: \(domain)"))
       return result
     }
     record = tempRecord!
@@ -317,7 +316,7 @@ public func verify(dnsLoopupTxtFunction: @escaping (String) throws -> String?, e
   }
   guard let public_key_base64 = dns_tag_value_list[DNSEntryTagNames.PublicKey.rawValue] else {
     result.status = DKIMStatus.Error(
-      DKIMError.invalidDNSEntry(message: "no public key dns entry (p)"))
+      DKIMError.InvalidDNSEntry(message: "no public key dns entry (p)"))
     return result
   }
 
@@ -341,7 +340,7 @@ public func verify(dnsLoopupTxtFunction: @escaping (String) throws -> String?, e
   guard let public_key_data = Data(base64Encoded: public_key_base64)
   else {
     result.status = DKIMStatus.Error(
-      DKIMError.invalidDNSEntry(message: "invalid base64 encoding for public key"))
+      DKIMError.InvalidDNSEntry(message: "invalid base64 encoding for public key"))
     return result
   }
 
@@ -363,13 +362,13 @@ public func verify(dnsLoopupTxtFunction: @escaping (String) throws -> String?, e
 
   guard let raw_signed_data = raw_signed_string.data(using: .utf8) else {
     result.status = DKIMStatus.Error(
-      DKIMError.invalidEntryInDKIMHeader(message: "could not encode using utf8"))
+      DKIMError.InvalidEntryInDKIMHeader(message: "could not encode using utf8"))
     return result
 
   }
 
   guard let dkim_signature = tag_value_list[DKIMTagNames.Signature.rawValue] else {
-    result.status = DKIMStatus.Error(DKIMError.invalidEntryInDKIMHeader(message: "no b entry"))
+    result.status = DKIMStatus.Error(DKIMError.InvalidEntryInDKIMHeader(message: "no b entry"))
     return result
   }
 
@@ -389,7 +388,7 @@ public func verify(dnsLoopupTxtFunction: @escaping (String) throws -> String?, e
   // print(Optional(dkim_signature_clean))
   guard let dkim_signature_data = Data(base64Encoded: dkim_signature_clean) else {
     result.status = DKIMStatus.Error(
-      DKIMError.invalidEntryInDKIMHeader(message: "invalid base64 in signature ('b') entry"))
+      DKIMError.InvalidEntryInDKIMHeader(message: "invalid base64 in signature ('b') entry"))
     return result
   }
 
