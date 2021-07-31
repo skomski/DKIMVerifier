@@ -11,6 +11,40 @@ final class HelpersTests: XCTestCase {
     XCTAssertEqual("ads".trailingTrim(.whitespacesAndNewlines), "ads")
   }
 
+  func testParseEmailFromField() {
+    XCTAssertEqual(DKIMVerifier.parseEmailFromField(raw_from_field: ""), nil)
+    XCTAssertEqual(DKIMVerifier.parseEmailFromField(raw_from_field: "blabla"), nil)
+    XCTAssertEqual(
+      DKIMVerifier.parseEmailFromField(raw_from_field: "blabla <hallo@skomski.com>"),
+      "hallo@skomski.com")
+    XCTAssertEqual(
+      DKIMVerifier.parseEmailFromField(raw_from_field: "\"blabla\" <hallo@skomski.com>"),
+      "hallo@skomski.com")
+    XCTAssertEqual(
+      DKIMVerifier.parseEmailFromField(
+        raw_from_field: #""Giant; \"Big\" Box" <sysservices@example.net>"#),
+      "sysservices@example.net")
+    XCTAssertEqual(
+      DKIMVerifier.parseEmailFromField(raw_from_field: "hallo@skomski.com"), "hallo@skomski.com")
+    XCTAssertEqual(
+      DKIMVerifier.parseEmailFromField(raw_from_field: " Joe SixPack <joe@football.example.com>"),
+      "joe@football.example.com")
+    XCTAssertEqual(
+      DKIMVerifier.parseEmailFromField(raw_from_field: "Joe SixPack <joe@football.example.com>"),
+      "joe@football.example.com")
+  }
+
+  func testParseDomainFromEmail() {
+    XCTAssertEqual(DKIMVerifier.parseDomainFromEmail(email: ""), nil)
+    XCTAssertEqual(DKIMVerifier.parseDomainFromEmail(email: "blabla"), nil)
+    XCTAssertEqual(DKIMVerifier.parseDomainFromEmail(email: "hallo@skomski.com"), "skomski.com")
+    XCTAssertEqual(DKIMVerifier.parseDomainFromEmail(email: "example.net"), nil)
+    XCTAssertEqual(
+      DKIMVerifier.parseDomainFromEmail(email: "pseudo@subdomain.example.net"),
+      "subdomain.example.net")
+    XCTAssertEqual(DKIMVerifier.parseDomainFromEmail(email: "hello@ä.example.net"), "ä.example.net")
+  }
+
   func testRFC822MessageParsing() {
     let simple_message = """
       help: 1

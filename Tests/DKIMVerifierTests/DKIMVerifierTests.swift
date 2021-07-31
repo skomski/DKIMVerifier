@@ -54,7 +54,9 @@ final class DKIMVerifierTests: XCTestCase {
           expected_result = DKIMVerifier.DKIMResult.init(
             status: DKIMVerifier.DKIMStatus.Valid_Insecure(
               Set.init([
-                DKIMVerifier.DKIMRisks.UsingSHA1, DKIMVerifier.DKIMRisks.UsingLengthParameter,
+                DKIMVerifier.DKIMRisks.UsingSHA1,
+                DKIMVerifier.DKIMRisks.UsingLengthParameter,
+                DKIMVerifier.DKIMRisks.SDIDNotEqualToSender,
               ])))
 
           XCTAssertEqual(result.info!.version, 1)
@@ -76,6 +78,8 @@ final class DKIMVerifierTests: XCTestCase {
             result.info!.publicKeyQueryMethod, DKIMVerifier.DKIMPublicKeyQueryMethod.DNSTXT)
 
           XCTAssertEqual(result.info!.auid, "@example.com")
+          XCTAssertEqual(result.extracted_domain_from_sender, "football.example.com")
+          XCTAssertEqual(result.info!.sdid, "example.com")
           XCTAssertEqual(result.info!.bodyLength, 55)
           XCTAssertEqual(
             result.info!.signatureTimestamp, Date(timeIntervalSince1970: 1_627_477_130))
@@ -85,7 +89,9 @@ final class DKIMVerifierTests: XCTestCase {
         case _ where emailFilePath.contains("sha1"):
           expected_result = DKIMVerifier.DKIMResult.init(
             status: DKIMVerifier.DKIMStatus.Valid_Insecure(
-              Set.init([DKIMVerifier.DKIMRisks.UsingSHA1])))
+              Set.init([
+                DKIMVerifier.DKIMRisks.UsingSHA1, DKIMVerifier.DKIMRisks.SDIDNotEqualToSender,
+              ])))
 
           XCTAssertEqual(result.info!.version, 1)
           XCTAssertEqual(
@@ -100,6 +106,7 @@ final class DKIMVerifierTests: XCTestCase {
                 DKIMVerifier.DKIMRisks.ImportantHeaderFieldNotSigned(name: "date"),
                 DKIMVerifier.DKIMRisks.ImportantHeaderFieldNotSigned(name: "to"),
                 DKIMVerifier.DKIMRisks.ImportantHeaderFieldNotSigned(name: "message-id"),
+                DKIMVerifier.DKIMRisks.SDIDNotEqualToSender,
               ])))
 
           XCTAssertEqual(result.info!.version, 1)
@@ -117,10 +124,12 @@ final class DKIMVerifierTests: XCTestCase {
                 DKIMVerifier.DKIMRisks.ImportantHeaderFieldNotSigned(name: "date"),
                 DKIMVerifier.DKIMRisks.ImportantHeaderFieldNotSigned(name: "message-id"),
               ])))
+          XCTAssertEqual(result.extracted_domain_from_sender, "mubi.com")
           valid_insecure_emails += 1
         default:
           expected_result = DKIMVerifier.DKIMResult.init(
             status: DKIMVerifier.DKIMStatus.Valid)
+          XCTAssert(result.info != nil, emailFilePath)
           XCTAssertEqual(result.info!.version, 1)
           XCTAssertEqual(
             result.info!.publicKeyQueryMethod, DKIMVerifier.DKIMPublicKeyQueryMethod.DNSTXT)

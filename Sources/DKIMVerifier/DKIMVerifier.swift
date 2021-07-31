@@ -105,17 +105,20 @@ public struct DKIMResult: Equatable {
   public var status: DKIMStatus
   public var info: DKIMInfo?
   public var email_from_sender: String?
+  public var extracted_domain_from_sender: String?
 
   init() {
     status = DKIMStatus.Error(DKIMError.UnexpectedError(message: "initial status"))
     info = nil
     email_from_sender = nil
+    extracted_domain_from_sender = nil
   }
 
   init(status: DKIMStatus) {
     self.status = status
     info = nil
     email_from_sender = nil
+    extracted_domain_from_sender = nil
   }
 }
 
@@ -255,6 +258,10 @@ func validate_dkim_fields(
       DKIMError.InvalidEntryInDKIMHeader(message: "missing required sdid field (s)")
   }
 
+  if sdid != dkim_result.extracted_domain_from_sender {
+    risks.insert(DKIMRisks.SDIDNotEqualToSender)
+  }
+
   let dkimPublicQueryMethod: DKIMPublicKeyQueryMethod = DKIMPublicKeyQueryMethod.DNSTXT
 
   if dkimFields[DKIMTagNames.PublicKeyQueryMethod.rawValue] != nil {
@@ -340,15 +347,37 @@ public func verify(dnsLoopupTxtFunction: @escaping (String) throws -> String?, e
     return result
   }
 
+  guard headers.filter({ $0.key.lowercased() == "from" }).count == 1 else {
+    result.status = DKIMStatus.Error(
+      DKIMError.InvalidRFC822Headers(message: "multiple from email headers"))
+    return result
+  }
+
   let from_header_field: String = headers.last(where: { $0.key.lowercased() == "from" }
   )!.value
 
   result.email_from_sender = from_header_field.trimmingCharacters(in: .whitespacesAndNewlines)
 
+  result.extracted_domain_from_sender = parseDomainFromEmail(
+    email: parseEmailFromField(raw_from_field: result.email_from_sender!) ?? "")
+
+  guard result.extracted_domain_from_sender != nil else {
+    result.status = DKIMStatus.Error(
+      DKIMError.InvalidRFC822Headers(
+        message: "could not extract domain from email from field \(result.email_from_sender!)"))
+    return result
+  }
+
   guard headers.contains(where: { $0.key.lowercased() == "dkim-signature" }) else {
     result.status = DKIMStatus.NoSignature
     return result
   }
+
+  //  guard headers.filter({ $0.key.lowercased() == "dkim-signature" }).count == 1 else {
+  //    result.status = DKIMStatus.Error(
+  //      DKIMError.InvalidRFC822Headers(message: "multiple dkim signatures not supported"))
+  //    return result
+  //  }
 
   // TODO: multiple dkim signatures, validate in order
   let dkim_header_field: String = headers.last(where: { $0.key.lowercased() == "dkim-signature" }

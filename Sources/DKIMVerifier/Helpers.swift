@@ -1,4 +1,6 @@
 import Foundation
+import Peppermint
+import SwiftParsec
 
 extension String {
   func trailingTrim(_ characterSet: CharacterSet) -> String {
@@ -128,4 +130,45 @@ func generateSignedData(headers: OrderedKeyValueArray, includeHeaders: [String])
 
   finalString += headers[index!].key + ":" + without_b.trailingTrim(.whitespacesAndNewlines)
   return finalString
+}
+
+func parseEmailFromField(raw_from_field: String) -> String? {
+  let noneOf = StringParser.noneOf
+  let character = StringParser.character
+
+  let quotedChars =
+    noneOf("\\\"") <|> (StringParser.string("\\\"").attempt *> GenericParser(result: "\""))
+
+  let quote = character("\"")
+  let quotedField = quote *> quotedChars.many.stringValue <* (quote <?> "quote at end of field")
+
+  let displayName = quotedField <|> noneOf("<").many.stringValue
+
+  let field = (displayName *> StringParser.spaces *> character("<") *> noneOf(">").many.stringValue)
+
+  let result: String
+  do {
+    result = try field.run(sourceName: "", input: raw_from_field)
+  } catch {
+    let predicate = EmailPredicate()
+    if predicate.evaluate(with: raw_from_field) {
+      return raw_from_field
+    }
+    return nil
+  }
+
+  return result
+}
+
+func parseDomainFromEmail(email: String) -> String? {
+  let predicate = EmailPredicate()
+  guard predicate.evaluate(with: email) else {
+    return nil
+  }
+  let result = email.split(separator: "@")
+  if result.count != 2 {
+    return nil
+  }
+
+  return String(result.last!)
 }

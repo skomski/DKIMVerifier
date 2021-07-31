@@ -22,12 +22,16 @@ let package = Package(
       name: "swift-argument-parser", url: "https://github.com/apple/swift-argument-parser",
       from: "0.4.0"),
     .package(name: "swift-crypto", url: "https://github.com/apple/swift-crypto", .branch("main")),
+    .package(
+      name: "SwiftParsec", url: "https://github.com/davedufresne/SwiftParsec", .branch("master")),
+    .package(name: "Peppermint", url: "https://github.com/nsagora/peppermint", from: "1.0.0"),
   ],
   targets: [
     .target(
       name: "DKIMVerifier",
       dependencies: [
-        "RegularExpressions", .product(name: "Crypto", package: "swift-crypto"),
+        "RegularExpressions", "Peppermint", "SwiftParsec",
+        .product(name: "Crypto", package: "swift-crypto"),
         .product(name: "_CryptoExtras", package: "swift-crypto"),
       ]),
     .target(
