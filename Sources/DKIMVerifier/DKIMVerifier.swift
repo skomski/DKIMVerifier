@@ -72,6 +72,16 @@ public enum DKIMRisks: Hashable, Equatable {
   // Subject, Content-Type, Reply-To,... should be signed
 }
 
+// The rfc6376 recommended header fields to sign
+let importantHeaderFields: Set<String> = [
+  "from", "sender", "reply-to", "subject", "date", "message-id", "to", "cc",
+  "mime-version", "content-type", "content-transfer-encoding",
+  "content-id", "content-description", "resent-date", "resent-from",
+  "resent-sender", "resent-to", "resent-cc", "resent-message-id",
+  "in-reply-to", "references", "list-id", "list-help", "list-unsubscribe",
+  "list-subscribe", "list-post", "list-owner", "list-archive",
+]
+
 public struct DKIMInfo: Equatable {
   var version: UInt
   var algorithm: DKIMSignatureAlgorithm
@@ -227,25 +237,12 @@ func validate_dkim_fields(
       DKIMError.InvalidEntryInDKIMHeader(message: "signed header fields missing from: field (h)")
   }
 
-  // print(email_headers.map({$0.key}))
-  // print(signedHeaderFields)
-
-  if email_headers.contains(where: { $0.key.lowercased() == "subject" })
-    && !signedHeaderFields.contains("subject")
-  {
-    risks.insert(DKIMRisks.ImportantHeaderFieldNotSigned(name: "subject"))
-  }
-
-  if email_headers.contains(where: { $0.key.lowercased() == "date" })
-    && !signedHeaderFields.contains("date")
-  {
-    risks.insert(DKIMRisks.ImportantHeaderFieldNotSigned(name: "date"))
-  }
-
-  if email_headers.contains(where: { $0.key.lowercased() == "reply-to" })
-    && !signedHeaderFields.contains("reply-to")
-  {
-    risks.insert(DKIMRisks.ImportantHeaderFieldNotSigned(name: "reply-to"))
+  for importantHeaderField in importantHeaderFields {
+    if email_headers.contains(where: { $0.key.lowercased() == importantHeaderField })
+      && !signedHeaderFields.contains(importantHeaderField)
+    {
+      risks.insert(DKIMRisks.ImportantHeaderFieldNotSigned(name: importantHeaderField))
+    }
   }
 
   guard let domainSelectorString = dkimFields[DKIMTagNames.DomainSelector.rawValue] else {

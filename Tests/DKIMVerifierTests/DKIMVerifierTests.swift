@@ -98,6 +98,8 @@ final class DKIMVerifierTests: XCTestCase {
               Set.init([
                 DKIMVerifier.DKIMRisks.ImportantHeaderFieldNotSigned(name: "subject"),
                 DKIMVerifier.DKIMRisks.ImportantHeaderFieldNotSigned(name: "date"),
+                DKIMVerifier.DKIMRisks.ImportantHeaderFieldNotSigned(name: "to"),
+                DKIMVerifier.DKIMRisks.ImportantHeaderFieldNotSigned(name: "message-id"),
               ])))
 
           XCTAssertEqual(result.info!.version, 1)
@@ -111,7 +113,10 @@ final class DKIMVerifierTests: XCTestCase {
         case _ where emailFilePath.contains("mubi"):
           expected_result = DKIMVerifier.DKIMResult.init(
             status: DKIMVerifier.DKIMStatus.Valid_Insecure(
-              Set.init([DKIMVerifier.DKIMRisks.ImportantHeaderFieldNotSigned(name: "date")])))
+              Set.init([
+                DKIMVerifier.DKIMRisks.ImportantHeaderFieldNotSigned(name: "date"),
+                DKIMVerifier.DKIMRisks.ImportantHeaderFieldNotSigned(name: "message-id"),
+              ])))
           valid_insecure_emails += 1
         default:
           expected_result = DKIMVerifier.DKIMResult.init(
