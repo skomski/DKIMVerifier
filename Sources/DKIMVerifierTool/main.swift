@@ -10,11 +10,25 @@ struct DKIMVerifierTool: ParsableCommand {
     do {
       let email_raw = try String(contentsOf: URL(fileURLWithPath: email_path), encoding: .ascii)
       //let dns_raw = try String(contentsOf: URL(fileURLWithPath: dns_path), encoding: .ascii)
-      print(
-        DKIMVerifier.verify(
+      let result =
+        DKIMVerifier.verifyDKIMSignatures(
           dnsLoopupTxtFunction: DKIMVerifier.queryDNSTXTEntry,
           email_raw: email_raw
-        ).status)
+        )
+      switch result.status {
+      case DKIMStatus.Valid:
+        print("Valid")
+      case DKIMStatus.NoSignature:
+        print("NoSignature")
+      case DKIMStatus.Error(let error):
+        print(error)
+      case DKIMStatus.Valid_Insecure, DKIMStatus.Invalid:
+        var resultString = ""
+        for signature in result.signatures {
+          resultString += String(describing: signature.status) + " "
+        }
+        print(resultString)
+      }
     } catch {
       print("failure: \(error)")
     }

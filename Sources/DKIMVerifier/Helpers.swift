@@ -106,7 +106,9 @@ internal func parseRFC822Message(message: String) throws -> (OrderedKeyValueArra
 }
 
 // generates the canonicalization data needed for signature
-func generateSignedData(headers: OrderedKeyValueArray, includeHeaders: [String]) throws
+func generateSignedData(
+  dkimHeaderField: KeyValue, headers: OrderedKeyValueArray, includeHeaders: [String]
+) throws
   -> String
 {
   var headers = headers
@@ -119,16 +121,15 @@ func generateSignedData(headers: OrderedKeyValueArray, includeHeaders: [String])
       finalString += result.key + ":" + result.value
     }
   }
-  let index = headers.lastIndex(where: { $0.key.lowercased() == "dkim-signature" })
 
   // remove the deposited signature (b\n=\nblalala to b=)
   // no leading crlf
   let FWS = #"(?:(?:\s*\r?\n)?\s+)?"#
   let RE_BTAG = #"([;\s]b"# + FWS + #"=)(?:"# + FWS + #"[a-zA-Z0-9+/=])*(?:\r?\n\Z)?"#
-  let without_b = try headers[index!].value.regexSub(
+  let without_b = try dkimHeaderField.value.regexSub(
     RE_BTAG, replacer: { (in, m) in m.groups[0]!.match })
 
-  finalString += headers[index!].key + ":" + without_b.trailingTrim(.whitespacesAndNewlines)
+  finalString += dkimHeaderField.key + ":" + without_b.trailingTrim(.whitespacesAndNewlines)
   return finalString
 }
 

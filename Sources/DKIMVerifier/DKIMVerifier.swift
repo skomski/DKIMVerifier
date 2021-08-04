@@ -56,10 +56,17 @@ enum DNSEntryTagNames: String {
   case Flags = "t"  // optional
 }
 
-public enum DKIMStatus: Equatable {
+public enum DKIMSignatureStatus: Equatable {
   case Valid
   case Valid_Insecure(Set<DKIMRisks>)
   case Invalid(DKIMError)
+  case Error(DKIMError)
+}
+
+public enum DKIMStatus: Equatable {
+  case Valid
+  case Valid_Insecure
+  case Invalid
   case NoSignature
   case Error(DKIMError)
 }
@@ -82,7 +89,7 @@ let importantHeaderFields: Set<String> = [
   "list-subscribe", "list-post", "list-owner", "list-archive",
 ]
 
-public struct DKIMInfo: Equatable {
+public struct DKIMSignatureInfo: Equatable {
   var version: UInt
   var algorithm: DKIMSignatureAlgorithm
   var signature: String
@@ -101,32 +108,35 @@ public struct DKIMInfo: Equatable {
   var copiedHeaderFields: String?
 }
 
+public struct DKIMSignatureResult: Equatable {
+  public var status: DKIMSignatureStatus
+  public var info: DKIMSignatureInfo?
+}
+
 public struct DKIMResult: Equatable {
   public var status: DKIMStatus
-  public var info: DKIMInfo?
+  public var signatures: [DKIMSignatureResult]
   public var email_from_sender: String?
   public var extracted_domain_from_sender: String?
 
   init() {
     status = DKIMStatus.Error(DKIMError.UnexpectedError(message: "initial status"))
-    info = nil
+    signatures = []
     email_from_sender = nil
     extracted_domain_from_sender = nil
   }
 
   init(status: DKIMStatus) {
     self.status = status
-    info = nil
+    signatures = []
     email_from_sender = nil
     extracted_domain_from_sender = nil
   }
 }
 
-var dnsLoopupTxtFunction: (String) -> String? = { (domainName) in "fail" }
-
-func validate_dkim_fields(
+func validateDKIMFields(
   email_headers: OrderedKeyValueArray, email_body: String, dkimFields: TagValueDictionary,
-  dkim_result: inout DKIMResult
+  dkim_result: inout DKIMSignatureResult, extractedDomainFromSender: String
 ) throws -> Set<DKIMRisks> {
   var risks: Set<DKIMRisks> = Set<DKIMRisks>.init()
 
@@ -258,7 +268,7 @@ func validate_dkim_fields(
       DKIMError.InvalidEntryInDKIMHeader(message: "missing required sdid field (s)")
   }
 
-  if sdid != dkim_result.extracted_domain_from_sender {
+  if sdid != extractedDomainFromSender {
     risks.insert(DKIMRisks.SDIDNotEqualToSender)
   }
 
@@ -270,7 +280,7 @@ func validate_dkim_fields(
     }
   }
 
-  var info: DKIMInfo = DKIMInfo.init(
+  var info: DKIMSignatureInfo = DKIMSignatureInfo.init(
     version: dkimVersion, algorithm: dkimSignatureAlgorithm, signature: dkimSignatureClean,
     bodyHash: bodyHash, headerCanonicalization: canonicalizationHeaderMethod,
     bodyCanonicalization: canonicalizationBodyMethod, sdid: sdid,
@@ -317,11 +327,12 @@ func validate_dkim_fields(
   return risks
 }
 
-public func verify(dnsLoopupTxtFunction: @escaping (String) throws -> String?, email_raw: String)
+public func verifyDKIMSignatures(
+  dnsLoopupTxtFunction: @escaping (String) throws -> String?, email_raw: String
+)
   -> DKIMResult
 {
   var result: DKIMResult = DKIMResult.init()
-  var risks: Set<DKIMRisks> = Set<DKIMRisks>.init()
 
   // seperate headers from body
   var (headers, body): (OrderedKeyValueArray, String)
@@ -373,64 +384,99 @@ public func verify(dnsLoopupTxtFunction: @escaping (String) throws -> String?, e
     return result
   }
 
-  //  guard headers.filter({ $0.key.lowercased() == "dkim-signature" }).count == 1 else {
-  //    result.status = DKIMStatus.Error(
-  //      DKIMError.InvalidRFC822Headers(message: "multiple dkim signatures not supported"))
-  //    return result
-  //  }
+  for (index, header) in headers.enumerated() {
+    if header.key.lowercased() != "dkim-signature" {
+      continue
+    }
 
-  // TODO: multiple dkim signatures, validate in order
-  let dkim_header_field: String = headers.last(where: { $0.key.lowercased() == "dkim-signature" }
-  )!.value
-  let tag_value_list: TagValueDictionary
-  do {
-    tag_value_list = try parseTagValueList(raw_list: dkim_header_field)
-  } catch let error as DKIMError {
-    result.status = DKIMStatus.Error(error)
-    return result
-  } catch {
-    result.status = DKIMStatus.Error(DKIMError.UnexpectedError(message: error.localizedDescription))
-    return result
+    do {
+      let signatureResult = try verifyDKIMSignature(
+        dnsLoopupTxtFunction: dnsLoopupTxtFunction,
+        emailHeaders: headers, emailBody: body, dkimHeaderFieldIndex: index,
+        extractedDomainFromSender: result.extracted_domain_from_sender!)
+      result.signatures.append(signatureResult)
+    } catch let error as DKIMError {
+      result.status = DKIMStatus.Error(error)
+      return result
+    } catch {
+      result.status = DKIMStatus.Error(
+        DKIMError.UnexpectedError(message: error.localizedDescription))
+      return result
+    }
   }
+
+  if result.signatures.allSatisfy({ $0.status == DKIMSignatureStatus.Valid }) {
+    result.status = DKIMStatus.Valid
+  } else if result.signatures.allSatisfy({
+    if case .Valid_Insecure = $0.status { return true } else { return false }
+  }) {
+    result.status = DKIMStatus.Valid_Insecure
+  } else {
+    result.status = DKIMStatus.Invalid
+    if result.signatures.count == 0 {
+      result.status = DKIMStatus.NoSignature
+    }
+  }
+
+  return result
+}
+
+func verifyDKIMSignature(
+  dnsLoopupTxtFunction: @escaping (String) throws -> String?,
+  emailHeaders: OrderedKeyValueArray, emailBody: String, dkimHeaderFieldIndex: Int,
+  extractedDomainFromSender: String
+) throws -> DKIMSignatureResult {
+  var result: DKIMSignatureResult = DKIMSignatureResult.init(
+    status: DKIMSignatureStatus.Error(DKIMError.UnexpectedError(message: "unset error")), info: nil)
+  var risks: Set<DKIMRisks> = Set<DKIMRisks>.init()
+
+  let dkimFields = try parseTagValueList(raw_list: emailHeaders[dkimHeaderFieldIndex].value)
 
   // validate dkim fields and add possible risks
   do {
     risks = risks.union(
-      try validate_dkim_fields(
-        email_headers: headers, email_body: body, dkimFields: tag_value_list, dkim_result: &result))
+      try validateDKIMFields(
+        email_headers: emailHeaders, email_body: emailBody, dkimFields: dkimFields,
+        dkim_result: &result, extractedDomainFromSender: extractedDomainFromSender))
   } catch let error as DKIMError {
-    result.status = DKIMStatus.Error(error)
+    result.status = DKIMSignatureStatus.Error(error)
     return result
   } catch {
-    result.status = DKIMStatus.Error(DKIMError.UnexpectedError(message: error.localizedDescription))
+    result.status = DKIMSignatureStatus.Error(
+      DKIMError.UnexpectedError(message: error.localizedDescription))
     return result
   }
 
   guard let parameters = result.info else {
-    result.status = DKIMStatus.Error(
+    result.status = DKIMSignatureStatus.Error(
       DKIMError.UnexpectedError(message: "validation did not parse parameters"))
     return result
   }
 
+  let canonEmailHeaders: OrderedKeyValueArray
+  let canonEmailBody: String
   do {
     switch parameters.headerCanonicalization {
     case DKIMCanonicalization.Simple:
-      headers = try SimpleCanonicalizationHeaderAlgorithm.canonicalize(headers: headers)
+      canonEmailHeaders = try SimpleCanonicalizationHeaderAlgorithm.canonicalize(
+        headers: emailHeaders)
     case DKIMCanonicalization.Relaxed:
-      headers = try RelaxedCanonicalizationHeaderAlgorithm.canonicalize(headers: headers)
+      canonEmailHeaders = try RelaxedCanonicalizationHeaderAlgorithm.canonicalize(
+        headers: emailHeaders)
     }
 
     switch parameters.bodyCanonicalization {
     case DKIMCanonicalization.Simple:
-      body = try SimpleCanonicalizationBodyAlgorithm.canonicalize(body: body)
+      canonEmailBody = try SimpleCanonicalizationBodyAlgorithm.canonicalize(body: emailBody)
     case DKIMCanonicalization.Relaxed:
-      body = try RelaxedCanonicalizationBodyAlgorithm.canonicalize(body: body)
+      canonEmailBody = try RelaxedCanonicalizationBodyAlgorithm.canonicalize(body: emailBody)
     }
   } catch let error as DKIMError {
-    result.status = DKIMStatus.Error(error)
+    result.status = DKIMSignatureStatus.Error(error)
     return result
   } catch {
-    result.status = DKIMStatus.Error(DKIMError.UnexpectedError(message: error.localizedDescription))
+    result.status = DKIMSignatureStatus.Error(
+      DKIMError.UnexpectedError(message: error.localizedDescription))
     return result
   }
 
@@ -446,19 +492,19 @@ public func verify(dnsLoopupTxtFunction: @escaping (String) throws -> String?, e
 
   // check if the calculated body hash matches the deposited body hash in the DKIM Header
   let provided_hash = parameters.bodyHash
-  //print(Optional(body))
+
   let calculated_hash: String
   switch parameters.algorithm {
   case DKIMSignatureAlgorithm.RSA_SHA1:
-    calculated_hash = Data(Crypto.Insecure.SHA1.hash(data: body.data(using: .utf8)!))
+    calculated_hash = Data(Crypto.Insecure.SHA1.hash(data: canonEmailBody.data(using: .utf8)!))
       .base64EncodedString()
   case DKIMSignatureAlgorithm.RSA_SHA256, DKIMSignatureAlgorithm.Ed25519_SHA256:
-    calculated_hash = Data(Crypto.SHA256.hash(data: body.data(using: .utf8)!))
+    calculated_hash = Data(Crypto.SHA256.hash(data: canonEmailBody.data(using: .utf8)!))
       .base64EncodedString()
   }
 
   guard provided_hash == calculated_hash else {
-    result.status = DKIMStatus.Invalid(
+    result.status = DKIMSignatureStatus.Invalid(
       DKIMError.BodyHashDoesNotMatch(
         message: "provided hash " + provided_hash + " not equal to calculated hash "
           + calculated_hash))
@@ -473,16 +519,17 @@ public func verify(dnsLoopupTxtFunction: @escaping (String) throws -> String?, e
   do {
     let tempRecord = try dnsLoopupTxtFunction(domain)
     guard tempRecord != nil else {
-      result.status = DKIMStatus.Error(
+      result.status = DKIMSignatureStatus.Error(
         DKIMError.InvalidDNSEntry(message: "DNS Entry is empty for domain: \(domain)"))
       return result
     }
     record = tempRecord!
   } catch let error as DKIMError {
-    result.status = DKIMStatus.Error(error)
+    result.status = DKIMSignatureStatus.Error(error)
     return result
   } catch {
-    result.status = DKIMStatus.Error(DKIMError.UnexpectedError(message: error.localizedDescription))
+    result.status = DKIMSignatureStatus.Error(
+      DKIMError.UnexpectedError(message: error.localizedDescription))
     return result
   }
 
@@ -490,14 +537,15 @@ public func verify(dnsLoopupTxtFunction: @escaping (String) throws -> String?, e
   do {
     dns_tag_value_list = try parseTagValueList(raw_list: record)
   } catch let error as DKIMError {
-    result.status = DKIMStatus.Error(error)
+    result.status = DKIMSignatureStatus.Error(error)
     return result
   } catch {
-    result.status = DKIMStatus.Error(DKIMError.UnexpectedError(message: error.localizedDescription))
+    result.status = DKIMSignatureStatus.Error(
+      DKIMError.UnexpectedError(message: error.localizedDescription))
     return result
   }
   guard let public_key_base64 = dns_tag_value_list[DNSEntryTagNames.PublicKey.rawValue] else {
-    result.status = DKIMStatus.Error(
+    result.status = DKIMSignatureStatus.Error(
       DKIMError.InvalidDNSEntry(message: "no public key dns entry (p)"))
     return result
   }
@@ -521,7 +569,7 @@ public func verify(dnsLoopupTxtFunction: @escaping (String) throws -> String?, e
 
   guard let public_key_data = Data(base64Encoded: public_key_base64)
   else {
-    result.status = DKIMStatus.Error(
+    result.status = DKIMSignatureStatus.Error(
       DKIMError.InvalidDNSEntry(message: "invalid base64 encoding for public key"))
     return result
   }
@@ -531,26 +579,26 @@ public func verify(dnsLoopupTxtFunction: @escaping (String) throws -> String?, e
   // generate the signed data from the headers without the signature
   do {
     raw_signed_string = try DKIMVerifier.generateSignedData(
-      headers: headers, includeHeaders: parameters.signedHeaderFields)
+      dkimHeaderField: canonEmailHeaders[dkimHeaderFieldIndex],
+      headers: canonEmailHeaders, includeHeaders: parameters.signedHeaderFields)
   } catch let error as DKIMError {
-    result.status = DKIMStatus.Error(error)
+    result.status = DKIMSignatureStatus.Error(error)
     return result
   } catch {
-    result.status = DKIMStatus.Error(DKIMError.UnexpectedError(message: error.localizedDescription))
+    result.status = DKIMSignatureStatus.Error(
+      DKIMError.UnexpectedError(message: error.localizedDescription))
     return result
   }
 
-  // print(Optional(raw_signed_string))
-
   guard let raw_signed_data = raw_signed_string.data(using: .utf8) else {
-    result.status = DKIMStatus.Error(
+    result.status = DKIMSignatureStatus.Error(
       DKIMError.InvalidEntryInDKIMHeader(message: "could not encode using utf8"))
     return result
 
   }
 
   guard let dkim_signature_data = Data(base64Encoded: parameters.signature) else {
-    result.status = DKIMStatus.Error(
+    result.status = DKIMSignatureStatus.Error(
       DKIMError.InvalidEntryInDKIMHeader(message: "invalid base64 in signature ('b') entry"))
     return result
   }
@@ -569,21 +617,22 @@ public func verify(dnsLoopupTxtFunction: @escaping (String) throws -> String?, e
         encodedKey: public_key_data, signature: dkim_signature_data, data: raw_signed_data)
     }
   } catch let error as DKIMError {
-    result.status = DKIMStatus.Error(error)
+    result.status = DKIMSignatureStatus.Error(error)
     return result
   } catch {
-    result.status = DKIMStatus.Error(DKIMError.UnexpectedError(message: error.localizedDescription))
+    result.status = DKIMSignatureStatus.Error(
+      DKIMError.UnexpectedError(message: error.localizedDescription))
     return result
   }
 
   if signature_result {
     if risks.count > 0 {
-      result.status = DKIMStatus.Valid_Insecure(risks)
+      result.status = DKIMSignatureStatus.Valid_Insecure(risks)
     } else {
-      result.status = DKIMStatus.Valid
+      result.status = DKIMSignatureStatus.Valid
     }
   } else {
-    result.status = DKIMStatus.Invalid(DKIMError.SignatureDoesNotMatch)
+    result.status = DKIMSignatureStatus.Invalid(DKIMError.SignatureDoesNotMatch)
   }
 
   return result
