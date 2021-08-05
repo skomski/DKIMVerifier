@@ -6,7 +6,7 @@
 
 * Verification of DKIM signatures (https://datatracker.ietf.org/doc/html/rfc6376)
 * No boolean result: Additional detection of DKIM security pitfalls
-* Query DMARC infos 
+* Query DMARC infos
 
 ## API
 
@@ -61,4 +61,20 @@ public struct DKIMResult: Equatable {
   var status: DKIMStatus
   var info: DKIMInfo?
 }
+```
+
+## Oracle Test Tool
+
+### Setup
+
+```
+python3 -m pip install dkimpy
+npm install -g mailauth
+```
+
+### Run
+
+```
+./Tools/gen_oracle_reports.sh ../../emails 50 > oracle_log.csv
+./Tools/analyze_oracle_report.py oracle_log.csv
 ```

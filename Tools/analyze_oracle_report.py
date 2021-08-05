@@ -14,13 +14,17 @@ args = parser.parse_args()
 total_emails = 0
 valid_emails = 0
 no_signature_emails = 0
+valid_insecure_emails = 0
 
 reader = csv.DictReader(args.report)
 for row in reader:
     total_emails += 1
     if row["dkimpy"] == "signature ok" and "pass" in row["mailauth"] and "Valid" in row["dkimverifier"]:
-        valid_emails += 1
-        continue
+        if "Valid" not in row["dkimverifier"].replace("Valid_Insecure", ""):
+            valid_insecure_emails += 1
+        else:
+            valid_emails += 1
+            continue
     if (
         row["dkimpy"] == "signature verification failed"
         and "message not signed" in row["mailauth"]
@@ -33,5 +37,6 @@ for row in reader:
 
 print("total_emails: ", total_emails)
 print("valid_emails: ", valid_emails)
+print("valid_insecure_emails: ", valid_insecure_emails)
 print("no_signature_emails: ", no_signature_emails)
-print("fail_emails: ", total_emails - valid_emails - no_signature_emails)
+print("fail_emails: ", total_emails - valid_emails - no_signature_emails - valid_insecure_emails)
