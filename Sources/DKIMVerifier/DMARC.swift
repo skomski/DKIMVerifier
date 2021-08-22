@@ -22,7 +22,7 @@ enum DMARCVersion {
   case One
 }
 
-public struct DMARCEntry {
+public struct DMARCEntry: Equatable {
   var dkimAlignmentMode: AlignmentMode  // default relaxed
   // var SPFAlignmentMode : AlignmentMode // default relaxed
   //var failureReportingOptions:  FailureReportingOptions // default is AllFail
@@ -47,26 +47,62 @@ public enum DMARCError: Error, Equatable {
   case TagValueListParsingError(message: String)
   case InvalidEntryInDMARCHeader(message: String)
   case InvalidDNSEntry(message: String)
+  case InvalidURL(message: String)
   case UnexpectedError(message: String)
 }
 
-public enum DMARCStatus: Equatable {
-  case Valid
-  case Error(DMARCError)
-}
-
-public struct DMARCResult {
-  var status: DMARCStatus
+public struct DMARCResult: Equatable {
   var entry: DMARCEntry
+  var valid: Bool
 }
 
-public func queryDMARC(
-  dnsLoopupTxtFunction: @escaping (String) throws -> String?, domain: String
+internal func checkDMARC(
+  dnsLookupTxtFunction: @escaping (String) throws -> String?, fromSenderDomain: String,
+  validDKIMDomains: [String]
+) throws -> DMARCResult {
+  // 1. check subdomain dmarc entry
+  let subdomainDmarc = "_dmarc." + fromSenderDomain
+  let dmarcEntry: DMARCEntry
+  do {
+    dmarcEntry = try queryDMARC(dnsLookupTxtFunction: dnsLookupTxtFunction, domain: subdomainDmarc)
+  } catch {
+    // 1.1. check organizational dmarc entry
+    let splittedDomain = fromSenderDomain.split(separator: ".")
+    guard splittedDomain.count > 1 else {
+      throw DMARCError.InvalidURL(message: "no root domain")
+    }
+    let orgDomainDMARC =
+      splittedDomain[splittedDomain.endIndex - 2] + "."
+      + splittedDomain[splittedDomain.endIndex - 1]
+
+    dmarcEntry = try queryDMARC(
+      dnsLookupTxtFunction: dnsLookupTxtFunction, domain: String(orgDomainDMARC))
+  }
+
+  // 3. check strict or relaxed alignment for valid dkim domains
+
+  for domain in validDKIMDomains {
+    if dmarcEntry.dkimAlignmentMode == AlignmentMode.Relaxed {
+      if fromSenderDomain.hasSuffix(domain) {
+        return DMARCResult.init(entry: dmarcEntry, valid: true)
+      }
+    } else if dmarcEntry.dkimAlignmentMode == AlignmentMode.Strict {
+      if domain == fromSenderDomain {
+        return DMARCResult.init(entry: dmarcEntry, valid: true)
+      }
+    }
+  }
+
+  return DMARCResult.init(entry: dmarcEntry, valid: false)
+}
+
+internal func queryDMARC(
+  dnsLookupTxtFunction: @escaping (String) throws -> String?, domain: String
 ) throws -> DMARCEntry {
   let dmarcDomain = "_dmarc." + domain
   let txtEntry: String?
   do {
-    txtEntry = try dnsLoopupTxtFunction(dmarcDomain)
+    txtEntry = try dnsLookupTxtFunction(dmarcDomain)
   } catch {
     throw DMARCError.UnexpectedError(message: error.localizedDescription)
   }

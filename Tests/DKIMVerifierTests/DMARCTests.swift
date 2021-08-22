@@ -19,7 +19,7 @@ final class DMARCTests: XCTestCase {
 
   func testDMARCQueryNoFail() {
     do {
-      let result = try queryDMARC(dnsLoopupTxtFunction: getDMARCNoFailDnsEntry, domain: "test.com")
+      let result = try queryDMARC(dnsLookupTxtFunction: getDMARCNoFailDnsEntry, domain: "test.com")
       XCTAssertEqual(result.version, DMARCVersion.One)
       XCTAssertEqual(result.mailReceiverPolicy, MailReceiverPolicy.None)
       XCTAssertEqual(result.subdomainMailReceiverPolicy, MailReceiverPolicy.Quarantine)
@@ -32,7 +32,7 @@ final class DMARCTests: XCTestCase {
   func testDMARCQueryNoFailDefault() {
     do {
       let result = try queryDMARC(
-        dnsLoopupTxtFunction: getDMARCNoFailDnsEntry, domain: "testdefault.com")
+        dnsLookupTxtFunction: getDMARCNoFailDnsEntry, domain: "testdefault.com")
       XCTAssertEqual(result.version, DMARCVersion.One)
       XCTAssertEqual(result.mailReceiverPolicy, MailReceiverPolicy.Reject)
       XCTAssertEqual(result.subdomainMailReceiverPolicy, MailReceiverPolicy.Reject)

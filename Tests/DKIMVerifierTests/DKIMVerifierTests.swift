@@ -17,6 +17,32 @@ final class DKIMVerifierTests: XCTestCase {
     return nil
   }
 
+  func testDMARCEmail() {
+    let emailFilePaths = Bundle.module.paths(forResourcesOfType: "eml", inDirectory: nil)
+    let emailFilePath = emailFilePaths.first(where: { $0.contains("multiple_signatures") })!
+
+    do {
+      let email_raw = try String(
+        contentsOf: URL(fileURLWithPath: emailFilePath), encoding: .utf8)
+
+      let result = DKIMVerifier.verifyDKIMSignatures(
+        dnsLoopupTxtFunction: GetDnsKey, email_raw: email_raw, verifyDMARC: true)
+
+      let expected_result = DKIMVerifier.DKIMSignatureResult.init(
+        status: DKIMVerifier.DKIMSignatureStatus.Valid)
+      XCTAssertEqual(result.signatures.count, 2, emailFilePath)
+      XCTAssertEqual(result.signatures[0].status, expected_result.status, emailFilePath)
+      XCTAssertEqual(result.signatures[1].status, expected_result.status, emailFilePath)
+      XCTAssertEqual(result.status, DKIMStatus.Valid)
+      XCTAssertEqual(result.DMARCResult?.valid, true)
+      XCTAssertEqual(result.DMARCResult?.entry.dkimAlignmentMode, AlignmentMode.Strict)
+
+    } catch {
+      XCTFail("email \(emailFilePath) should not throw an error: \(error)")
+    }
+
+  }
+
   func testCompleteEmails() {
     let emailFilePaths = Bundle.module.paths(forResourcesOfType: "eml", inDirectory: nil)
 

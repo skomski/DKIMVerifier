@@ -118,6 +118,7 @@ public struct DKIMResult: Equatable {
   public var signatures: [DKIMSignatureResult]
   public var email_from_sender: String?
   public var extracted_domain_from_sender: String?
+  public var DMARCResult: DMARCResult?
 
   init() {
     status = DKIMStatus.Error(DKIMError.UnexpectedError(message: "initial status"))
@@ -328,7 +329,8 @@ func validateDKIMFields(
 }
 
 public func verifyDKIMSignatures(
-  dnsLoopupTxtFunction: @escaping (String) throws -> String?, email_raw: String
+  dnsLoopupTxtFunction: @escaping (String) throws -> String?, email_raw: String,
+  verifyDMARC: Bool = false
 )
   -> DKIMResult
 {
@@ -398,6 +400,28 @@ public func verifyDKIMSignatures(
     } catch let error as DKIMError {
       result.status = DKIMStatus.Error(error)
       return result
+    } catch {
+      result.status = DKIMStatus.Error(
+        DKIMError.UnexpectedError(message: error.localizedDescription))
+      return result
+    }
+  }
+
+  if verifyDMARC {
+    var validDKIMDomains: [String] = []
+    for signature in result.signatures {
+      if signature.status == .Valid {
+        validDKIMDomains.append(signature.info!.sdid)
+      }
+      if case .Valid_Insecure = signature.status {
+        validDKIMDomains.append(signature.info!.sdid)
+      }
+    }
+
+    do {
+      result.DMARCResult = try checkDMARC(
+        dnsLookupTxtFunction: dnsLoopupTxtFunction,
+        fromSenderDomain: result.extracted_domain_from_sender!, validDKIMDomains: validDKIMDomains)
     } catch {
       result.status = DKIMStatus.Error(
         DKIMError.UnexpectedError(message: error.localizedDescription))
