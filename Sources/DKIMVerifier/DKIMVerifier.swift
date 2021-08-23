@@ -116,22 +116,22 @@ public struct DKIMSignatureResult: Equatable {
 public struct DKIMResult: Equatable {
   public var status: DKIMStatus
   public var signatures: [DKIMSignatureResult]
-  public var email_from_sender: String?
-  public var extracted_domain_from_sender: String?
+  public var emailFromSender: String?
+  public var extractedDomainFromSender: String?
   public var DMARCResult: DMARCResult?
 
   init() {
     status = DKIMStatus.Error(DKIMError.UnexpectedError(message: "initial status"))
     signatures = []
-    email_from_sender = nil
-    extracted_domain_from_sender = nil
+    emailFromSender = nil
+    extractedDomainFromSender = nil
   }
 
   init(status: DKIMStatus) {
     self.status = status
     signatures = []
-    email_from_sender = nil
-    extracted_domain_from_sender = nil
+    emailFromSender = nil
+    extractedDomainFromSender = nil
   }
 }
 
@@ -369,15 +369,15 @@ public func verifyDKIMSignatures(
   let from_header_field: String = headers.last(where: { $0.key.lowercased() == "from" }
   )!.value
 
-  result.email_from_sender = from_header_field.trimmingCharacters(in: .whitespacesAndNewlines)
+  result.emailFromSender = from_header_field.trimmingCharacters(in: .whitespacesAndNewlines)
 
-  result.extracted_domain_from_sender = parseDomainFromEmail(
-    email: parseEmailFromField(raw_from_field: result.email_from_sender!) ?? "")
+  result.extractedDomainFromSender = parseDomainFromEmail(
+    email: parseEmailFromField(raw_from_field: result.emailFromSender!) ?? "")
 
-  guard result.extracted_domain_from_sender != nil else {
+  guard result.extractedDomainFromSender != nil else {
     result.status = DKIMStatus.Error(
       DKIMError.InvalidRFC5322Headers(
-        message: "could not extract domain from email from field \(result.email_from_sender!)"))
+        message: "could not extract domain from email from field \(result.emailFromSender!)"))
     return result
   }
 
@@ -395,7 +395,7 @@ public func verifyDKIMSignatures(
       let signatureResult = try verifyDKIMSignature(
         dnsLoopupTxtFunction: dnsLoopupTxtFunction,
         emailHeaders: headers, emailBody: body, dkimHeaderFieldIndex: index,
-        extractedDomainFromSender: result.extracted_domain_from_sender!)
+        extractedDomainFromSender: result.extractedDomainFromSender!)
       result.signatures.append(signatureResult)
     } catch let error as DKIMError {
       result.status = DKIMStatus.Error(error)
@@ -421,7 +421,7 @@ public func verifyDKIMSignatures(
     do {
       result.DMARCResult = try checkDMARC(
         dnsLookupTxtFunction: dnsLoopupTxtFunction,
-        fromSenderDomain: result.extracted_domain_from_sender!, validDKIMDomains: validDKIMDomains)
+        fromSenderDomain: result.extractedDomainFromSender!, validDKIMDomains: validDKIMDomains)
     } catch {
       result.status = DKIMStatus.Error(
         DKIMError.UnexpectedError(message: error.localizedDescription))

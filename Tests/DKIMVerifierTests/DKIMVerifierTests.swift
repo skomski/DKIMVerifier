@@ -63,7 +63,7 @@ final class DKIMVerifierTests: XCTestCase {
         if emailFilePath.contains("unsigned") {
           XCTAssertEqual(result.signatures.count, 0, emailFilePath)
           XCTAssertEqual(result.status, DKIMVerifier.DKIMStatus.NoSignature)
-          XCTAssertEqual(result.email_from_sender, "Joe SixPack <joe@football.example.com>")
+          XCTAssertEqual(result.emailFromSender, "Joe SixPack <joe@football.example.com>")
           no_signature_emails += 1
         } else if emailFilePath.contains("error_invalid_without_header") {
           XCTAssertEqual(result.signatures.count, 0, emailFilePath)
@@ -124,7 +124,7 @@ final class DKIMVerifierTests: XCTestCase {
               DKIMVerifier.DKIMPublicKeyQueryMethod.DNSTXT)
 
             XCTAssertEqual(result.signatures[0].info!.auid, "@example.com")
-            XCTAssertEqual(result.extracted_domain_from_sender, "football.example.com")
+            XCTAssertEqual(result.extractedDomainFromSender, "football.example.com")
             XCTAssertEqual(result.signatures[0].info!.sdid, "example.com")
             XCTAssertEqual(result.signatures[0].info!.bodyLength, 55)
             XCTAssertEqual(
@@ -178,7 +178,7 @@ final class DKIMVerifierTests: XCTestCase {
                   DKIMVerifier.DKIMRisks.ImportantHeaderFieldNotSigned(name: "date"),
                   DKIMVerifier.DKIMRisks.ImportantHeaderFieldNotSigned(name: "message-id"),
                 ])))
-            XCTAssertEqual(result.extracted_domain_from_sender, "mubi.com")
+            XCTAssertEqual(result.extractedDomainFromSender, "mubi.com")
             valid_insecure_emails += 1
             XCTAssertEqual(result.status, DKIMStatus.Valid_Insecure)
           default:
