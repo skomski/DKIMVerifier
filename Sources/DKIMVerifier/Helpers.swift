@@ -76,14 +76,14 @@ internal func parseRFC822Message(message: String) throws -> (OrderedKeyValueArra
 
     if [Character("\t"), Character(" ")].contains(lines[i][lines[i].startIndex]) {
       if headers.isEmpty {
-        throw DKIMError.RFC822MessageParsingError(message: "value for unknown header")
+        throw DKIMError.RFC5322MessageParsingError(message: "value for unknown header")
       }
       headers[headers.endIndex - 1].value += lines[i] + "\r\n"
     } else {
       do {
         let match = try lines[i].regexMatch(#"([\x21-\x7e]+?):"#)
         if match == nil {
-          throw DKIMError.RFC822MessageParsingError(
+          throw DKIMError.RFC5322MessageParsingError(
             message: "invalid header in line: " + String(i))
         }
 
@@ -95,7 +95,7 @@ internal func parseRFC822Message(message: String) throws -> (OrderedKeyValueArra
           )
         ]
       } catch {
-        throw DKIMError.RFC822MessageParsingError(message: "regex error in line:" + String(i))
+        throw DKIMError.RFC5322MessageParsingError(message: "regex error in line:" + String(i))
       }
     }
 
