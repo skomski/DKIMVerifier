@@ -34,7 +34,7 @@ final class DKIMVerifierTests: XCTestCase {
       XCTAssertEqual(result.signatures[0].status, expected_result.status, emailFilePath)
       XCTAssertEqual(result.signatures[1].status, expected_result.status, emailFilePath)
       XCTAssertEqual(result.status, DKIMStatus.Valid)
-      XCTAssertEqual(result.DMARCResult?.valid, true)
+      XCTAssertEqual(result.DMARCResult?.validDKIMIdentifierAlignment, true)
       XCTAssertEqual(result.DMARCResult?.entry.dkimAlignmentMode, AlignmentMode.Strict)
 
     } catch {
@@ -69,7 +69,7 @@ final class DKIMVerifierTests: XCTestCase {
           XCTAssertEqual(result.signatures.count, 0, emailFilePath)
           let expected_result = DKIMVerifier.DKIMResult.init(
             status: DKIMVerifier.DKIMStatus.Error(
-              DKIMVerifier.DKIMError.InvalidRFC822Headers(message: "invalid email without header")))
+              DKIMVerifier.DKIMError.InvalidRFC5322Headers(message: "invalid email without header")))
           XCTAssertEqual(result, expected_result)
           error_emails += 1
         } else if emailFilePath.contains("multiple_signatures") {

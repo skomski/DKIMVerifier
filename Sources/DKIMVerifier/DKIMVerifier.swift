@@ -5,8 +5,8 @@ import _CryptoExtras
 
 public enum DKIMError: Error, Equatable {
   case TagValueListParsingError(message: String)
-  case RFC822MessageParsingError(message: String)
-  case InvalidRFC822Headers(message: String)
+  case RFC5322MessageParsingError(message: String)
+  case InvalidRFC5322Headers(message: String)
   case InvalidEntryInDKIMHeader(message: String)
   case BodyHashDoesNotMatch(message: String)
   case SignatureDoesNotMatch
@@ -350,19 +350,19 @@ public func verifyDKIMSignatures(
 
   guard !headers.isEmpty else {
     result.status = DKIMStatus.Error(
-      DKIMError.InvalidRFC822Headers(message: "invalid email without header"))
+      DKIMError.InvalidRFC5322Headers(message: "invalid email without header"))
     return result
   }
 
   guard headers.contains(where: { $0.key.lowercased() == "from" }) else {
     result.status = DKIMStatus.Error(
-      DKIMError.InvalidRFC822Headers(message: "no from email header"))
+      DKIMError.InvalidRFC5322Headers(message: "no from email header"))
     return result
   }
 
   guard headers.filter({ $0.key.lowercased() == "from" }).count == 1 else {
     result.status = DKIMStatus.Error(
-      DKIMError.InvalidRFC822Headers(message: "multiple from email headers"))
+      DKIMError.InvalidRFC5322Headers(message: "multiple from email headers"))
     return result
   }
 
@@ -376,7 +376,7 @@ public func verifyDKIMSignatures(
 
   guard result.extracted_domain_from_sender != nil else {
     result.status = DKIMStatus.Error(
-      DKIMError.InvalidRFC822Headers(
+      DKIMError.InvalidRFC5322Headers(
         message: "could not extract domain from email from field \(result.email_from_sender!)"))
     return result
   }
@@ -429,9 +429,9 @@ public func verifyDKIMSignatures(
     }
   }
 
-  if result.signatures.allSatisfy({ $0.status == DKIMSignatureStatus.Valid }) {
+  if result.signatures.contains(where: { $0.status == DKIMSignatureStatus.Valid }) {
     result.status = DKIMStatus.Valid
-  } else if result.signatures.allSatisfy({
+  } else if result.signatures.contains(where: {
     if case .Valid_Insecure = $0.status { return true } else { return false }
   }) {
     result.status = DKIMStatus.Valid_Insecure

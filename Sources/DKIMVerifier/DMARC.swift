@@ -53,7 +53,7 @@ public enum DMARCError: Error, Equatable {
 
 public struct DMARCResult: Equatable {
   var entry: DMARCEntry
-  var valid: Bool
+  var validDKIMIdentifierAlignment: Bool
 }
 
 internal func checkDMARC(
@@ -84,16 +84,16 @@ internal func checkDMARC(
   for domain in validDKIMDomains {
     if dmarcEntry.dkimAlignmentMode == AlignmentMode.Relaxed {
       if fromSenderDomain.hasSuffix(domain) {
-        return DMARCResult.init(entry: dmarcEntry, valid: true)
+        return DMARCResult.init(entry: dmarcEntry, validDKIMIdentifierAlignment: true)
       }
     } else if dmarcEntry.dkimAlignmentMode == AlignmentMode.Strict {
       if domain == fromSenderDomain {
-        return DMARCResult.init(entry: dmarcEntry, valid: true)
+        return DMARCResult.init(entry: dmarcEntry, validDKIMIdentifierAlignment: true)
       }
     }
   }
 
-  return DMARCResult.init(entry: dmarcEntry, valid: false)
+  return DMARCResult.init(entry: dmarcEntry, validDKIMIdentifierAlignment: false)
 }
 
 internal func queryDMARC(
