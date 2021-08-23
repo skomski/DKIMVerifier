@@ -25,7 +25,7 @@ DKIMVerifier.verifyDKIMSignatures(
 
 Arguments:
 * dnsLookupTxtFunction: should return txt value for specific domain
-* email_raw: RFC5322 Message as raw string
+* mail: RFC5322 Message as raw string
 * verifyDMARCAlignment: additional verify DMARC DKIM Alignment for valid signatures (default: false)
 
 Result:
@@ -34,7 +34,7 @@ public struct DKIMResult: Equatable {
   public var status: DKIMStatus
   public var signatures: [DKIMSignatureResult]
   public var emailFromSender: String?
-  public var extracteDomainFromSender: String?
+  public var extractedDomainFromSender: String?
   public var DMARCResult: DMARCResult?
 }
 
