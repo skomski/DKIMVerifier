@@ -19,7 +19,7 @@ valid_insecure_emails = 0
 reader = csv.DictReader(args.report)
 for row in reader:
     total_emails += 1
-    if row["dkimpy"] == "signature ok" and "pass" in row["mailauth"] and "Valid" in row["dkimverifier"]:
+    if "SUCCESS" in row["thunderbird"] and row["dkimpy"] == "signature ok" and "pass" in row["mailauth"] and "Valid" in row["dkimverifier"]:
         if "Valid" not in row["dkimverifier"].replace("Valid_Insecure", ""):
             valid_insecure_emails += 1
         else:
@@ -32,7 +32,7 @@ for row in reader:
     ):
         no_signature_emails += 1
         continue
-    print(row["filename"][-19:], row["dkimpy"], row["mailauth"], row["dkimverifier"])
+    print(row["filename"][-19:], row["thunderbird"], row["dkimpy"], row["mailauth"], row["dkimverifier"])
 
 
 print("total_emails: ", total_emails)

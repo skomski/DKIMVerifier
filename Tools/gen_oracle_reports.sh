@@ -4,7 +4,7 @@
 
 swift build | true
 
-echo "filename,dkimpy,mailauth,dkimverifier"
+echo "filename,thunderbird,dkimpy,mailauth,dkimverifier"
 
 emails_location=$1
 count_emails=$2
@@ -13,6 +13,8 @@ counter=0
 for filename in $emails_location/*.eml; do
     [ -e "$filename" ] || continue
     printf "$filename" | sed -e 's/"/""/g' | xargs -0 -I{} printf "\"{}\","
+    cat "$filename" | node ./Tools/thunderbird_runner.js | tr -d '\n' | sed -e 's/"/""/g' | xargs -0 -I{} printf "\"{}\""
+    printf ","
     cat "$filename" | dkimverify 2>&1 | sed '$!d' | tr -d '\n' | sed -e 's/"/""/g' | xargs -0 -I{} printf "\"{}\""
     printf ","
     cat "$filename" | mailauth report | jq .dkim.results[0].info | tr -d '\n' | sed 's:^.\(.*\).$:\1:' | sed -e 's/"/""/g' | xargs -0 -I{} printf "\"{}\""
