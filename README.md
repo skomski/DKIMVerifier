@@ -25,16 +25,22 @@ DKIMVerifier.verifyDKIMSignatures(
 
 Arguments:
 * dnsLookupTxtFunction: should return txt value for specific domain
-* email_raw: RFC5322 Message as raw string
+* mail: RFC5322 Message as raw string
 * verifyDMARCAlignment: additional verify DMARC DKIM Alignment for valid signatures (default: false)
 
 Result:
+* status: an overall status, Valid or Valid_Insecure if any of the dkim signatures in the mail returned this result
+* signatures: the individual signature results, good to check for DKIM Risks if the overall result is only Valid_Insecure
+* emailFromSender: the extracted email from the From: mail header field
+* extractedDomainFromSender: the extracted domain from the From: mail header field, used for the DKIM SDID and DMARC alignment checks 
+* DMARCResult: the dmarc info and alignment check info if requested via verifyDMARCAlignment
+
 ```swift
 public struct DKIMResult: Equatable {
   public var status: DKIMStatus
   public var signatures: [DKIMSignatureResult]
   public var emailFromSender: String?
-  public var extracteDomainFromSender: String?
+  public var extractedDomainFromSender: String?
   public var DMARCResult: DMARCResult?
 }
 
