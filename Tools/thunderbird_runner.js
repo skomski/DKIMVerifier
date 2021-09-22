@@ -52,7 +52,7 @@ async function main() {
     function queryDnsTxt(name) {
         return dns.promises.resolveTxt(name).then((res) => {
             return {
-                data: res[0],
+                data: [res[0].join("")],
                 rcode: 0,
                 secure: false,
                 bogus: false,
