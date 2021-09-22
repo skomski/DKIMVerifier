@@ -86,6 +86,12 @@ final class DKIMVerifierTests: XCTestCase {
 
           let expected_result: DKIMVerifier.DKIMSignatureResult
           switch emailFilePath {
+          case _ where emailFilePath.contains("revoked"):
+            expected_result = DKIMVerifier.DKIMSignatureResult.init(
+              status: DKIMVerifier.DKIMSignatureStatus.Error(
+                DKIMVerifier.DKIMError.PublicKeyRevoked))
+            error_emails += 1
+            XCTAssertEqual(result.status, DKIMStatus.Invalid)
           case _ where emailFilePath.contains("wrong_signature"):
             expected_result = DKIMVerifier.DKIMSignatureResult.init(
               status: DKIMVerifier.DKIMSignatureStatus.Invalid(
@@ -216,8 +222,8 @@ final class DKIMVerifierTests: XCTestCase {
     }
 
     XCTAssertEqual(total_emails, emailFilePaths.count)
-    XCTAssertEqual(total_emails, 12)
-    XCTAssertEqual(error_emails, 2)
+    XCTAssertEqual(total_emails, 13)
+    XCTAssertEqual(error_emails, 3)
     XCTAssertEqual(no_signature_emails, 1)
     XCTAssertEqual(valid_insecure_emails, 4)
     XCTAssertEqual(valid_emails, 5)

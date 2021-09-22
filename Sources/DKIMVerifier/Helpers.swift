@@ -38,7 +38,7 @@ internal func parseTagValueList(raw_list: String) throws -> TagValueDictionary {
     let splitted = tag_spec.split(separator: "=", maxSplits: 1)
     if splitted.count != 2 {
       throw DKIMError.TagValueListParsingError(
-        message: "no value for key: " + String(splitted[0]))
+        message: "no value for key: " + String(splitted[0].trimmingCharacters(in: .whitespacesAndNewlines)))
     }
     let key = splitted[0].trimmingCharacters(in: .whitespacesAndNewlines)
     let value = splitted[1].trimmingCharacters(in: .whitespacesAndNewlines)

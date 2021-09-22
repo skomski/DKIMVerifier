@@ -11,6 +11,7 @@ public enum DKIMError: Error, Equatable {
   case BodyHashDoesNotMatch(message: String)
   case SignatureDoesNotMatch
   case InvalidDNSEntry(message: String)
+  case PublicKeyRevoked
   case UnexpectedError(message: String)
 }
 
@@ -560,6 +561,9 @@ func verifyDKIMSignature(
   let dns_tag_value_list: TagValueDictionary
   do {
     dns_tag_value_list = try parseTagValueList(raw_list: record)
+  } catch let error as DKIMError where error == .TagValueListParsingError(message: "no value for key: p") {
+    result.status = DKIMSignatureStatus.Error(DKIMError.PublicKeyRevoked)
+    return result
   } catch let error as DKIMError {
     result.status = DKIMSignatureStatus.Error(error)
     return result
