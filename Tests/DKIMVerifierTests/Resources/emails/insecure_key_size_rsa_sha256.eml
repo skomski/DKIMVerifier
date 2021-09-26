@@ -1,0 +1,17 @@
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=insecure.com;
+ i=@insecure.com; q=dns/txt; s=test; t=1632658407; h=from : to :
+ subject : date : message-id : from;
+ bh=4bLNXImK9drULnmePzZNEBleUanJCX5PIsDIFoH4KTQ=;
+ b=WsjGFPMOLHuQHnbuSS8MUROof2Mkj4mN9JaXKv2Sglp7D/OsDWUOVPJepOBDyREzIulo1
+ TZJ+nEex6Gmv00kFA==
+From: Joe SixPack <joe@football.example.com>
+To: Suzie Q <suzie@shopping.example.net>
+Subject: Is dinner ready?
+Date: Fri, 11 Jul 2003 21:00:37 -0700 (PDT)
+Message-ID: <20030712040037.46341.5F8J@football.example.com>
+
+Hi.
+
+We lost the game.  Are you hungry yet?
+
+Joe.

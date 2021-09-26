@@ -14,14 +14,14 @@ func checkRSA_SHA1_Signature(encodedKey: Data, signature: Data, data: Data) thro
 }
 
 func checkRSA_SHA256_Signature(encodedKey: Data, signature: Data, data: Data) throws
-  -> Bool
+  -> (Int, Bool)
 {
   let key = try _RSA.Signing.PublicKey.init(derRepresentation: encodedKey)
   let signature = _RSA.Signing.RSASignature.init(rawRepresentation: signature)
 
-  return key.isValidSignature(
+  return (key.keySizeInBits, key.isValidSignature(
     signature, for: Crypto.SHA256.hash(data: data),
-    padding: _RSA.Signing.Padding.insecurePKCS1v1_5)
+    padding: _RSA.Signing.Padding.insecurePKCS1v1_5))
 }
 
 func checkEd25519_SHA256_Signature(encodedKey: Data, signature: Data, data: Data) throws

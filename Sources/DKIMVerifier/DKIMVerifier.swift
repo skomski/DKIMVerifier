@@ -12,6 +12,7 @@ public enum DKIMError: Error, Equatable {
   case SignatureDoesNotMatch
   case InvalidDNSEntry(message: String)
   case PublicKeyRevoked
+  case PublicKeyWithIncorrectParameters // for example keySize lower than 1024 for RSA
   case UnexpectedError(message: String)
 }
 
@@ -78,7 +79,10 @@ public enum DKIMRisks: Hashable, Equatable {
   case SDIDNotEqualToSender  // third-party signature, From: Sender different to DKIM Domain
   case ImportantHeaderFieldNotSigned(name: String)  // only From: field required, but more fields are better else manipulation possible
   // Subject, Content-Type, Reply-To,... should be signed
+  case InsecureKeySize // using a key size less than 2048 for RSA
 }
+
+var LowestSecureKeySize : Int = 2048
 
 // The rfc6376 recommended header fields to sign
 let importantHeaderFields: Set<String> = [
@@ -107,6 +111,8 @@ public struct DKIMSignatureInfo: Equatable {
   var signatureTimestamp: Date?
   var signatureExpiration: String?
   var copiedHeaderFields: String?
+  
+  var rsaKeySizeInBits: Int?
 }
 
 public struct DKIMSignatureResult: Equatable {
@@ -638,8 +644,16 @@ func verifyDKIMSignature(
       signature_result = try DKIMVerifier.checkRSA_SHA1_Signature(
         encodedKey: public_key_data, signature: dkim_signature_data, data: raw_signed_data)
     case DKIMSignatureAlgorithm.RSA_SHA256:
-      signature_result = try DKIMVerifier.checkRSA_SHA256_Signature(
+      let keySizeInBits : Int
+      (keySizeInBits, signature_result) = try DKIMVerifier.checkRSA_SHA256_Signature(
         encodedKey: public_key_data, signature: dkim_signature_data, data: raw_signed_data)
+      
+      result.info?.rsaKeySizeInBits = keySizeInBits
+
+      if keySizeInBits < LowestSecureKeySize {
+        risks.insert(DKIMRisks.InsecureKeySize)
+      }
+      
     case DKIMSignatureAlgorithm.Ed25519_SHA256:
       signature_result = try DKIMVerifier.checkEd25519_SHA256_Signature(
         encodedKey: public_key_data, signature: dkim_signature_data, data: raw_signed_data)
@@ -647,9 +661,12 @@ func verifyDKIMSignature(
   } catch let error as DKIMError {
     result.status = DKIMSignatureStatus.Error(error)
     return result
+  } catch CryptoKitError.incorrectParameterSize {
+    result.status = DKIMSignatureStatus.Error(DKIMError.PublicKeyWithIncorrectParameters)
+    return result
   } catch {
     result.status = DKIMSignatureStatus.Error(
-      DKIMError.UnexpectedError(message: error.localizedDescription))
+      DKIMError.UnexpectedError(message: "CryptoKit: \(error)"))
     return result
   }
 
