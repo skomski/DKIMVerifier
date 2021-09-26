@@ -4,15 +4,22 @@ import RegularExpressions
 import _CryptoExtras
 
 public enum DKIMError: Error, Equatable {
+  // email errors
   case TagValueListParsingError(message: String)
   case RFC5322MessageParsingError(message: String)
   case InvalidRFC5322Headers(message: String)
+  case NoSignature
+  case OnlyInvalidSignatures
+  
+  // signature errors
   case InvalidEntryInDKIMHeader(message: String)
   case BodyHashDoesNotMatch(message: String)
   case SignatureDoesNotMatch
   case InvalidDNSEntry(message: String)
   case PublicKeyRevoked
   case PublicKeyWithIncorrectParameters // for example keySize lower than 1024 for RSA
+  
+  // always possible
   case UnexpectedError(message: String)
 }
 
@@ -60,16 +67,13 @@ enum DNSEntryTagNames: String {
 
 public enum DKIMSignatureStatus: Equatable {
   case Valid
-  case Valid_Insecure(Set<DKIMRisks>)
-  case Invalid(DKIMError)
+  case Insecure(Set<DKIMRisks>)
   case Error(DKIMError)
 }
 
 public enum DKIMStatus: Equatable {
   case Valid
-  case Valid_Insecure
-  case Invalid
-  case NoSignature
+  case Insecure
   case Error(DKIMError)
 }
 
@@ -389,7 +393,7 @@ public func verifyDKIMSignatures(
   }
 
   guard headers.contains(where: { $0.key.lowercased() == "dkim-signature" }) else {
-    result.status = DKIMStatus.NoSignature
+    result.status = DKIMStatus.Error(DKIMError.NoSignature)
     return result
   }
 
@@ -420,7 +424,7 @@ public func verifyDKIMSignatures(
       if signature.status == .Valid {
         validDKIMDomains.append(signature.info!.sdid)
       }
-      if case .Valid_Insecure = signature.status {
+      if case .Insecure = signature.status {
         validDKIMDomains.append(signature.info!.sdid)
       }
     }
@@ -439,14 +443,11 @@ public func verifyDKIMSignatures(
   if result.signatures.contains(where: { $0.status == DKIMSignatureStatus.Valid }) {
     result.status = DKIMStatus.Valid
   } else if result.signatures.contains(where: {
-    if case .Valid_Insecure = $0.status { return true } else { return false }
+    if case .Insecure = $0.status { return true } else { return false }
   }) {
-    result.status = DKIMStatus.Valid_Insecure
+    result.status = DKIMStatus.Insecure
   } else {
-    result.status = DKIMStatus.Invalid
-    if result.signatures.count == 0 {
-      result.status = DKIMStatus.NoSignature
-    }
+    result.status = DKIMStatus.Error(DKIMError.OnlyInvalidSignatures)
   }
 
   return result
@@ -535,7 +536,7 @@ func verifyDKIMSignature(
   }
 
   guard provided_hash == calculated_hash else {
-    result.status = DKIMSignatureStatus.Invalid(
+    result.status = DKIMSignatureStatus.Error(
       DKIMError.BodyHashDoesNotMatch(
         message: "provided hash " + provided_hash + " not equal to calculated hash "
           + calculated_hash))
@@ -672,12 +673,12 @@ func verifyDKIMSignature(
 
   if signature_result {
     if risks.count > 0 {
-      result.status = DKIMSignatureStatus.Valid_Insecure(risks)
+      result.status = DKIMSignatureStatus.Insecure(risks)
     } else {
       result.status = DKIMSignatureStatus.Valid
     }
   } else {
-    result.status = DKIMSignatureStatus.Invalid(DKIMError.SignatureDoesNotMatch)
+    result.status = DKIMSignatureStatus.Error(DKIMError.SignatureDoesNotMatch)
   }
 
   return result

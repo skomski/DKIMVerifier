@@ -18,11 +18,9 @@ struct DKIMVerifierTool: ParsableCommand {
       switch result.status {
       case DKIMStatus.Valid:
         print("Valid")
-      case DKIMStatus.NoSignature:
-        print("NoSignature")
       case DKIMStatus.Error(let error):
         print(error)
-      case DKIMStatus.Valid_Insecure, DKIMStatus.Invalid:
+      case DKIMStatus.Insecure:
         var resultString = ""
         for signature in result.signatures {
           resultString += String(describing: signature.status) + " "
