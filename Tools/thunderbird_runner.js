@@ -16,7 +16,7 @@ async function main() {
     const { default: KeyStore } = await import(thunderbird_dkimverifier_location + '/modules/dkim/keyStore.mjs.js');
     const { default: Logging } = await import(thunderbird_dkimverifier_location + "/modules/logging.mjs.js");
 
-    Logging.setLogLevel(Logging.Level.Error);
+    Logging.setLogLevel(Logging.Level.Debug);
 
     prefs._valueGetter = (name) => { return prefs._prefs[name]; };
     prefs._valueSetter = (name, value) => { prefs._prefs[name] = value; return Promise.resolve(); };

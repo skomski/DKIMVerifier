@@ -32,9 +32,10 @@ final class HelpersTests: XCTestCase {
     XCTAssertEqual(
       DKIMVerifier.parseEmailFromField(raw_from_field: "Joe SixPack <joe@football.example.com>"),
       "joe@football.example.com")
-    
+
     XCTAssertEqual(
-      DKIMVerifier.parseEmailFromField(raw_from_field: "IT-Helpcenter <it-helpcenter@HTW-Berlin.de>"),
+      DKIMVerifier.parseEmailFromField(
+        raw_from_field: "IT-Helpcenter <it-helpcenter@HTW-Berlin.de>"),
       "it-helpcenter@HTW-Berlin.de")
   }
 

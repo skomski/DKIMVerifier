@@ -1,9 +1,10 @@
-DKIM-Signature: v=1; a=rsa-sha1; c=relaxed/simple; d=test.com;
- i=@example.com; q=dns/txt; s=revoked; t=1627228361; h=from : to :
- subject : date : message-id : from; bh=NusQdCEdbIrlDBgnlbQjBOFK4uI=;
- b=j2HHHgacA3t9oIGBpveL+aXW5O4IurCleF3+CM+E+JDzFP42UfcYXb92dq/rE9bwKWzKi
- ChF0vMAQvd1kIzYpAyZs+qzp4kup/Ag7p917zxs0sKnAEzZ+Y3lOBMyFTrY8iNQDkDrZL1B
- 2XTCziiGlhqkEnav7siG9bvaNYdsBg0=
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=test.com;
+ i=@test.com; q=dns/txt; s=revoked; t=1636562989; h=from : to : subject
+ : date : message-id : from;
+ bh=4bLNXImK9drULnmePzZNEBleUanJCX5PIsDIFoH4KTQ=;
+ b=ppwlEORkRufNaoPdQsbpTfZJd92Ktrmr1Uvx5/Pgopnnpyu6DCEIuRNLKBNt5+qn/eLCn
+ klFTUvoRhnc+Sx7hS52ZPPv6o9qJw73G2QjOD1tZcJKhnFn7SkrbfVbfl4SgTd+bEtummsh
+ XybseH/ts6NOZq4gk0FKPOk9DfMBS90=
 From: Joe SixPack <joe@football.example.com>
 To: Suzie Q <suzie@shopping.example.net>
 Subject: Is dinner ready?

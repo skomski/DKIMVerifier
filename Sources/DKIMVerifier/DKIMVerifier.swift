@@ -24,7 +24,6 @@ public enum DKIMError: Error, Equatable {
 }
 
 public enum DKIMSignatureAlgorithm {
-  case RSA_SHA1
   case RSA_SHA256
   case Ed25519_SHA256
 }
@@ -79,11 +78,13 @@ public enum DKIMStatus: Equatable {
 
 public enum DKIMRisks: Hashable, Equatable {
   case UsingLengthParameter  // only verified to a specific body length
-  case UsingSHA1  // insecure hashing algorithm
   case SDIDNotInFrom(sdid: String, fromDomain: String)  // third-party signature, DKIM Domain not a subdomain or equal to From: Sender
   case ImportantHeaderFieldNotSigned(name: String)  // only From: field required, but more fields are better else manipulation possible
   // Subject, Content-Type, Reply-To,... should be signed
   case InsecureKeySize(size: Int, expected: Int)  // using a key size less than 2048 for RSA
+
+  // Not accepted as a risk anymore (RFC8301) -> Error
+  // case UsingSHA1  // insecure hashing algorithm
 }
 
 var LowestSecureKeySize: Int = 2048
@@ -200,13 +201,13 @@ func validateDKIMFields(
   } else if dkimSignatureAlgorithmString == "ed25519-sha256" {
     dkimSignatureAlgorithm = DKIMSignatureAlgorithm.Ed25519_SHA256
   } else if dkimSignatureAlgorithmString == "rsa-sha1" {
-    dkimSignatureAlgorithm = DKIMSignatureAlgorithm.RSA_SHA1
-    risks.insert(DKIMRisks.UsingSHA1)
+    throw DKIMError.InvalidEntryInDKIMHeader(
+      message: "rsa-sha1 deprecated as hashing algorithm (RFC8301) ('a')")
   } else {
     throw
       DKIMError.InvalidEntryInDKIMHeader(
         message:
-          "invalid signature algorithm provided \(dkimSignatureAlgorithmString ?? "none") ('a') (rsa-sha256, ed25519-sha256, rsa-sha1 supported"
+          "invalid signature algorithm provided \(dkimSignatureAlgorithmString ?? "none") ('a') (rsa-sha256 and ed25519-sha256 supported"
       )
 
   }
@@ -514,24 +515,11 @@ func verifyDKIMSignature(
     return result
   }
 
-  //  if parameters.bodyLength != nil {
-  //    guard parameters.bodyLength! <= body.count else {
-  //      result.status = DKIMStatus.Error(
-  //        DKIMError.InvalidEntryInDKIMHeader(
-  //          message:
-  //            "supplied body length \(parameters.bodyLength!) > email body length \(body.count)"))
-  //      return result
-  //    }
-  //  }
-
   // check if the calculated body hash matches the deposited body hash in the DKIM Header
   let provided_hash = parameters.bodyHash
 
   let calculated_hash: String
   switch parameters.algorithm {
-  case DKIMSignatureAlgorithm.RSA_SHA1:
-    calculated_hash = Data(Crypto.Insecure.SHA1.hash(data: canonEmailBody.data(using: .utf8)!))
-      .base64EncodedString()
   case DKIMSignatureAlgorithm.RSA_SHA256, DKIMSignatureAlgorithm.Ed25519_SHA256:
     calculated_hash = Data(Crypto.SHA256.hash(data: canonEmailBody.data(using: .utf8)!))
       .base64EncodedString()
@@ -645,9 +633,7 @@ func verifyDKIMSignature(
   let signature_result: Bool
   do {
     switch parameters.algorithm {
-    case DKIMSignatureAlgorithm.RSA_SHA1:
-      signature_result = try DKIMVerifier.checkRSA_SHA1_Signature(
-        encodedKey: public_key_data, signature: dkim_signature_data, data: raw_signed_data)
+
     case DKIMSignatureAlgorithm.RSA_SHA256:
       let keySizeInBits: Int
       (keySizeInBits, signature_result) = try DKIMVerifier.checkRSA_SHA256_Signature(
