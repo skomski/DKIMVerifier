@@ -77,10 +77,11 @@ public enum DKIMStatus: Equatable {
 }
 
 public enum DKIMRisks: Hashable, Equatable {
-  case SDIDNotInFrom(sdid: String, fromDomain: String)  // third-party signature, DKIM Domain not a subdomain or equal to From: Sender
+  case SDIDNotInFrom(sdid: String, fromDomain: String)  // third-party signature, DKIM Domain not a subdomain or equal to From: E-Mail-Header
   case ImportantHeaderFieldNotSigned(name: String)  // only From: field required, but more fields are better else manipulation possible
   // Subject, Content-Type, Reply-To,... should be signed
   case InsecureKeySize(size: Int, expected: Int)  // using a key size less than 2048 for RSA
+  case SignatureExpired(expirationDate: Date)  // Signature Expiration Parameter is in the past
 
   // Not accepted as a risk anymore (high risk, not used)
   //   -> Ignored in body hash validation, error on additional content
@@ -117,7 +118,7 @@ public struct DKIMSignatureInfo: Equatable {
   public var auid: String?
   // public var bodyLength: UInt?
   public var signatureTimestamp: Date?
-  public var signatureExpiration: String?
+  public var signatureExpiration: Date?
   //public var copiedHeaderFields: String?
 
   public var rsaKeySizeInBits: Int?
@@ -318,6 +319,10 @@ func validateDKIMFields(
     }
     let signatureTimestamp = Date(timeIntervalSince1970: Double(signatureTimestampNumber))
     info.signatureTimestamp = signatureTimestamp
+
+    if signatureTimestamp > Date() {
+      throw DKIMError.InvalidEntryInDKIMHeader(message: "signature timestamp is in the future")
+    }
   }
 
   if dkimFields[DKIMTagNames.SignatureExpiration.rawValue] != nil {
@@ -327,7 +332,11 @@ func validateDKIMFields(
       throw DKIMError.InvalidEntryInDKIMHeader(message: "signature expiration not a number")
     }
     let signatureExpiration = Date(timeIntervalSince1970: Double(signatureExpirationNumber))
-    info.signatureTimestamp = signatureExpiration
+    info.signatureExpiration = signatureExpiration
+
+    if signatureExpiration < Date() {
+      risks.insert(DKIMRisks.SignatureExpired(expirationDate: signatureExpiration))
+    }
   }
 
   dkim_result.info = info

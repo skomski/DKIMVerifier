@@ -156,6 +156,15 @@ final class DKIMVerifierTests: XCTestCase {
                 )))
             error_emails += 1
             XCTAssertEqual(result.status, DKIMStatus.Error(DKIMError.OnlyInvalidSignatures))
+          case _ where emailFilePath.hasSuffix("sha256_expired.eml"):
+            expected_result = DKIMVerifier.DKIMSignatureResult.init(
+              status: DKIMVerifier.DKIMSignatureStatus.Insecure([
+                DKIMRisks.SignatureExpired(
+                  expirationDate: Date.init(timeIntervalSince1970: 1_636_570_698))
+              ])
+            )
+            insecure_emails += 1
+            XCTAssertEqual(result.status, DKIMStatus.Insecure)
           case _ where emailFilePath.hasSuffix("sha1.eml"):
             expected_result = DKIMVerifier.DKIMSignatureResult.init(
               status: DKIMVerifier.DKIMSignatureStatus.Error(
@@ -245,10 +254,10 @@ final class DKIMVerifierTests: XCTestCase {
     }
 
     XCTAssertEqual(total_emails, emailFilePaths.count)
-    XCTAssertEqual(total_emails, 15)
+    XCTAssertEqual(total_emails, 16)
     XCTAssertEqual(error_emails, 7)
     XCTAssertEqual(no_signature_emails, 1)
-    XCTAssertEqual(insecure_emails, 4)
+    XCTAssertEqual(insecure_emails, 5)
     XCTAssertEqual(valid_emails, 3)
     XCTAssertEqual(
       valid_emails + insecure_emails + error_emails + no_signature_emails, total_emails)
