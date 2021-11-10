@@ -51,7 +51,7 @@ enum DKIMTagNames: String {
   case DomainSelector = "s"  // required
   case SignatureTimestamp = "t"  // optional
   case SignatureExpiration = "x"  // optional
-  case CopiedHeaderFields = "z"  // optional
+  //case CopiedHeaderFields = "z"  // optional, unused in practice, rfc unclear
 }
 
 enum DNSEntryTagNames: String {
@@ -118,7 +118,7 @@ public struct DKIMSignatureInfo: Equatable {
   // public var bodyLength: UInt?
   public var signatureTimestamp: Date?
   public var signatureExpiration: String?
-  public var copiedHeaderFields: String?
+  //public var copiedHeaderFields: String?
 
   public var rsaKeySizeInBits: Int?
 }
@@ -302,7 +302,7 @@ func validateDKIMFields(
     bodyCanonicalization: canonicalizationBodyMethod, sdid: sdid,
     signedHeaderFields: signedHeaderFields, domainSelector: domainSelectorString,
     publicKeyQueryMethod: dkimPublicQueryMethod, auid: nil,
-    signatureTimestamp: nil, signatureExpiration: nil, copiedHeaderFields: nil)
+    signatureTimestamp: nil, signatureExpiration: nil)
 
   if dkimFields[DKIMTagNames.AUID.rawValue] != nil {
     let auid = dkimFields[DKIMTagNames.AUID.rawValue]!
