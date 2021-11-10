@@ -46,7 +46,7 @@ enum DKIMTagNames: String {
   case SDID = "d"  // required, Domain Identifier
   case SignedHeaderFields = "h"  // required
   case AUID = "i"  // optional, User Identifier
-  case BodyLength = "l"  // optional, Security Risk
+  // case BodyLength = "l"  // optional, ignored for BodyHash calculation because security risk
   case PublicKeyQueryMethod = "q"  // optional, only dns/txt
   case DomainSelector = "s"  // required
   case SignatureTimestamp = "t"  // optional
@@ -77,11 +77,14 @@ public enum DKIMStatus: Equatable {
 }
 
 public enum DKIMRisks: Hashable, Equatable {
-  case UsingLengthParameter  // only verified to a specific body length
   case SDIDNotInFrom(sdid: String, fromDomain: String)  // third-party signature, DKIM Domain not a subdomain or equal to From: Sender
   case ImportantHeaderFieldNotSigned(name: String)  // only From: field required, but more fields are better else manipulation possible
   // Subject, Content-Type, Reply-To,... should be signed
   case InsecureKeySize(size: Int, expected: Int)  // using a key size less than 2048 for RSA
+
+  // Not accepted as a risk anymore (high risk, not used)
+  //   -> Ignored in body hash validation, error on additional content
+  // case UsingLengthParameter  // only verified to a specific body length
 
   // Not accepted as a risk anymore (RFC8301) -> Error
   // case UsingSHA1  // insecure hashing algorithm
@@ -112,7 +115,7 @@ public struct DKIMSignatureInfo: Equatable {
   public var publicKeyQueryMethod: DKIMPublicKeyQueryMethod  // optional, but default dns/txt
 
   public var auid: String?
-  public var bodyLength: UInt?
+  // public var bodyLength: UInt?
   public var signatureTimestamp: Date?
   public var signatureExpiration: String?
   public var copiedHeaderFields: String?
@@ -298,18 +301,8 @@ func validateDKIMFields(
     bodyHash: bodyHash, headerCanonicalization: canonicalizationHeaderMethod,
     bodyCanonicalization: canonicalizationBodyMethod, sdid: sdid,
     signedHeaderFields: signedHeaderFields, domainSelector: domainSelectorString,
-    publicKeyQueryMethod: dkimPublicQueryMethod, auid: nil, bodyLength: nil,
+    publicKeyQueryMethod: dkimPublicQueryMethod, auid: nil,
     signatureTimestamp: nil, signatureExpiration: nil, copiedHeaderFields: nil)
-
-  if dkimFields[DKIMTagNames.BodyLength.rawValue] != nil {
-    risks.insert(DKIMRisks.UsingLengthParameter)
-
-    guard let bodyLength = UInt(dkimFields[DKIMTagNames.BodyLength.rawValue]!) else {
-      throw DKIMError.InvalidEntryInDKIMHeader(message: "body length not a number")
-    }
-
-    info.bodyLength = bodyLength
-  }
 
   if dkimFields[DKIMTagNames.AUID.rawValue] != nil {
     let auid = dkimFields[DKIMTagNames.AUID.rawValue]!

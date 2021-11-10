@@ -101,21 +101,21 @@ final class DKIMVerifierTests: XCTestCase {
                 DKIMVerifier.DKIMError.PublicKeyWithIncorrectParameters))
             error_emails += 1
             XCTAssertEqual(result.status, DKIMStatus.Error(DKIMError.OnlyInvalidSignatures))
-          case _ where emailFilePath.contains("revoked"):
+          case _ where emailFilePath.hasSuffix("revoked.eml"):
             expected_result = DKIMVerifier.DKIMSignatureResult.init(
               status: DKIMVerifier.DKIMSignatureStatus.Error(
                 DKIMVerifier.DKIMError.PublicKeyRevoked))
             error_emails += 1
             XCTAssertEqual(result.status, DKIMStatus.Error(DKIMError.OnlyInvalidSignatures))
-          case _ where emailFilePath.contains("wrong_signature"):
+          case _ where emailFilePath.hasSuffix("wrong_signature.eml"):
             expected_result = DKIMVerifier.DKIMSignatureResult.init(
               status: DKIMVerifier.DKIMSignatureStatus.Error(
                 DKIMVerifier.DKIMError.SignatureDoesNotMatch))
             error_emails += 1
             XCTAssertEqual(result.status, DKIMStatus.Error(DKIMError.OnlyInvalidSignatures))
-          case _ where emailFilePath.contains("sha256_length"):
+          case _ where emailFilePath.hasSuffix("sha256_length.eml"):
             expected_result = DKIMVerifier.DKIMSignatureResult.init(
-              status: DKIMVerifier.DKIMSignatureStatus.Insecure([DKIMRisks.UsingLengthParameter]))
+              status: DKIMVerifier.DKIMSignatureStatus.Valid)
 
             XCTAssertEqual(result.signatures[0].info!.version, 1)
             XCTAssertEqual(
@@ -139,22 +139,31 @@ final class DKIMVerifierTests: XCTestCase {
 
             XCTAssertEqual(result.signatures[0].info!.auid, "@football.example.com")
             XCTAssertEqual(result.extractedDomainFromSender, "football.example.com")
-            XCTAssertEqual(result.signatures[0].info!.bodyLength, 55)
+            // XCTAssertEqual(result.signatures[0].info!.bodyLength, 55)
             XCTAssertEqual(
               result.signatures[0].info!.signatureTimestamp,
               Date(timeIntervalSince1970: 1_636_565_887))
             XCTAssertEqual(result.signatures[0].info!.signatureExpiration, nil)
             XCTAssertEqual(result.signatures[0].info!.copiedHeaderFields, nil)
             error_emails += 1
-            XCTAssertEqual(result.status, DKIMStatus.Insecure)
-          case _ where emailFilePath.contains("sha1"):
+            XCTAssertEqual(result.status, DKIMStatus.Valid)
+          case _ where emailFilePath.hasSuffix("sha256_length_invalid.eml"):
+            expected_result = DKIMVerifier.DKIMSignatureResult.init(
+              status: DKIMVerifier.DKIMSignatureStatus.Error(
+                DKIMVerifier.DKIMError.BodyHashDoesNotMatch(
+                  message:
+                    "provided hash 4bLNXImK9drULnmePzZNEBleUanJCX5PIsDIFoH4KTQ= not equal to calculated hash Zr8R2aqxpJdF3jqLdZOjFGftFtVk4IGFgM9uI2+FvOA="
+                )))
+            error_emails += 1
+            XCTAssertEqual(result.status, DKIMStatus.Error(DKIMError.OnlyInvalidSignatures))
+          case _ where emailFilePath.hasSuffix("sha1.eml"):
             expected_result = DKIMVerifier.DKIMSignatureResult.init(
               status: DKIMVerifier.DKIMSignatureStatus.Error(
                 DKIMError.InvalidEntryInDKIMHeader(
                   message: "rsa-sha1 deprecated as hashing algorithm (RFC8301) ('a')")))
             error_emails += 1
             XCTAssertEqual(result.status, DKIMStatus.Error(DKIMError.OnlyInvalidSignatures))
-          case _ where emailFilePath.contains("only_from"):
+          case _ where emailFilePath.hasSuffix("only_from.eml"):
             expected_result = DKIMVerifier.DKIMSignatureResult.init(
               status: DKIMVerifier.DKIMSignatureStatus.Insecure(
                 Set.init([
@@ -215,10 +224,12 @@ final class DKIMVerifierTests: XCTestCase {
                 result.signatures[0].info!.algorithm,
                 DKIMVerifier.DKIMSignatureAlgorithm.Ed25519_SHA256)
             } else if emailFilePath.contains("rsa_sha256") {
+
               XCTAssertEqual(result.signatures[0].info!.rsaKeySizeInBits!, 1024)
               XCTAssertEqual(
                 result.signatures[0].info!.algorithm, DKIMVerifier.DKIMSignatureAlgorithm.RSA_SHA256
               )
+
             } else {
               XCTFail("invalid valid signature algorithm")
             }
@@ -234,8 +245,8 @@ final class DKIMVerifierTests: XCTestCase {
     }
 
     XCTAssertEqual(total_emails, emailFilePaths.count)
-    XCTAssertEqual(total_emails, 14)
-    XCTAssertEqual(error_emails, 6)
+    XCTAssertEqual(total_emails, 15)
+    XCTAssertEqual(error_emails, 7)
     XCTAssertEqual(no_signature_emails, 1)
     XCTAssertEqual(insecure_emails, 4)
     XCTAssertEqual(valid_emails, 3)
