@@ -63,8 +63,8 @@ struct DKIMVerifierTool: ParsableCommand {
       }
 
       if verbose {
-        print("emailFrom: \(result.emailFromSender!)")
-        print("extractedDomain: \(result.extractedDomainFromSender!)")
+        print("emailFrom: \(result.emailFromSender ?? "missing")")
+        print("extractedDomain: \(result.extractedDomainFromSender ?? "missing")")
         print("\(result.signatures.count) signature(s)")
         for signature in result.signatures {
           let status: String
