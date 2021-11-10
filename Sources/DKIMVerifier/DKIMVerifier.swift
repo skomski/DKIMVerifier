@@ -80,7 +80,7 @@ public enum DKIMStatus: Equatable {
 public enum DKIMRisks: Hashable, Equatable {
   case UsingLengthParameter  // only verified to a specific body length
   case UsingSHA1  // insecure hashing algorithm
-  case SDIDNotEqualToFrom(sdid: String, fromDomain: String)  // third-party signature, From: Sender different to DKIM Domain
+  case SDIDNotInFrom(sdid: String, fromDomain: String)  // third-party signature, DKIM Domain not a subdomain or equal to From: Sender
   case ImportantHeaderFieldNotSigned(name: String)  // only From: field required, but more fields are better else manipulation possible
   // Subject, Content-Type, Reply-To,... should be signed
   case InsecureKeySize(size: Int, expected: Int)  // using a key size less than 2048 for RSA
@@ -275,13 +275,13 @@ func validateDKIMFields(
       DKIMError.InvalidEntryInDKIMHeader(message: "missing required domain selector field (d)")
   }
 
-  guard let sdid = dkimFields[DKIMTagNames.SDID.rawValue] else {
+  guard let sdid = dkimFields[DKIMTagNames.SDID.rawValue]?.lowercased() else {
     throw
       DKIMError.InvalidEntryInDKIMHeader(message: "missing required sdid field (s)")
   }
 
-  if sdid != extractedDomainFromSender {
-    risks.insert(DKIMRisks.SDIDNotEqualToFrom(sdid: sdid, fromDomain: extractedDomainFromSender))
+  if !(extractedDomainFromSender == sdid) && !extractedDomainFromSender.hasSuffix(".\(sdid)") {
+    risks.insert(DKIMRisks.SDIDNotInFrom(sdid: sdid, fromDomain: extractedDomainFromSender))
   }
 
   let dkimPublicQueryMethod: DKIMPublicKeyQueryMethod = DKIMPublicKeyQueryMethod.DNSTXT
@@ -313,6 +313,8 @@ func validateDKIMFields(
   if dkimFields[DKIMTagNames.AUID.rawValue] != nil {
     let auid = dkimFields[DKIMTagNames.AUID.rawValue]!
     info.auid = auid
+  } else {
+    info.auid = "@\(info.sdid)"
   }
 
   if dkimFields[DKIMTagNames.SignatureTimestamp.rawValue] != nil {
@@ -388,7 +390,7 @@ public func verifyDKIMSignatures(
   guard result.extractedDomainFromSender != nil else {
     result.status = DKIMStatus.Error(
       DKIMError.InvalidRFC5322Headers(
-        message: "could not extract domain from email from field \(result.emailFromSender!)"))
+        message: "could not extract domain out of email From: field \(result.emailFromSender!)"))
     return result
   }
 

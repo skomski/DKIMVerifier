@@ -163,6 +163,7 @@ func parseEmailFromField(raw_from_field: String) -> String? {
 }
 
 func parseDomainFromEmail(email: String) -> String? {
+  let email = email.lowercased()
   let predicate = EmailPredicate()
   guard predicate.evaluate(with: email) else {
     return nil

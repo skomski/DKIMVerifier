@@ -32,6 +32,10 @@ final class HelpersTests: XCTestCase {
     XCTAssertEqual(
       DKIMVerifier.parseEmailFromField(raw_from_field: "Joe SixPack <joe@football.example.com>"),
       "joe@football.example.com")
+    
+    XCTAssertEqual(
+      DKIMVerifier.parseEmailFromField(raw_from_field: "IT-Helpcenter <it-helpcenter@HTW-Berlin.de>"),
+      "it-helpcenter@HTW-Berlin.de")
   }
 
   func testParseDomainFromEmail() {
@@ -43,6 +47,9 @@ final class HelpersTests: XCTestCase {
       DKIMVerifier.parseDomainFromEmail(email: "pseudo@subdomain.example.net"),
       "subdomain.example.net")
     XCTAssertEqual(DKIMVerifier.parseDomainFromEmail(email: "hello@ä.example.net"), "ä.example.net")
+    XCTAssertEqual(
+      DKIMVerifier.parseDomainFromEmail(email: "it-helpcenter@HTW-Berlin.de"),
+      "htw-berlin.de")
   }
 
   func testRFC822MessageParsing() {

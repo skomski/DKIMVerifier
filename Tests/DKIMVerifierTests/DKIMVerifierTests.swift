@@ -119,8 +119,6 @@ final class DKIMVerifierTests: XCTestCase {
                 Set.init([
                   DKIMVerifier.DKIMRisks.UsingSHA1,
                   DKIMVerifier.DKIMRisks.UsingLengthParameter,
-                  DKIMVerifier.DKIMRisks.SDIDNotEqualToFrom(
-                    sdid: "example.com", fromDomain: "football.example.com"),
                 ])))
 
             XCTAssertEqual(result.signatures[0].info!.version, 1)
@@ -161,8 +159,6 @@ final class DKIMVerifierTests: XCTestCase {
               status: DKIMVerifier.DKIMSignatureStatus.Insecure(
                 Set.init([
                   DKIMVerifier.DKIMRisks.UsingSHA1,
-                  DKIMVerifier.DKIMRisks.SDIDNotEqualToFrom(
-                    sdid: "example.com", fromDomain: "football.example.com"),
                 ])))
 
             XCTAssertEqual(result.signatures[0].info!.version, 1)
@@ -181,7 +177,7 @@ final class DKIMVerifierTests: XCTestCase {
                   DKIMVerifier.DKIMRisks.ImportantHeaderFieldNotSigned(name: "date"),
                   DKIMVerifier.DKIMRisks.ImportantHeaderFieldNotSigned(name: "to"),
                   DKIMVerifier.DKIMRisks.ImportantHeaderFieldNotSigned(name: "message-id"),
-                  DKIMVerifier.DKIMRisks.SDIDNotEqualToFrom(
+                  DKIMVerifier.DKIMRisks.SDIDNotInFrom(
                     sdid: "custom.com", fromDomain: "football.example.com"),
                   DKIMVerifier.DKIMRisks.InsecureKeySize(size: 1024, expected: 2048),
                 ])))

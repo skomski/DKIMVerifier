@@ -24,7 +24,7 @@ let package = Package(
     .package(name: "swift-crypto", url: "https://github.com/apple/swift-crypto", .branch("main")),
     .package(
       name: "SwiftParsec", url: "https://github.com/davedufresne/SwiftParsec", .branch("master")),
-    .package(name: "Peppermint", url: "https://github.com/nsagora/peppermint", from: "1.0.0"),
+    .package(name: "Peppermint", url: "https://github.com/nsagora/peppermint", from: "1.1.0"),
   ],
   targets: [
     .target(
