@@ -10,31 +10,31 @@ public enum DKIMError: Error, Equatable {
   case InvalidRFC5322Headers(message: String)
   case NoSignature
   case OnlyInvalidSignatures
-  
+
   // signature errors
   case InvalidEntryInDKIMHeader(message: String)
   case BodyHashDoesNotMatch(message: String)
   case SignatureDoesNotMatch
   case InvalidDNSEntry(message: String)
   case PublicKeyRevoked
-  case PublicKeyWithIncorrectParameters // for example keySize lower than 1024 for RSA
-  
+  case PublicKeyWithIncorrectParameters  // for example keySize lower than 1024 for RSA
+
   // always possible
   case UnexpectedError(message: String)
 }
 
-enum DKIMSignatureAlgorithm {
+public enum DKIMSignatureAlgorithm {
   case RSA_SHA1
   case RSA_SHA256
   case Ed25519_SHA256
 }
 
-enum DKIMCanonicalization {
+public enum DKIMCanonicalization {
   case Simple
   case Relaxed
 }
 
-enum DKIMPublicKeyQueryMethod {
+public enum DKIMPublicKeyQueryMethod {
   case DNSTXT
 }
 
@@ -80,13 +80,13 @@ public enum DKIMStatus: Equatable {
 public enum DKIMRisks: Hashable, Equatable {
   case UsingLengthParameter  // only verified to a specific body length
   case UsingSHA1  // insecure hashing algorithm
-  case SDIDNotEqualToSender  // third-party signature, From: Sender different to DKIM Domain
+  case SDIDNotEqualToFrom(sdid: String, fromDomain: String)  // third-party signature, From: Sender different to DKIM Domain
   case ImportantHeaderFieldNotSigned(name: String)  // only From: field required, but more fields are better else manipulation possible
   // Subject, Content-Type, Reply-To,... should be signed
-  case InsecureKeySize // using a key size less than 2048 for RSA
+  case InsecureKeySize(size: Int, expected: Int)  // using a key size less than 2048 for RSA
 }
 
-var LowestSecureKeySize : Int = 2048
+var LowestSecureKeySize: Int = 2048
 
 // The rfc6376 recommended header fields to sign
 let importantHeaderFields: Set<String> = [
@@ -99,24 +99,24 @@ let importantHeaderFields: Set<String> = [
 ]
 
 public struct DKIMSignatureInfo: Equatable {
-  var version: UInt
-  var algorithm: DKIMSignatureAlgorithm
-  var signature: String
-  var bodyHash: String
-  var headerCanonicalization: DKIMCanonicalization  // optional, but default simple
-  var bodyCanonicalization: DKIMCanonicalization  // optional, but default simple
-  var sdid: String
-  var signedHeaderFields: [String]
-  var domainSelector: String
-  var publicKeyQueryMethod: DKIMPublicKeyQueryMethod  // optional, but default dns/txt
+  public var version: UInt
+  public var algorithm: DKIMSignatureAlgorithm
+  public var signature: String
+  public var bodyHash: String
+  public var headerCanonicalization: DKIMCanonicalization  // optional, but default simple
+  public var bodyCanonicalization: DKIMCanonicalization  // optional, but default simple
+  public var sdid: String
+  public var signedHeaderFields: [String]
+  public var domainSelector: String
+  public var publicKeyQueryMethod: DKIMPublicKeyQueryMethod  // optional, but default dns/txt
 
-  var auid: String?
-  var bodyLength: UInt?
-  var signatureTimestamp: Date?
-  var signatureExpiration: String?
-  var copiedHeaderFields: String?
-  
-  var rsaKeySizeInBits: Int?
+  public var auid: String?
+  public var bodyLength: UInt?
+  public var signatureTimestamp: Date?
+  public var signatureExpiration: String?
+  public var copiedHeaderFields: String?
+
+  public var rsaKeySizeInBits: Int?
 }
 
 public struct DKIMSignatureResult: Equatable {
@@ -281,7 +281,7 @@ func validateDKIMFields(
   }
 
   if sdid != extractedDomainFromSender {
-    risks.insert(DKIMRisks.SDIDNotEqualToSender)
+    risks.insert(DKIMRisks.SDIDNotEqualToFrom(sdid: sdid, fromDomain: extractedDomainFromSender))
   }
 
   let dkimPublicQueryMethod: DKIMPublicKeyQueryMethod = DKIMPublicKeyQueryMethod.DNSTXT
@@ -568,7 +568,9 @@ func verifyDKIMSignature(
   let dns_tag_value_list: TagValueDictionary
   do {
     dns_tag_value_list = try parseTagValueList(raw_list: record)
-  } catch let error as DKIMError where error == .TagValueListParsingError(message: "no value for key: p") {
+  } catch let error as DKIMError
+    where error == .TagValueListParsingError(message: "no value for key: p")
+  {
     result.status = DKIMSignatureStatus.Error(DKIMError.PublicKeyRevoked)
     return result
   } catch let error as DKIMError {
@@ -645,16 +647,16 @@ func verifyDKIMSignature(
       signature_result = try DKIMVerifier.checkRSA_SHA1_Signature(
         encodedKey: public_key_data, signature: dkim_signature_data, data: raw_signed_data)
     case DKIMSignatureAlgorithm.RSA_SHA256:
-      let keySizeInBits : Int
+      let keySizeInBits: Int
       (keySizeInBits, signature_result) = try DKIMVerifier.checkRSA_SHA256_Signature(
         encodedKey: public_key_data, signature: dkim_signature_data, data: raw_signed_data)
-      
+
       result.info?.rsaKeySizeInBits = keySizeInBits
 
       if keySizeInBits < LowestSecureKeySize {
-        risks.insert(DKIMRisks.InsecureKeySize)
+        risks.insert(DKIMRisks.InsecureKeySize(size: keySizeInBits, expected: LowestSecureKeySize))
       }
-      
+
     case DKIMSignatureAlgorithm.Ed25519_SHA256:
       signature_result = try DKIMVerifier.checkEd25519_SHA256_Signature(
         encodedKey: public_key_data, signature: dkim_signature_data, data: raw_signed_data)

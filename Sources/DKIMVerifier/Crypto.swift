@@ -19,9 +19,12 @@ func checkRSA_SHA256_Signature(encodedKey: Data, signature: Data, data: Data) th
   let key = try _RSA.Signing.PublicKey.init(derRepresentation: encodedKey)
   let signature = _RSA.Signing.RSASignature.init(rawRepresentation: signature)
 
-  return (key.keySizeInBits, key.isValidSignature(
-    signature, for: Crypto.SHA256.hash(data: data),
-    padding: _RSA.Signing.Padding.insecurePKCS1v1_5))
+  return (
+    key.keySizeInBits,
+    key.isValidSignature(
+      signature, for: Crypto.SHA256.hash(data: data),
+      padding: _RSA.Signing.Padding.insecurePKCS1v1_5)
+  )
 }
 
 func checkEd25519_SHA256_Signature(encodedKey: Data, signature: Data, data: Data) throws

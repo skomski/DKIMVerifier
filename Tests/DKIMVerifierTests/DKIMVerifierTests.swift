@@ -33,7 +33,9 @@ final class DKIMVerifierTests: XCTestCase {
       XCTAssertEqual(result.signatures.count, 2, emailFilePath)
       XCTAssertEqual(result.signatures[0].status, expected_result.status, emailFilePath)
       expected_result = DKIMVerifier.DKIMSignatureResult.init(
-        status: DKIMVerifier.DKIMSignatureStatus.Insecure([DKIMRisks.InsecureKeySize]))
+        status: DKIMVerifier.DKIMSignatureStatus.Insecure([
+          DKIMRisks.InsecureKeySize(size: 1024, expected: 2048)
+        ]))
       XCTAssertEqual(result.signatures[1].status, expected_result.status, emailFilePath)
       XCTAssertEqual(result.status, DKIMStatus.Valid)
       XCTAssertEqual(result.DMARCResult?.validDKIMIdentifierAlignment, true)
@@ -71,7 +73,8 @@ final class DKIMVerifierTests: XCTestCase {
           XCTAssertEqual(result.signatures.count, 0, emailFilePath)
           let expected_result = DKIMVerifier.DKIMResult.init(
             status: DKIMVerifier.DKIMStatus.Error(
-              DKIMVerifier.DKIMError.InvalidRFC5322Headers(message: "invalid email without header")))
+              DKIMVerifier.DKIMError.InvalidRFC5322Headers(message: "invalid email without header"))
+          )
           XCTAssertEqual(result, expected_result)
           error_emails += 1
         } else if emailFilePath.contains("multiple_signatures") {
@@ -80,8 +83,10 @@ final class DKIMVerifierTests: XCTestCase {
             status: DKIMVerifier.DKIMSignatureStatus.Valid)
           XCTAssertEqual(result.signatures.count, 2, emailFilePath)
           XCTAssertEqual(result.signatures[0].status, expected_result.status, emailFilePath)
-      expected_result = DKIMVerifier.DKIMSignatureResult.init(
-        status: DKIMVerifier.DKIMSignatureStatus.Insecure([DKIMRisks.InsecureKeySize]))
+          expected_result = DKIMVerifier.DKIMSignatureResult.init(
+            status: DKIMVerifier.DKIMSignatureStatus.Insecure([
+              DKIMRisks.InsecureKeySize(size: 1024, expected: 2048)
+            ]))
           XCTAssertEqual(result.signatures[1].status, expected_result.status, emailFilePath)
           XCTAssertEqual(result.status, DKIMStatus.Valid)
           valid_emails += 1
@@ -114,7 +119,8 @@ final class DKIMVerifierTests: XCTestCase {
                 Set.init([
                   DKIMVerifier.DKIMRisks.UsingSHA1,
                   DKIMVerifier.DKIMRisks.UsingLengthParameter,
-                  DKIMVerifier.DKIMRisks.SDIDNotEqualToSender,
+                  DKIMVerifier.DKIMRisks.SDIDNotEqualToFrom(
+                    sdid: "example.com", fromDomain: "football.example.com"),
                 ])))
 
             XCTAssertEqual(result.signatures[0].info!.version, 1)
@@ -154,7 +160,9 @@ final class DKIMVerifierTests: XCTestCase {
             expected_result = DKIMVerifier.DKIMSignatureResult.init(
               status: DKIMVerifier.DKIMSignatureStatus.Insecure(
                 Set.init([
-                  DKIMVerifier.DKIMRisks.UsingSHA1, DKIMVerifier.DKIMRisks.SDIDNotEqualToSender,
+                  DKIMVerifier.DKIMRisks.UsingSHA1,
+                  DKIMVerifier.DKIMRisks.SDIDNotEqualToFrom(
+                    sdid: "example.com", fromDomain: "football.example.com"),
                 ])))
 
             XCTAssertEqual(result.signatures[0].info!.version, 1)
@@ -173,8 +181,9 @@ final class DKIMVerifierTests: XCTestCase {
                   DKIMVerifier.DKIMRisks.ImportantHeaderFieldNotSigned(name: "date"),
                   DKIMVerifier.DKIMRisks.ImportantHeaderFieldNotSigned(name: "to"),
                   DKIMVerifier.DKIMRisks.ImportantHeaderFieldNotSigned(name: "message-id"),
-                  DKIMVerifier.DKIMRisks.SDIDNotEqualToSender,
-                  DKIMVerifier.DKIMRisks.InsecureKeySize,
+                  DKIMVerifier.DKIMRisks.SDIDNotEqualToFrom(
+                    sdid: "custom.com", fromDomain: "football.example.com"),
+                  DKIMVerifier.DKIMRisks.InsecureKeySize(size: 1024, expected: 2048),
                 ])))
 
             XCTAssertEqual(result.signatures[0].info!.version, 1)
@@ -194,7 +203,7 @@ final class DKIMVerifierTests: XCTestCase {
                 Set.init([
                   DKIMVerifier.DKIMRisks.ImportantHeaderFieldNotSigned(name: "date"),
                   DKIMVerifier.DKIMRisks.ImportantHeaderFieldNotSigned(name: "message-id"),
-                  DKIMVerifier.DKIMRisks.InsecureKeySize,
+                  DKIMVerifier.DKIMRisks.InsecureKeySize(size: 1024, expected: 2048),
                 ])))
             XCTAssertEqual(result.extractedDomainFromSender, "mubi.com")
             valid_insecure_emails += 1
@@ -202,12 +211,12 @@ final class DKIMVerifierTests: XCTestCase {
           default:
             if result.signatures[0].info!.rsaKeySizeInBits ?? 2048 < 2048 {
               XCTAssertEqual(result.signatures[0].info!.rsaKeySizeInBits!, 1024)
-            expected_result = DKIMVerifier.DKIMSignatureResult.init(
-              status: DKIMVerifier.DKIMSignatureStatus.Insecure(
-                Set.init([
-                  DKIMVerifier.DKIMRisks.InsecureKeySize,
-                ])))
-               valid_insecure_emails += 1
+              expected_result = DKIMVerifier.DKIMSignatureResult.init(
+                status: DKIMVerifier.DKIMSignatureStatus.Insecure(
+                  Set.init([
+                    DKIMVerifier.DKIMRisks.InsecureKeySize(size: 1024, expected: 2048)
+                  ])))
+              valid_insecure_emails += 1
             } else {
               XCTAssertEqual(result.status, DKIMStatus.Valid)
               expected_result = DKIMVerifier.DKIMSignatureResult.init(
