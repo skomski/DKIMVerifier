@@ -12,7 +12,10 @@ let package = Package(
     .library(
       name: "DKIMVerifier", type: .static,
       targets: ["DKIMVerifier"]),
+    .library(name: "DKIMVerifierToolBase", targets: ["DKIMVerifierToolBase"]),
     .executable(name: "DKIMVerifierTool", targets: ["DKIMVerifierTool"]),
+    .executable(name: "DKIMVerifierTool_unbound", targets: ["DKIMVerifierTool_unbound"]),
+    .executable(name: "DKIMVerifierTool_dnssd", targets: ["DKIMVerifierTool_dnssd"]),
   ],
   dependencies: [
     .package(
@@ -27,6 +30,13 @@ let package = Package(
     .package(name: "Peppermint", url: "https://github.com/nsagora/peppermint", from: "1.1.0"),
   ],
   targets: [
+    .systemLibrary(
+        name: "libunbound",
+        pkgConfig: "libunbound",
+        providers: [
+            .brew(["unbound"])
+        ]
+    ),
     .target(
       name: "DKIMVerifier",
       dependencies: [
@@ -35,10 +45,33 @@ let package = Package(
         .product(name: "_CryptoExtras", package: "swift-crypto"),
       ]),
     .target(
-      name: "DKIMVerifierTool",
+      name: "DKIMVerifierDNS_dnssd",
+      dependencies: ["DKIMVerifier"]),
+    .target(
+      name: "DKIMVerifierDNS_unbound",
+      dependencies: ["DKIMVerifier", "libunbound"]),
+    .target(
+      name: "DKIMVerifierToolBase",
       dependencies: [
         "DKIMVerifier",
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
+      ]),
+    .target(
+      name: "DKIMVerifierTool",
+      dependencies: [
+        "DKIMVerifierToolBase",
+      ]),
+    .target(
+      name: "DKIMVerifierTool_dnssd",
+      dependencies: [
+        "DKIMVerifierToolBase",
+        "DKIMVerifierDNS_dnssd"
+      ]),
+    .target(
+      name: "DKIMVerifierTool_unbound",
+      dependencies: [
+        "DKIMVerifierToolBase",
+        "DKIMVerifierDNS_unbound"
       ]),
     .testTarget(
       name: "DKIMVerifierTests",

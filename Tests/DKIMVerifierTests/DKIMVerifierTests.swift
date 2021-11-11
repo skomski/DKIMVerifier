@@ -3,18 +3,20 @@ import XCTest
 @testable import DKIMVerifier
 
 final class DKIMVerifierTests: XCTestCase {
-  func GetDnsKey(domain: String) throws -> String? {
+  func GetDnsKey(domain: String) throws -> DNSResult {
     let dnsKeyFilePaths = Bundle.module.paths(forResourcesOfType: "dns", inDirectory: nil)
 
     for dnsKeyFilePath in dnsKeyFilePaths {
       if dnsKeyFilePath.contains(domain) {
-        return try String(
-          contentsOf: URL(fileURLWithPath: dnsKeyFilePath), encoding: .utf8)
+        return try DNSResult.init(
+          result: String(
+            contentsOf: URL(fileURLWithPath: dnsKeyFilePath), encoding: .utf8),
+          validatedWithDNSSEC: true)
       }
     }
 
     XCTFail("unknown dns domain")
-    return nil
+    return DNSResult.init(result: String(), validatedWithDNSSEC: true)
   }
 
   func testDMARCEmail() {

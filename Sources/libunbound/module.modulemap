@@ -1,0 +1,5 @@
+module libunbound [system] {
+    header "shim.h"
+    link "libunbound"
+    export *
+}

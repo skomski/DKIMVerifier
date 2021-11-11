@@ -4,17 +4,19 @@ import XCTest
 
 final class DMARCTests: XCTestCase {
 
-  func getDMARCNoFailDnsEntry(domain: String) throws -> String? {
+  func getDMARCNoFailDnsEntry(domain: String) throws -> DNSResult {
     if domain == "_dmarc.test.com" {
-      return "v=DMARC1; p=none; sp=quarantine; rua=mailto:mailauth-reports@test.com; adkim=s;"
+      return DNSResult.init(
+        result: "v=DMARC1; p=none; sp=quarantine; rua=mailto:mailauth-reports@test.com; adkim=s;",
+        validatedWithDNSSEC: true)
     }
 
     if domain == "_dmarc.testdefault.com" {
-      return "v=DMARC1; p=reject;"
+      return DNSResult.init(result: "v=DMARC1; p=reject;", validatedWithDNSSEC: true)
     }
 
     XCTFail("unknown dns domain")
-    return nil
+    return DNSResult(result: "", validatedWithDNSSEC: true)
   }
 
   func testDMARCQueryNoFail() {

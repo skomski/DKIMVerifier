@@ -37,14 +37,6 @@ class SimpleCanonicalizationHeaderAlgorithm: CanonicalizationHeaderAlgorithm {
 
 class RelaxedCanonicalizationHeaderAlgorithm: CanonicalizationHeaderAlgorithm {
   static func canonicalize(headers: OrderedKeyValueArray) throws -> OrderedKeyValueArray {
-    // Convert all header field names to lowercase.
-    // Unfold all header lines.
-    // Compress WSP to single space.
-    // Remove all WSP at the start or end of the field value (strip).
-    //      return [
-    //          (x[0].lower().rstrip(),
-    //           compress_whitespace(unfold_header_value(x[1])).strip() + b"\r\n")
-    //          for x in headers]
     var headers = headers
     for index in headers.indices {
       headers[index].key = headers[index].key.lowercased().trimmingCharacters(in: .whitespaces)
@@ -72,12 +64,6 @@ class SimpleCanonicalizationBodyAlgorithm: CanonicalizationBodyAlgorithm {
 
 class RelaxedCanonicalizationBodyAlgorithm: CanonicalizationBodyAlgorithm {
   static func canonicalize(body: String) throws -> String {
-    // Remove all trailing WSP at end of lines.
-    // Compress non-line-ending WSP to single space.
-    // Ignore all empty lines at the end of the message body.
-    // return correct_empty_body(strip_trailing_lines(
-    //    compress_whitespace(strip_trailing_whitespace(body))))
-
     return try correct_empty_body(
       text: strip_trailing_lines(
         text: compress_whitespace(text: strip_trailing_whitespace(text: body))))

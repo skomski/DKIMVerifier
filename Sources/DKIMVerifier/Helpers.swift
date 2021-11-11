@@ -62,7 +62,7 @@ internal func parseTagValueList(raw_list: String) throws -> TagValueDictionary {
   return tags
 }
 
-// separates header and body for a RFC822Message and parses the headers into a dictionary
+// separates header and body for a RFC5322Message and parses the headers into a dictionary
 internal func parseRFC822Message(message: String) throws -> (OrderedKeyValueArray, String) {
   var headers: OrderedKeyValueArray = []
 
@@ -123,8 +123,7 @@ func generateSignedData(
     }
   }
 
-  // remove the deposited signature (b\n=\nblalala to b=)
-  // no leading crlf
+  // removes the signature data (b\n=\nblalala to b=)
   let FWS = #"(?:(?:\s*\r?\n)?\s+)?"#
   let RE_BTAG = #"([;\s]b"# + FWS + #"=)(?:"# + FWS + #"[a-zA-Z0-9+/=])*(?:\r?\n\Z)?"#
   let without_b = try dkimHeaderField.value.regexSub(
@@ -162,6 +161,7 @@ func parseEmailFromField(raw_from_field: String) -> String? {
   return result
 }
 
+/// This functions extracts the domain name part from a email address
 func parseDomainFromEmail(email: String) -> String? {
   let email = email.lowercased()
   let predicate = EmailPredicate()

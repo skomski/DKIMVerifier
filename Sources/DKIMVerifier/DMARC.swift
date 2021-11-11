@@ -57,7 +57,7 @@ public struct DMARCResult: Equatable {
 }
 
 internal func checkDMARC(
-  dnsLookupTxtFunction: @escaping (String) throws -> String?, fromSenderDomain: String,
+  dnsLookupTxtFunction: @escaping DNSLookupFunctionType, fromSenderDomain: String,
   validDKIMDomains: [String]
 ) throws -> DMARCResult {
   // 1. check subdomain dmarc entry
@@ -97,12 +97,12 @@ internal func checkDMARC(
 }
 
 internal func queryDMARC(
-  dnsLookupTxtFunction: @escaping (String) throws -> String?, domain: String
+  dnsLookupTxtFunction: @escaping DNSLookupFunctionType, domain: String
 ) throws -> DMARCEntry {
   let dmarcDomain = "_dmarc." + domain
   let txtEntry: String?
   do {
-    txtEntry = try dnsLookupTxtFunction(dmarcDomain)
+    txtEntry = try dnsLookupTxtFunction(dmarcDomain).result
   } catch {
     throw DMARCError.UnexpectedError(message: error.localizedDescription)
   }
