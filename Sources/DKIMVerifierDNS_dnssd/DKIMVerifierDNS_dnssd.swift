@@ -14,7 +14,7 @@ public func queryDNSTXTEntry(domainName: String) throws -> DNSResult {
 
   let callback: DNSServiceQueryRecordReply = {
     (
-      sdRef, flags, interfaceIndex, errorCode, fullname, rrtype, rrclass, rdlen, rdata, ttl,
+      _, flags, _, errorCode, _, _, _, rdlen, rdata, _,
       context
     )
       -> Void in

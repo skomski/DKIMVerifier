@@ -110,8 +110,7 @@ internal func parseRFC822Message(message: String) throws -> (OrderedKeyValueArra
 func generateSignedData(
   dkimHeaderField: KeyValue, headers: OrderedKeyValueArray, includeHeaders: [String]
 ) throws
-  -> String
-{
+  -> String {
   var headers = headers
 
   var finalString: String = String()
@@ -127,7 +126,7 @@ func generateSignedData(
   let FWS = #"(?:(?:\s*\r?\n)?\s+)?"#
   let RE_BTAG = #"([;\s]b"# + FWS + #"=)(?:"# + FWS + #"[a-zA-Z0-9+/=])*(?:\r?\n\Z)?"#
   let without_b = try dkimHeaderField.value.regexSub(
-    RE_BTAG, replacer: { (in, m) in m.groups[0]!.match })
+    RE_BTAG, replacer: { (_, m) in m.groups[0]!.match })
 
   finalString += dkimHeaderField.key + ":" + without_b.trailingTrim(.whitespacesAndNewlines)
   return finalString

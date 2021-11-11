@@ -25,13 +25,13 @@ enum DMARCVersion {
 public struct DMARCEntry: Equatable {
   var dkimAlignmentMode: AlignmentMode  // default relaxed
   // var SPFAlignmentMode : AlignmentMode // default relaxed
-  //var failureReportingOptions:  FailureReportingOptions // default is AllFail
+  // var failureReportingOptions:  FailureReportingOptions // default is AllFail
   var mailReceiverPolicy: MailReceiverPolicy  // required
-  //var pct : Int // default 100, between 0 and 100
-  //var reportFormats  : [String] // requested report formats
-  //var reportInterval: Int // default 86400
-  //var aggregateFeedbackAddresses: [String] // optional
-  //var failureFeedbackAdresses: [String] // optional
+  // var pct : Int // default 100, between 0 and 100
+  // var reportFormats  : [String] // requested report formats
+  // var reportInterval: Int // default 86400
+  // var aggregateFeedbackAddresses: [String] // optional
+  // var failureFeedbackAdresses: [String] // optional
   var subdomainMailReceiverPolicy: MailReceiverPolicy  // optional
   var version: DMARCVersion
 }
@@ -155,8 +155,7 @@ internal func queryDMARC(
   var subdomainMailReceiverPolicy: MailReceiverPolicy = mailReceiverPolicy
 
   if let subdomainMailReceiverPolicyString = dmarcFields[
-    DMARCTagNames.SubdomainMailReceiverPolicy.rawValue]
-  {
+    DMARCTagNames.SubdomainMailReceiverPolicy.rawValue] {
     if subdomainMailReceiverPolicyString == "none" {
       subdomainMailReceiverPolicy = MailReceiverPolicy.None
     } else if subdomainMailReceiverPolicyString == "quarantine" {

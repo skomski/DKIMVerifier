@@ -3,8 +3,7 @@ import Foundation
 import _CryptoExtras
 
 func checkRSA_SHA1_Signature(encodedKey: Data, signature: Data, data: Data) throws
-  -> Bool
-{
+  -> Bool {
   let key = try _RSA.Signing.PublicKey.init(derRepresentation: encodedKey)
   let signature = _RSA.Signing.RSASignature.init(rawRepresentation: signature)
 
@@ -14,8 +13,7 @@ func checkRSA_SHA1_Signature(encodedKey: Data, signature: Data, data: Data) thro
 }
 
 func checkRSA_SHA256_Signature(encodedKey: Data, signature: Data, data: Data) throws
-  -> (Int, Bool)
-{
+  -> (Int, Bool) {
   let key = try _RSA.Signing.PublicKey.init(derRepresentation: encodedKey)
   let signature = _RSA.Signing.RSASignature.init(rawRepresentation: signature)
 
@@ -28,8 +26,7 @@ func checkRSA_SHA256_Signature(encodedKey: Data, signature: Data, data: Data) th
 }
 
 func checkEd25519_SHA256_Signature(encodedKey: Data, signature: Data, data: Data) throws
-  -> Bool
-{
+  -> Bool {
   let key = try Crypto.Curve25519.Signing.PublicKey.init(rawRepresentation: encodedKey)
   return key.isValidSignature(signature, for: Data(Crypto.SHA256.hash(data: data)))
 }

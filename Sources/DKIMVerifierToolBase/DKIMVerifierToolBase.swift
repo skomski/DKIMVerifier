@@ -2,7 +2,7 @@ import ArgumentParser
 import DKIMVerifier
 import Foundation
 
-public var dnsFunction: DNSLookupFunctionType? = nil
+public var dnsFunction: DNSLookupFunctionType?
 
 public struct DKIMVerifierToolBaseArguments: ParsableArguments {
   public init() {}
@@ -76,7 +76,7 @@ public func baseRun(options: DKIMVerifierToolBaseArguments) {
       print("failure: empty input")
       return
     }
-    var dns_raw: String? = nil
+    var dns_raw: String?
     if options.dns_path != nil {
       dns_raw = try String(contentsOf: URL(fileURLWithPath: options.dns_path!), encoding: .ascii)
     }

@@ -49,7 +49,7 @@ enum DKIMTagNames: String {
   case DomainSelector = "s"  // required
   case SignatureTimestamp = "t"  // optional
   case SignatureExpiration = "x"  // optional
-  //case CopiedHeaderFields = "z"  // optional, unused in practice, rfc unclear
+  // case CopiedHeaderFields = "z"  // optional, unused in practice, rfc unclear
 }
 
 enum DNSEntryTagNames: String {
@@ -98,7 +98,7 @@ let importantHeaderFields: Set<String> = [
   "content-id", "content-description", "resent-date", "resent-from",
   "resent-sender", "resent-to", "resent-cc", "resent-message-id",
   "in-reply-to", "references", "list-id", "list-help", "list-unsubscribe",
-  "list-subscribe", "list-post", "list-owner", "list-archive",
+  "list-subscribe", "list-post", "list-owner", "list-archive"
 ]
 
 public struct DKIMSignatureInfo: Equatable {
@@ -117,7 +117,7 @@ public struct DKIMSignatureInfo: Equatable {
   // public var bodyLength: UInt?
   public var signatureTimestamp: Date?
   public var signatureExpiration: Date?
-  //public var copiedHeaderFields: String?
+  // public var copiedHeaderFields: String?
 
   public var rsaKeySizeInBits: Int?
 }

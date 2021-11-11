@@ -2,19 +2,19 @@ import Foundation
 import RegularExpressions
 
 func strip_trailing_lines(text: String) throws -> String {
-  return try text.regexSub("(\r\n)+$", replacer: { n, m in return "\r\n" })
+  return try text.regexSub("(\r\n)+$", replacer: { _, _ in return "\r\n" })
 }
 
 func strip_trailing_whitespace(text: String) throws -> String {
-  return try text.regexSub("[\t ]+\r\n", replacer: { n, m in return "\r\n" })
+  return try text.regexSub("[\t ]+\r\n", replacer: { _, _ in return "\r\n" })
 }
 
 func compress_whitespace(text: String) throws -> String {
-  return try text.regexSub("[\t ]+", replacer: { n, m in return " " })
+  return try text.regexSub("[\t ]+", replacer: { _, _ in return " " })
 }
 
 func unfold_header_value(text: String) throws -> String {
-  return try text.regexSub("\r\n", replacer: { n, m in return "" })
+  return try text.regexSub("\r\n", replacer: { _, _ in return "" })
 }
 
 func correct_empty_body(text: String) throws -> String {

@@ -7,8 +7,7 @@ public func verifyDKIMSignatures(
   dnsLoopupTxtFunction: @escaping DNSLookupFunctionType, email_raw: String,
   verifyDMARC: Bool = false
 )
-  -> DKIMResult
-{
+  -> DKIMResult {
   var result: DKIMResult = DKIMResult.init()
 
   // seperate headers from body
@@ -220,8 +219,7 @@ func verifyDKIMSignature(
   do {
     dns_tag_value_list = try parseTagValueList(raw_list: record)
   } catch let error as DKIMError
-    where error == .TagValueListParsingError(message: "no value for key: p")
-  {
+    where error == .TagValueListParsingError(message: "no value for key: p") {
     result.status = DKIMSignatureStatus.Error(DKIMError.PublicKeyRevoked)
     return result
   } catch let error as DKIMError {

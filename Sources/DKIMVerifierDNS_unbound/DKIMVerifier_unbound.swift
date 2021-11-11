@@ -2,7 +2,7 @@ import DKIMVerifier
 import Foundation
 import libunbound
 
-public var rootKeyPath: String? = nil
+public var rootKeyPath: String?
 
 public func queryDNSTXTEntry(domainName: String) throws -> DNSResult {
   var result: DNSResult = DNSResult.init(result: String.init(), validatedWithDNSSEC: false)
@@ -26,10 +26,10 @@ public func queryDNSTXTEntry(domainName: String) throws -> DNSResult {
   }
 
   /* query for webserver */
-  var ub_result: UnsafeMutablePointer<ub_result>? = nil
+  var ub_result: UnsafeMutablePointer<ub_result>?
   let retval = ub_resolve(
     ctx, domainName,
-    16,  //kDNSServiceType_TXT,
+    16,  // kDNSServiceType_TXT,
     1 /* CLASS IN (internet) */, &ub_result)
   if retval != 0 {
     throw DKIMError.InvalidDNSEntry(message: "dns error: could not create unbound context")

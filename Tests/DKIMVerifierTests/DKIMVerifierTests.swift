@@ -184,7 +184,7 @@ final class DKIMVerifierTests: XCTestCase {
                   DKIMVerifier.DKIMRisks.ImportantHeaderFieldNotSigned(name: "message-id"),
                   DKIMVerifier.DKIMRisks.SDIDNotInFrom(
                     sdid: "custom.com", fromDomain: "football.example.com"),
-                  DKIMVerifier.DKIMRisks.InsecureKeySize(size: 1024, expected: 2048),
+                  DKIMVerifier.DKIMRisks.InsecureKeySize(size: 1024, expected: 2048)
                 ])))
 
             XCTAssertEqual(result.signatures[0].info!.version, 1)
@@ -204,7 +204,7 @@ final class DKIMVerifierTests: XCTestCase {
                 Set.init([
                   DKIMVerifier.DKIMRisks.ImportantHeaderFieldNotSigned(name: "date"),
                   DKIMVerifier.DKIMRisks.ImportantHeaderFieldNotSigned(name: "message-id"),
-                  DKIMVerifier.DKIMRisks.InsecureKeySize(size: 1024, expected: 2048),
+                  DKIMVerifier.DKIMRisks.InsecureKeySize(size: 1024, expected: 2048)
                 ])))
             XCTAssertEqual(result.extractedDomainFromSender, "mubi.com")
             insecure_emails += 1

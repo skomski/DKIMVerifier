@@ -28,7 +28,7 @@ func validateDKIMFields(
   do {
     // remove whitespace from signature
     dkimSignatureClean = try dkimSignature.regexSub(
-      #"\s+"#, replacer: { num, m in "" })
+      #"\s+"#, replacer: { _, _ in "" })
   } catch {
     throw DKIMError.UnexpectedError(message: error.localizedDescription)
   }
@@ -119,8 +119,7 @@ func validateDKIMFields(
 
   for importantHeaderField in importantHeaderFields {
     if email_headers.contains(where: { $0.key.lowercased() == importantHeaderField })
-      && !signedHeaderFields.contains(importantHeaderField)
-    {
+      && !signedHeaderFields.contains(importantHeaderField) {
       risks.insert(DKIMRisks.ImportantHeaderFieldNotSigned(name: importantHeaderField))
     }
   }
