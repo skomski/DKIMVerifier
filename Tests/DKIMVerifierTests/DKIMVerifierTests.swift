@@ -40,8 +40,8 @@ final class DKIMVerifierTests: XCTestCase {
         ]))
       XCTAssertEqual(result.signatures[1].status, expected_result.status, emailFilePath)
       XCTAssertEqual(result.status, DKIMStatus.Valid)
-      XCTAssertEqual(result.DMARCResult?.validDKIMIdentifierAlignment, true)
-      XCTAssertEqual(result.DMARCResult?.entry.dkimAlignmentMode, AlignmentMode.Strict)
+      XCTAssertEqual(result.dmarcResult!.status, DMARCStatus.validDKIMIdentifierAlignment)
+      XCTAssertEqual(result.dmarcResult!.entry!.dkimAlignmentMode, AlignmentMode.Strict)
 
     } catch {
       XCTFail("email \(emailFilePath) should not throw an error: \(error)")
@@ -184,7 +184,7 @@ final class DKIMVerifierTests: XCTestCase {
                   DKIMVerifier.DKIMRisks.ImportantHeaderFieldNotSigned(name: "message-id"),
                   DKIMVerifier.DKIMRisks.SDIDNotInFrom(
                     sdid: "custom.com", fromDomain: "football.example.com"),
-                  DKIMVerifier.DKIMRisks.InsecureKeySize(size: 1024, expected: 2048)
+                  DKIMVerifier.DKIMRisks.InsecureKeySize(size: 1024, expected: 2048),
                 ])))
 
             XCTAssertEqual(result.signatures[0].info!.version, 1)
@@ -204,7 +204,7 @@ final class DKIMVerifierTests: XCTestCase {
                 Set.init([
                   DKIMVerifier.DKIMRisks.ImportantHeaderFieldNotSigned(name: "date"),
                   DKIMVerifier.DKIMRisks.ImportantHeaderFieldNotSigned(name: "message-id"),
-                  DKIMVerifier.DKIMRisks.InsecureKeySize(size: 1024, expected: 2048)
+                  DKIMVerifier.DKIMRisks.InsecureKeySize(size: 1024, expected: 2048),
                 ])))
             XCTAssertEqual(result.extractedDomainFromSender, "mubi.com")
             insecure_emails += 1

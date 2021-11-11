@@ -7,7 +7,8 @@ public func verifyDKIMSignatures(
   dnsLoopupTxtFunction: @escaping DNSLookupFunctionType, email_raw: String,
   verifyDMARC: Bool = false
 )
-  -> DKIMResult {
+  -> DKIMResult
+{
   var result: DKIMResult = DKIMResult.init()
 
   // seperate headers from body
@@ -65,20 +66,11 @@ public func verifyDKIMSignatures(
       continue
     }
 
-    do {
-      let signatureResult = try verifyDKIMSignature(
-        dnsLoopupTxtFunction: dnsLoopupTxtFunction,
-        emailHeaders: headers, emailBody: body, dkimHeaderFieldIndex: index,
-        extractedDomainFromSender: result.extractedDomainFromSender!)
-      result.signatures.append(signatureResult)
-    } catch let error as DKIMError {
-      result.status = DKIMStatus.Error(error)
-      return result
-    } catch {
-      result.status = DKIMStatus.Error(
-        DKIMError.UnexpectedError(message: error.localizedDescription))
-      return result
-    }
+    let signatureResult = verifyDKIMSignature(
+      dnsLoopupTxtFunction: dnsLoopupTxtFunction,
+      emailHeaders: headers, emailBody: body, dkimHeaderFieldIndex: index,
+      extractedDomainFromSender: result.extractedDomainFromSender!)
+    result.signatures.append(signatureResult)
   }
 
   if verifyDMARC {
@@ -92,15 +84,10 @@ public func verifyDKIMSignatures(
       }
     }
 
-    do {
-      result.DMARCResult = try checkDMARC(
-        dnsLookupTxtFunction: dnsLoopupTxtFunction,
-        fromSenderDomain: result.extractedDomainFromSender!, validDKIMDomains: validDKIMDomains)
-    } catch {
-      result.status = DKIMStatus.Error(
-        DKIMError.UnexpectedError(message: error.localizedDescription))
-      return result
-    }
+    result.dmarcResult = checkDMARC(
+      dnsLookupTxtFunction: dnsLoopupTxtFunction,
+      fromSenderDomain: result.extractedDomainFromSender!, validDKIMDomains: validDKIMDomains)
+
   }
 
   if result.signatures.contains(where: { $0.status == DKIMSignatureStatus.Valid }) {
@@ -120,13 +107,24 @@ func verifyDKIMSignature(
   dnsLoopupTxtFunction: @escaping DNSLookupFunctionType,
   emailHeaders: OrderedKeyValueArray, emailBody: String, dkimHeaderFieldIndex: Int,
   extractedDomainFromSender: String
-) throws -> DKIMSignatureResult {
+) -> DKIMSignatureResult {
   var result: DKIMSignatureResult = DKIMSignatureResult.init(
     status: DKIMSignatureStatus.Error(DKIMError.UnexpectedError(message: "unset error")), info: nil,
     validatedWithDNSSEC: false)
   var risks: Set<DKIMRisks> = Set<DKIMRisks>.init()
 
-  let dkimFields = try parseTagValueList(raw_list: emailHeaders[dkimHeaderFieldIndex].value)
+  let dkimFields: TagValueDictionary
+
+  do {
+    dkimFields = try parseTagValueList(raw_list: emailHeaders[dkimHeaderFieldIndex].value)
+  } catch let error as DKIMError {
+    result.status = DKIMSignatureStatus.Error(error)
+    return result
+  } catch {
+    result.status = DKIMSignatureStatus.Error(
+      DKIMError.UnexpectedError(message: error.localizedDescription))
+    return result
+  }
 
   // validate dkim fields and add possible risks
   do {
@@ -219,7 +217,8 @@ func verifyDKIMSignature(
   do {
     dns_tag_value_list = try parseTagValueList(raw_list: record)
   } catch let error as DKIMError
-    where error == .TagValueListParsingError(message: "no value for key: p") {
+    where error == .TagValueListParsingError(message: "no value for key: p")
+  {
     result.status = DKIMSignatureStatus.Error(DKIMError.PublicKeyRevoked)
     return result
   } catch let error as DKIMError {

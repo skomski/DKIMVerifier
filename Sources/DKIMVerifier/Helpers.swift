@@ -110,7 +110,8 @@ internal func parseRFC822Message(message: String) throws -> (OrderedKeyValueArra
 func generateSignedData(
   dkimHeaderField: KeyValue, headers: OrderedKeyValueArray, includeHeaders: [String]
 ) throws
-  -> String {
+  -> String
+{
   var headers = headers
 
   var finalString: String = String()

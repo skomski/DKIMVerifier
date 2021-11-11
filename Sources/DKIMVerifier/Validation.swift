@@ -119,7 +119,8 @@ func validateDKIMFields(
 
   for importantHeaderField in importantHeaderFields {
     if email_headers.contains(where: { $0.key.lowercased() == importantHeaderField })
-      && !signedHeaderFields.contains(importantHeaderField) {
+      && !signedHeaderFields.contains(importantHeaderField)
+    {
       risks.insert(DKIMRisks.ImportantHeaderFieldNotSigned(name: importantHeaderField))
     }
   }

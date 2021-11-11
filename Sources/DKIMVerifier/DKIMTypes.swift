@@ -98,7 +98,7 @@ let importantHeaderFields: Set<String> = [
   "content-id", "content-description", "resent-date", "resent-from",
   "resent-sender", "resent-to", "resent-cc", "resent-message-id",
   "in-reply-to", "references", "list-id", "list-help", "list-unsubscribe",
-  "list-subscribe", "list-post", "list-owner", "list-archive"
+  "list-subscribe", "list-post", "list-owner", "list-archive",
 ]
 
 public struct DKIMSignatureInfo: Equatable {
@@ -133,7 +133,7 @@ public struct DKIMResult: Equatable {
   public var signatures: [DKIMSignatureResult]
   public var emailFromSender: String?
   public var extractedDomainFromSender: String?
-  public var DMARCResult: DMARCResult?
+  public var dmarcResult: DMARCResult?
 
   init() {
     status = DKIMStatus.Error(DKIMError.UnexpectedError(message: "initial status"))

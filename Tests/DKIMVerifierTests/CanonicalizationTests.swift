@@ -22,12 +22,12 @@ final class CanonicalizationTests: XCTestCase {
       try RelaxedCanonicalizationHeaderAlgorithm.canonicalize(headers: [
         KeyValue(key: "HABBA", value: " 1\r\n"),
         KeyValue(key: "habba ", value: " 1\t\r\n\t2  \r\n"),
-        KeyValue(key: "habbA", value: "1")
+        KeyValue(key: "habbA", value: "1"),
       ]),
       [
         KeyValue(key: "habba", value: "1\r\n"),
         KeyValue(key: "habba", value: "1 2\r\n"),
-        KeyValue(key: "habba", value: "1\r\n")
+        KeyValue(key: "habba", value: "1\r\n"),
       ])
   }
 

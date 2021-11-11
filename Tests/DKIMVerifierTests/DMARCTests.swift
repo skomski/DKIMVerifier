@@ -8,7 +8,7 @@ final class DMARCTests: XCTestCase {
     if domain == "_dmarc.test.com" {
       return DNSResult.init(
         result: "v=DMARC1; p=none; sp=quarantine; rua=mailto:mailauth-reports@test.com; adkim=s;",
-        validatedWithDNSSEC: true)
+        validatedWithDNSSEC: false)
     }
 
     if domain == "_dmarc.testdefault.com" {
@@ -21,11 +21,13 @@ final class DMARCTests: XCTestCase {
 
   func testDMARCQueryNoFail() {
     do {
-      let result = try queryDMARC(dnsLookupTxtFunction: getDMARCNoFailDnsEntry, domain: "test.com")
+      let (result, secure) = try queryDMARC(
+        dnsLookupTxtFunction: getDMARCNoFailDnsEntry, domain: "test.com")
       XCTAssertEqual(result.version, DMARCVersion.One)
       XCTAssertEqual(result.mailReceiverPolicy, MailReceiverPolicy.None)
       XCTAssertEqual(result.subdomainMailReceiverPolicy, MailReceiverPolicy.Quarantine)
       XCTAssertEqual(result.dkimAlignmentMode, AlignmentMode.Strict)
+      XCTAssertEqual(secure, false)
     } catch {
       XCTFail("dns dmarc should not throw an error: \(error)")
     }
@@ -33,12 +35,13 @@ final class DMARCTests: XCTestCase {
 
   func testDMARCQueryNoFailDefault() {
     do {
-      let result = try queryDMARC(
+      let (result, secure) = try queryDMARC(
         dnsLookupTxtFunction: getDMARCNoFailDnsEntry, domain: "testdefault.com")
       XCTAssertEqual(result.version, DMARCVersion.One)
       XCTAssertEqual(result.mailReceiverPolicy, MailReceiverPolicy.Reject)
       XCTAssertEqual(result.subdomainMailReceiverPolicy, MailReceiverPolicy.Reject)
       XCTAssertEqual(result.dkimAlignmentMode, AlignmentMode.Relaxed)
+      XCTAssertEqual(secure, true)
     } catch {
       XCTFail("dns dmarc should not throw an error: \(error)")
     }

@@ -75,7 +75,7 @@ final class HelpersTests: XCTestCase {
       [
         KeyValue(key: "habba", value: "1\r\n"),
         KeyValue(key: "babaB", value: "2\r\n"),
-        KeyValue(key: "DDD", value: " 3\r\n")
+        KeyValue(key: "DDD", value: " 3\r\n"),
       ])
     XCTAssertEqual(try DKIMVerifier.parseRFC822Message(message: multiple_headers).1, "")
 
@@ -93,7 +93,7 @@ final class HelpersTests: XCTestCase {
       [
         KeyValue(key: "habba", value: "1\r\n"),
         KeyValue(key: "habba", value: "1\r\n"),
-        KeyValue(key: "habbA", value: "1\r\n d\r\n")
+        KeyValue(key: "habbA", value: "1\r\n d\r\n"),
       ])
     XCTAssertEqual(
       try DKIMVerifier.parseRFC822Message(message: duplicate_headers).1, "duplicate_headers\r\n")

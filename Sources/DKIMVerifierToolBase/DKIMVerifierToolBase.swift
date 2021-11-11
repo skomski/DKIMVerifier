@@ -27,10 +27,32 @@ public struct DKIMVerifierToolBaseArguments: ParsableArguments {
   var email_path: String?
 }
 
+func printDMARCInfo(result: DKIMResult) {
+  if result.dmarcResult == nil {
+    print("DMARC")
+    print("  Not checked")
+    return
+  }
+  print("DMARC (dnssec=\(result.dmarcResult!.validatedWithDNSSEC))")
+  print("  dkimAlignmentResult: \(result.dmarcResult!.status)")
+  print("  foundSenderDomain: \(result.dmarcResult!.fromSenderDomain)")
+  print("  validDKIMDomains: \(result.dmarcResult!.validDKIMDomains)")
+  print("  foundPolicyDomain: \(result.dmarcResult!.foundPolicyDomain ?? "")")
+  print("  validDomain: \(result.dmarcResult!.validDomain ?? "")")
+  if result.dmarcResult!.entry != nil {
+    print("  dkimAlignmentMode('adkim'): \(result.dmarcResult!.entry!.dkimAlignmentMode)")
+    print("  mailReceiverPolicy('p'): \(result.dmarcResult!.entry!.mailReceiverPolicy)")
+    print(
+      "  subdomainMailReceiverPolicy('sp'): \(result.dmarcResult!.entry!.subdomainMailReceiverPolicy)"
+    )
+  }
+}
+
 func printVerboseInfo(result: DKIMResult) {
-  print("emailFrom: \(result.emailFromSender ?? "missing")")
-  print("extractedDomain: \(result.extractedDomainFromSender ?? "missing")")
-  print("\(result.signatures.count) signature(s)")
+  print("DKIM (Verbose)")
+  print(" emailFrom: \(result.emailFromSender ?? "missing")")
+  print(" extractedDomain: \(result.extractedDomainFromSender ?? "missing")")
+  print(" \(result.signatures.count) signature(s)")
   for signature in result.signatures {
     let status: String
     var info: String = "no info"
@@ -101,6 +123,8 @@ public func baseRun(options: DKIMVerifierToolBaseArguments) {
         dnsLoopupTxtFunction: dns_function,
         email_raw: email_raw, verifyDMARC: options.verifyDMARC
       )
+
+    print("DKIM")
     switch result.status {
     case DKIMStatus.Valid:
       print("Valid")
@@ -109,6 +133,10 @@ public func baseRun(options: DKIMVerifierToolBaseArguments) {
     case DKIMStatus.Error(let error):
       print("Error")
       print("  \(error)")
+    }
+
+    if options.verifyDMARC {
+      printDMARCInfo(result: result)
     }
 
     if options.verbose {

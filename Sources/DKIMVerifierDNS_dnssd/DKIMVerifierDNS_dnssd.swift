@@ -49,7 +49,9 @@ public func queryDNSTXTEntry(domainName: String) throws -> DNSResult {
   let serviceRef: UnsafeMutablePointer<DNSServiceRef?> = UnsafeMutablePointer.allocate(
     capacity: MemoryLayout<DNSServiceRef>.size)
   let code = DNSServiceQueryRecord(
-    serviceRef, kDNSServiceFlagsEnableDNSSEC, 0, domainName, UInt16(kDNSServiceType_TXT),
+    serviceRef,
+    kDNSServiceFlagsEnableDNSSEC | kDNSServiceFlagsTimeout | kDNSServiceFlagsLongLivedQuery, 0,
+    domainName, UInt16(kDNSServiceType_TXT),
     UInt16(kDNSServiceClass_IN), callback, &result)
   if code != kDNSServiceErr_NoError {
     throw DKIMError.InvalidDNSEntry(message: "dns error")
