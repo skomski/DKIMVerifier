@@ -1,6 +1,5 @@
 import Foundation
-import Peppermint
-import SwiftParsec
+import RegularExpressions
 
 extension String {
   func trailingTrim(_ characterSet: CharacterSet) -> String {
@@ -133,39 +132,62 @@ func generateSignedData(
   return finalString
 }
 
+/// checks email-address
+/// allows utf-8 but disallows comments, quoted strings, whitespace characters
+/// https://github.com/nsagora/peppermint/blob/main/Sources/Predicates/Standard/EmailPredicate.swift
+func checkEmailAddress(email_address: String) -> Bool {
+  let regex =
+    "^(?:[\\p{L}0-9!#$%\\&'*+/=?\\^_`{|}~-]+(?:\\.[\\p{L}0-9!#$%\\&'*+/=?\\^_`{|}"
+    + "~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\"
+    + "x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[\\p{L}0-9](?:[a-"
+    + "z0-9-]*[\\p{L}0-9])?\\.)+[\\p{L}0-9](?:[\\p{L}0-9-]*[\\p{L}0-9])?|\\[(?:(?:25[0-5"
+    + "]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-"
+    + "9][0-9]?|[\\p{L}0-9-]*[\\p{L}0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21"
+    + "-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])$"
+  return (try? email_address.regexMatch(regex)) != nil
+}
+
+///  Extracts an email address from a From: Field
+///  Only allows four formats:
+///     plain: test@example.com
+///     display name with quotes : "<test@example.com>" <test@example.com>
+///     display name without quotes but disallow additional @ before <>:  Test <test@example.com>
+///     only in quotes: <test@example.com>
+///
+///  TODO: more robust parser with warnings
 func parseEmailFromField(raw_from_field: String) -> String? {
-  let noneOf = StringParser.noneOf
-  let character = StringParser.character
+  let lowercased = raw_from_field.lowercased()
+  let stripped = lowercased.trimmingCharacters(in: .whitespacesAndNewlines)
+  // "display name" <test@example.de>
+  var match: RegexMatch? = try? stripped.regexMatch(#"^\s*".*"\s*<(.+@[^@\s]+\.[^@\s]+)>[^@]*$"#)
 
-  let quotedChars =
-    noneOf("\\\"") <|> (StringParser.string("\\\"").attempt *> GenericParser(result: "\""))
-
-  let quote = character("\"")
-  let quotedField = quote *> quotedChars.many.stringValue <* (quote <?> "quote at end of field")
-
-  let displayName = quotedField <|> noneOf("<").many.stringValue
-
-  let field = (displayName *> StringParser.spaces *> character("<") *> noneOf(">").many.stringValue)
-
-  let result: String
-  do {
-    result = try field.run(sourceName: "", input: raw_from_field)
-  } catch {
-    let predicate = EmailPredicate()
-    if predicate.evaluate(with: raw_from_field) {
-      return raw_from_field
-    }
-    return nil
+  // display name but no @ before <>
+  if match == nil {
+    match = try? stripped.regexMatch(#"^[^@]*<(.+)>[^@]*$"#)
   }
 
-  return result
+  if let match: RegexMatch = match {
+    if let group = match.groups[0] {
+      let strippedMatch = group.match.trimmingCharacters(in: .whitespacesAndNewlines)
+      if checkEmailAddress(email_address: strippedMatch) {
+        return strippedMatch
+      }
+    }
+  }
+
+  // plain
+  if checkEmailAddress(email_address: stripped) {
+    return stripped
+  }
+
+  return nil
 }
 
 /// This functions extracts the domain name part from a email address
 func parseDomainFromEmail(email: String) -> String? {
   let email = email.lowercased()
-  let predicate = EmailPredicate()
-  guard predicate.evaluate(with: email) else {
+
+  guard checkEmailAddress(email_address: email) else {
     return nil
   }
   let result = email.split(separator: "@")

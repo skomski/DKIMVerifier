@@ -20,15 +20,11 @@ let package = Package(
   dependencies: [
     .package(
       name: "RegularExpressions", url: "https://github.com/Peter-Schorn/RegularExpressions",
-      .branch("master")),
+      .upToNextMinor(from: "2.2.0")),
     .package(
       name: "swift-argument-parser", url: "https://github.com/apple/swift-argument-parser",
-      from: "0.4.0"),
-    .package(name: "swift-crypto", url: "https://github.com/apple/swift-crypto", .branch("main")),
-    .package(
-      name: "SwiftParsec", url: "https://github.com/davedufresne/SwiftParsec", .branch("master")),
-    .package(name: "Peppermint", url: "https://github.com/nsagora/peppermint", from: "1.1.0"),
-  ],
+      .upToNextMinor(from: "1.0.2")),
+      .package(name: "swift-crypto", url: "https://github.com/apple/swift-crypto", .upToNextMinor(from: "2.0.1")),  ],
   targets: [
     .systemLibrary(
         name: "libunbound",
@@ -40,7 +36,7 @@ let package = Package(
     .target(
       name: "DKIMVerifier",
       dependencies: [
-        "RegularExpressions", "Peppermint", "SwiftParsec",
+        "RegularExpressions",
         .product(name: "Crypto", package: "swift-crypto"),
         .product(name: "_CryptoExtras", package: "swift-crypto"),
       ]),

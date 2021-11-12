@@ -12,8 +12,7 @@ final class HelpersTests: XCTestCase {
   }
 
   func testParseEmailFromField() {
-    XCTAssertEqual(DKIMVerifier.parseEmailFromField(raw_from_field: ""), nil)
-    XCTAssertEqual(DKIMVerifier.parseEmailFromField(raw_from_field: "blabla"), nil)
+    // valid
     XCTAssertEqual(
       DKIMVerifier.parseEmailFromField(raw_from_field: "blabla <hallo@skomski.com>"),
       "hallo@skomski.com")
@@ -36,7 +35,72 @@ final class HelpersTests: XCTestCase {
     XCTAssertEqual(
       DKIMVerifier.parseEmailFromField(
         raw_from_field: "IT-Helpcenter <it-helpcenter@HTW-Berlin.de>"),
-      "it-helpcenter@HTW-Berlin.de")
+      "it-helpcenter@htw-berlin.de")
+    XCTAssertEqual(
+      DKIMVerifier.parseEmailFromField(raw_from_field: #"杨孝宇 <xiaoyu@example.com>"#),
+      "xiaoyu@example.com")
+    XCTAssertEqual(
+      DKIMVerifier.parseEmailFromField(raw_from_field: #" <admin@legitimate.com>"#),
+      "admin@legitimate.com")
+    XCTAssertEqual(
+      DKIMVerifier.parseEmailFromField(raw_from_field: #" <admin@legitimate.com> xcdd"#),
+      "admin@legitimate.com")
+    XCTAssertEqual(
+      DKIMVerifier.parseEmailFromField(raw_from_field: #" <admin@legitimate.com> \n"#),
+      "admin@legitimate.com")
+    XCTAssertEqual(
+      DKIMVerifier.parseEmailFromField(
+        raw_from_field:
+          #" "Rechnersicherheit S21 (support@kvv.imp.fu-berlin.de) (!Please do not reply to this message!)" <postmaster@mycampus.imp.fu-berlin.de>"#
+      ), "postmaster@mycampus.imp.fu-berlin.de")
+    XCTAssertEqual(
+      DKIMVerifier.parseEmailFromField(
+        raw_from_field:
+          #"=?UTF-8?Q?=22Lineare_Algebra_f=C3=BCr_Infor?= =?UTF-8?Q?matik_S21=22_=28support=40kvv=2Eimp?= =?UTF-8?Q?=2Efu-berlin=2Ede=29_=28!Please_do_?= =?UTF-8?Q?not_reply_to_this_message!=29?= <postmaster@mycampus.imp.fu-berlin.de>"#
+      ), "postmaster@mycampus.imp.fu-berlin.de")
+    XCTAssertEqual(
+      DKIMVerifier.parseEmailFromField(raw_from_field: #"  First   Last   <first@last.com>"#),
+      "first@last.com")
+    XCTAssertEqual(DKIMVerifier.parseEmailFromField(raw_from_field: #"tesα@aα.gr"#), "tesα@aα.gr")
+
+    // invalid testcases
+
+    XCTAssertEqual(DKIMVerifier.parseEmailFromField(raw_from_field: ""), nil)
+    XCTAssertEqual(DKIMVerifier.parseEmailFromField(raw_from_field: "blabla"), nil)
+    XCTAssertEqual(DKIMVerifier.parseEmailFromField(raw_from_field: "blabla@test"), nil)
+
+    // two addresses
+    XCTAssertEqual(
+      DKIMVerifier.parseEmailFromField(
+        raw_from_field: "<hello@hello.com> <joe@football.example.com>"),
+      nil)
+
+    // comment
+    XCTAssertEqual(
+      DKIMVerifier.parseEmailFromField(raw_from_field: #"ABC@abc (comment) < a@b.c>"#), nil)
+
+    // Composition Kills: A Case Study of Email Sender Authentication (Jianjun Chen and Vern Paxson and Jian Jiang)
+    // Testcases
+
+    // Quoted pair
+    XCTAssertEqual(
+      DKIMVerifier.parseEmailFromField(
+        raw_from_field: #" <admin@legitimate.com>\,<second@attack.com>"#), nil)
+
+    // Multiple address in From header
+    XCTAssertEqual(
+      DKIMVerifier.parseEmailFromField(
+        raw_from_field: #" <first@attack.com>, <admin@legitimate.com>"#), nil)
+
+    // Route portion
+    XCTAssertEqual(
+      DKIMVerifier.parseEmailFromField(
+        raw_from_field: #"<@attack.com,@any.com:admin@legitimate.com>"#), nil)
+
+    // Display name inconsistenccy
+    XCTAssertEqual(
+      DKIMVerifier.parseEmailFromField(raw_from_field: #"<any@attack.com>admin@legitimate.com"#),
+      nil)
   }
 
   func testParseDomainFromEmail() {
