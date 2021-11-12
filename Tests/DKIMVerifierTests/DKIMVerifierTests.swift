@@ -1,3 +1,4 @@
+import Punycode
 import XCTest
 
 @testable import DKIMVerifier
@@ -7,7 +8,7 @@ final class DKIMVerifierTests: XCTestCase {
     let dnsKeyFilePaths = Bundle.module.paths(forResourcesOfType: "dns", inDirectory: nil)
 
     for dnsKeyFilePath in dnsKeyFilePaths {
-      if dnsKeyFilePath.contains(domain) {
+      if dnsKeyFilePath.contains(domain.idnaDecoded!) {
         return try DNSResult.init(
           result: String(
             contentsOf: URL(fileURLWithPath: dnsKeyFilePath), encoding: .utf8),
@@ -15,7 +16,7 @@ final class DKIMVerifierTests: XCTestCase {
       }
     }
 
-    XCTFail("unknown dns domain")
+    XCTFail("unknown dns domain \(domain)")
     return DNSResult.init(result: String(), validatedWithDNSSEC: true)
   }
 
@@ -66,12 +67,19 @@ final class DKIMVerifierTests: XCTestCase {
         let result = DKIMVerifier.verifyDKIMSignatures(
           dnsLoopupTxtFunction: GetDnsKey, email_raw: email_raw)
 
-        if emailFilePath.contains("unsigned") {
+        if emailFilePath.hasSuffix("unsigned.eml") {
           XCTAssertEqual(result.signatures.count, 0, emailFilePath)
           XCTAssertEqual(result.status, DKIMVerifier.DKIMStatus.Error(DKIMError.NoSignature))
           XCTAssertEqual(result.emailFromSender, "Joe SixPack <joe@football.example.com>")
           no_signature_emails += 1
-        } else if emailFilePath.contains("error_invalid_without_header") {
+        } else if emailFilePath.hasSuffix("unsigned_idna.eml") {
+          XCTAssertEqual(result.signatures.count, 0, emailFilePath)
+          XCTAssertEqual(result.status, DKIMVerifier.DKIMStatus.Error(DKIMError.NoSignature))
+          XCTAssertEqual(result.emailFromSender, "<jäe@öüä.brätzelein.com>")
+          XCTAssertEqual(
+            result.extractedDomainFromSenderIdnaEncoded, "xn--4ca9as.xn--brtzelein-w2a.com")
+          no_signature_emails += 1
+        } else if emailFilePath.hasSuffix("error_invalid_without_header.eml") {
           XCTAssertEqual(result.signatures.count, 0, emailFilePath)
           let expected_result = DKIMVerifier.DKIMResult.init(
             status: DKIMVerifier.DKIMStatus.Error(
@@ -79,7 +87,7 @@ final class DKIMVerifierTests: XCTestCase {
           )
           XCTAssertEqual(result, expected_result)
           error_emails += 1
-        } else if emailFilePath.contains("multiple_signatures") {
+        } else if emailFilePath.hasSuffix("multiple_signatures.eml") {
 
           var expected_result = DKIMVerifier.DKIMSignatureResult.init(
             status: DKIMVerifier.DKIMSignatureStatus.Valid)
@@ -165,6 +173,19 @@ final class DKIMVerifierTests: XCTestCase {
                   expirationDate: Date.init(timeIntervalSince1970: 1_636_570_698))
               ])
             )
+            insecure_emails += 1
+            XCTAssertEqual(result.status, DKIMStatus.Insecure)
+          case _ where emailFilePath.hasSuffix("signed_idna.eml"):
+            expected_result = DKIMVerifier.DKIMSignatureResult.init(
+              status: DKIMVerifier.DKIMSignatureStatus.Insecure([
+                DKIMRisks.SignatureExpired(
+                  expirationDate: Date.init(timeIntervalSince1970: 1_636_742_550))
+              ])
+            )
+            XCTAssertEqual(
+              result.extractedDomainFromSenderIdnaEncoded, "xn--4ca9as.xn--brtzelein-w2a.com")
+            XCTAssertEqual(result.signatures[0].info?.sdid, "xn--brtzelein-w2a.com")
+            XCTAssertEqual(result.signatures[0].info?.domainSelector, "shä256_2048")
             insecure_emails += 1
             XCTAssertEqual(result.status, DKIMStatus.Insecure)
           case _ where emailFilePath.hasSuffix("sha1.eml"):
@@ -256,10 +277,10 @@ final class DKIMVerifierTests: XCTestCase {
     }
 
     XCTAssertEqual(total_emails, emailFilePaths.count)
-    XCTAssertEqual(total_emails, 16)
+    XCTAssertEqual(total_emails, 18)
     XCTAssertEqual(error_emails, 7)
-    XCTAssertEqual(no_signature_emails, 1)
-    XCTAssertEqual(insecure_emails, 5)
+    XCTAssertEqual(no_signature_emails, 2)
+    XCTAssertEqual(insecure_emails, 6)
     XCTAssertEqual(valid_emails, 3)
     XCTAssertEqual(
       valid_emails + insecure_emails + error_emails + no_signature_emails, total_emails)

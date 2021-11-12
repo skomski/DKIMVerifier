@@ -24,7 +24,9 @@ let package = Package(
     .package(
       name: "swift-argument-parser", url: "https://github.com/apple/swift-argument-parser",
       .upToNextMinor(from: "1.0.2")),
-      .package(name: "swift-crypto", url: "https://github.com/apple/swift-crypto", .upToNextMinor(from: "2.0.1")),  ],
+      .package(name: "swift-crypto", url: "https://github.com/apple/swift-crypto", .upToNextMinor(from: "2.0.1")),
+    .package(name: "TLDExtract", url: "https://github.com/gumob/TLDExtractSwift", .revision("8c051b60df00a3fd5c568bab657534857eb4287f")),
+  ],
   targets: [
     .systemLibrary(
         name: "libunbound",
@@ -36,7 +38,7 @@ let package = Package(
     .target(
       name: "DKIMVerifier",
       dependencies: [
-        "RegularExpressions",
+        "RegularExpressions", "TLDExtract",
         .product(name: "Crypto", package: "swift-crypto"),
         .product(name: "_CryptoExtras", package: "swift-crypto"),
       ]),

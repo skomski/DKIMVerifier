@@ -1,0 +1,15 @@
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=brätzelein.com;
+ i=@brätzelein.com; q=dns/txt; s=shä256_2048; x=1636742550; h=from :
+ to : subject : date : from;
+ bh=vJ+60ZHtzurQdEMhV+atxq2NW3wC+5GWLrZFx/ffABE=;
+ b=HIOjSmpQp4XAG2rdxZnqWQu2p8TxtNYjqe5E50VZeuuxbEWn/6I2JYiXKXB/j0YCGzqhR
+ EBIOEg0ikSqQ2pkfB5dOxsC8RcddIGtbtHPtnbswTEUghubzDHNHZXt1TRiqVPqwOc3TnSu
+ SVgryx4MgCZv5P49Y/khZ+GpbZ8dia8ofySiQcJxS9u241xsp6W3ereKO4njKL8J96V3bxq
+ PHzw1dZoWRqsSl1FSUck48zgx8qo/jz4T0lUJIzb/Uprf0qKot1eWSEsWURpU4JIQi8ysVD
+ Q987dVeUTO+xM8SOm/siX63jLROLfBvaKL0Gsx/i2wGnUUgYbZcu7AerJM/A==
+From: <jäe@öüä.brätzelein.com>
+To: Suzie Q <suzie@shopping.exämple.net>
+Subject: Is dinner räedy?
+Date: Fri, 11 Jul 2021 21:00:37 -0700 (PDT)
+
+Good göd

@@ -62,6 +62,9 @@ final class HelpersTests: XCTestCase {
       DKIMVerifier.parseEmailFromField(raw_from_field: #"  First   Last   <first@last.com>"#),
       "first@last.com")
     XCTAssertEqual(DKIMVerifier.parseEmailFromField(raw_from_field: #"tesα@aα.gr"#), "tesα@aα.gr")
+    XCTAssertEqual(
+      DKIMVerifier.parseEmailFromField(raw_from_field: #"test@führerschein.com"#),
+      "test@führerschein.com")
 
     // invalid testcases
 

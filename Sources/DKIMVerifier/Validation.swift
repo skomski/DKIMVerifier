@@ -3,7 +3,7 @@ import RegularExpressions
 
 func validateDKIMFields(
   email_headers: OrderedKeyValueArray, email_body: String, dkimFields: TagValueDictionary,
-  dkim_result: inout DKIMSignatureResult, extractedDomainFromSender: String
+  dkim_result: inout DKIMSignatureResult, extractedDomainFromSenderIdnaEncoded: String
 ) throws -> Set<DKIMRisks> {
   var risks: Set<DKIMRisks> = Set<DKIMRisks>.init()
 
@@ -135,8 +135,17 @@ func validateDKIMFields(
       DKIMError.InvalidEntryInDKIMHeader(message: "missing required sdid field (s)")
   }
 
-  if !(extractedDomainFromSender == sdid) && !extractedDomainFromSender.hasSuffix(".\(sdid)") {
-    risks.insert(DKIMRisks.SDIDNotInFrom(sdid: sdid, fromDomain: extractedDomainFromSender))
+  guard let sdidIdnaEncoded = sdid.idnaEncoded else {
+    throw
+      DKIMError.InvalidEntryInDKIMHeader(message: "could not encoded sdid field to idna (s)")
+  }
+
+  if !(extractedDomainFromSenderIdnaEncoded == sdidIdnaEncoded)
+    && !extractedDomainFromSenderIdnaEncoded.hasSuffix(".\(sdidIdnaEncoded)")
+  {
+    risks.insert(
+      DKIMRisks.SDIDNotInFrom(
+        sdid: sdidIdnaEncoded, fromDomain: extractedDomainFromSenderIdnaEncoded))
   }
 
   let dkimPublicQueryMethod: DKIMPublicKeyQueryMethod = DKIMPublicKeyQueryMethod.DNSTXT
@@ -150,7 +159,7 @@ func validateDKIMFields(
   var info: DKIMSignatureInfo = DKIMSignatureInfo.init(
     version: dkimVersion, algorithm: dkimSignatureAlgorithm, signature: dkimSignatureClean,
     bodyHash: bodyHash, headerCanonicalization: canonicalizationHeaderMethod,
-    bodyCanonicalization: canonicalizationBodyMethod, sdid: sdid,
+    bodyCanonicalization: canonicalizationBodyMethod, sdid: sdidIdnaEncoded,
     signedHeaderFields: signedHeaderFields, domainSelector: domainSelectorString,
     publicKeyQueryMethod: dkimPublicQueryMethod, auid: nil,
     signatureTimestamp: nil, signatureExpiration: nil)

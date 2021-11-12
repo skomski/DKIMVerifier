@@ -1,4 +1,5 @@
 import Foundation
+import TLDExtract
 
 public enum AlignmentMode {
   case Relaxed
@@ -85,19 +86,20 @@ internal func checkDMARC(
     dmarcResult.foundPolicyDomain = subdomainDmarc
   } catch {
     // 1.1. check organizational dmarc entry
-    let splittedDomain = fromSenderDomain.split(separator: ".")
-    guard splittedDomain.count > 1 else {
+
+    let parseResult = tldExtractor.parse(fromSenderDomain)
+
+    if parseResult == nil || parseResult!.rootDomain == nil {
       dmarcResult.status = DMARCStatus.Error(
         DMARCError.InvalidURL(message: "root domain extraction error"))
       return dmarcResult
     }
-    let orgDomainDMARC =
-      splittedDomain[splittedDomain.endIndex - 2] + "."
-      + splittedDomain[splittedDomain.endIndex - 1]
+
+    let orgDomainDMARC = parseResult!.rootDomain
 
     do {
       (dmarcResult.entry, dmarcResult.validatedWithDNSSEC) = try queryDMARC(
-        dnsLookupTxtFunction: dnsLookupTxtFunction, domain: String(orgDomainDMARC))
+        dnsLookupTxtFunction: dnsLookupTxtFunction, domain: orgDomainDMARC!)
     } catch let error as DMARCError {
       dmarcResult.status = DMARCStatus.Error(error)
       return dmarcResult
@@ -106,7 +108,7 @@ internal func checkDMARC(
       return dmarcResult
     }
 
-    dmarcResult.foundPolicyDomain = String(orgDomainDMARC)
+    dmarcResult.foundPolicyDomain = orgDomainDMARC
   }
 
   // 3. check strict or relaxed alignment for valid dkim domains

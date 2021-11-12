@@ -133,6 +133,7 @@ public struct DKIMResult: Equatable {
   public var signatures: [DKIMSignatureResult]
   public var emailFromSender: String?
   public var extractedDomainFromSender: String?
+  public var extractedDomainFromSenderIdnaEncoded: String?
   public var dmarcResult: DMARCResult?
 
   init() {

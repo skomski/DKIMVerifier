@@ -52,6 +52,7 @@ func printVerboseInfo(result: DKIMResult) {
   print("DKIM (Verbose)")
   print(" emailFrom: \(result.emailFromSender ?? "missing")")
   print(" extractedDomain: \(result.extractedDomainFromSender ?? "missing")")
+  print(" extractedDomainIdnaEncoded: \(result.extractedDomainFromSenderIdnaEncoded ?? "missing")")
   print(" \(result.signatures.count) signature(s)")
   for signature in result.signatures {
     let status: String

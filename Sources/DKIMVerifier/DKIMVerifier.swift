@@ -1,6 +1,8 @@
 import Crypto
 import Foundation
+import Punycode
 import RegularExpressions
+import TLDExtract
 import _CryptoExtras
 
 public func verifyDKIMSignatures(
@@ -56,6 +58,28 @@ public func verifyDKIMSignatures(
     return result
   }
 
+  let extractResult = tldExtractor.parse(result.extractedDomainFromSender!)
+
+  guard extractResult != nil && extractResult!.rootDomain != nil else {
+    result.status = DKIMStatus.Error(
+      DKIMError.InvalidRFC5322Headers(
+        message:
+          "could not extract root domain out of extractedDomainFromSender \(result.extractedDomainFromSender!)"
+      ))
+    return result
+  }
+
+  let idnaencoded_domain = result.extractedDomainFromSender!.idnaEncoded
+
+  guard idnaencoded_domain != nil else {
+    result.status = DKIMStatus.Error(
+      DKIMError.InvalidRFC5322Headers(
+        message: "could not punyencoded extracted domain \(result.extractedDomainFromSender!)"))
+    return result
+  }
+
+  result.extractedDomainFromSenderIdnaEncoded = idnaencoded_domain!
+
   guard headers.contains(where: { $0.key.lowercased() == "dkim-signature" }) else {
     result.status = DKIMStatus.Error(DKIMError.NoSignature)
     return result
@@ -69,7 +93,7 @@ public func verifyDKIMSignatures(
     let signatureResult = verifyDKIMSignature(
       dnsLoopupTxtFunction: dnsLoopupTxtFunction,
       emailHeaders: headers, emailBody: body, dkimHeaderFieldIndex: index,
-      extractedDomainFromSender: result.extractedDomainFromSender!)
+      extractedDomainFromSenderIdnaEncoded: result.extractedDomainFromSenderIdnaEncoded!)
     result.signatures.append(signatureResult)
   }
 
@@ -106,7 +130,7 @@ public func verifyDKIMSignatures(
 func verifyDKIMSignature(
   dnsLoopupTxtFunction: @escaping DNSLookupFunctionType,
   emailHeaders: OrderedKeyValueArray, emailBody: String, dkimHeaderFieldIndex: Int,
-  extractedDomainFromSender: String
+  extractedDomainFromSenderIdnaEncoded: String
 ) -> DKIMSignatureResult {
   var result: DKIMSignatureResult = DKIMSignatureResult.init(
     status: DKIMSignatureStatus.Error(DKIMError.UnexpectedError(message: "unset error")), info: nil,
@@ -131,7 +155,8 @@ func verifyDKIMSignature(
     risks = risks.union(
       try validateDKIMFields(
         email_headers: emailHeaders, email_body: emailBody, dkimFields: dkimFields,
-        dkim_result: &result, extractedDomainFromSender: extractedDomainFromSender))
+        dkim_result: &result,
+        extractedDomainFromSenderIdnaEncoded: extractedDomainFromSenderIdnaEncoded))
   } catch let error as DKIMError {
     result.status = DKIMSignatureStatus.Error(error)
     return result
