@@ -1,0 +1,23 @@
+name: build_and_test
+
+on: [push]
+
+jobs:
+  build:
+    name: Swift ${{ matrix.swift }} on ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        swift: ["5.5"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: fwal/setup-swift@1
+        with:
+          swift-version: ${{ matrix.swift }}
+      - uses: actions/checkout@v2
+      - name: Install k6 by homebrew
+        run: brew install unbound
+      - name: Build
+        run: swift build
+      - name: Run tests
+        run: swift test
