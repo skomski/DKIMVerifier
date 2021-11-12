@@ -11,7 +11,7 @@ jobs:
         swift: ["5.5"]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: fwal/setup-swift@1
+      - uses: fwal/setup-swift@v1
         with:
           swift-version: ${{ matrix.swift }}
       - uses: actions/checkout@v2
