@@ -91,9 +91,9 @@ public func baseRun(options: DKIMVerifierToolBaseArguments) {
     let email_raw: String
     if options.email_path != nil {
       email_raw = try String(
-        contentsOf: URL(fileURLWithPath: options.email_path!), encoding: .ascii)
+        contentsOf: URL(fileURLWithPath: options.email_path!), encoding: .utf8)
     } else {
-      email_raw = String(bytes: FileHandle.standardInput.availableData, encoding: .ascii) ?? ""
+      email_raw = String(bytes: FileHandle.standardInput.availableData, encoding: .utf8) ?? ""
     }
     if email_raw.isEmpty {
       print("failure: empty input")
@@ -101,7 +101,7 @@ public func baseRun(options: DKIMVerifierToolBaseArguments) {
     }
     var dns_raw: String?
     if options.dns_path != nil {
-      dns_raw = try String(contentsOf: URL(fileURLWithPath: options.dns_path!), encoding: .ascii)
+      dns_raw = try String(contentsOf: URL(fileURLWithPath: options.dns_path!), encoding: .utf8)
     }
 
     if dns_raw == nil && dnsFunction == nil {
@@ -112,7 +112,7 @@ public func baseRun(options: DKIMVerifierToolBaseArguments) {
     let dns_function: DNSLookupFunctionType
     if dns_raw != nil {
       func custom_dns_function(domain: String) -> DNSResult {
-        return DNSResult.init(result: dns_raw!, validatedWithDNSSEC: true)
+        return DNSResult.init(result: dns_raw!, validatedWithDNSSEC: false)
       }
       dns_function = custom_dns_function
     } else {
