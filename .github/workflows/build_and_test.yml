@@ -15,7 +15,9 @@ jobs:
         with:
           swift-version: ${{ matrix.swift }}
       - uses: actions/checkout@v2
-      - name: Install k6 by homebrew
+      - name: Install openssl via brew
+        run: brew install openssl
+      - name: Install unbound via brew
         run: brew install unbound
       - name: Build
         run: swift build
