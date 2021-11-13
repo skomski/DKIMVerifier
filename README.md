@@ -1,5 +1,7 @@
 # DKIMVerifier (Swift)
 
+[![build_and_test](https://github.com/skomski/DKIMVerifier/actions/workflows/build_and_test.yml/badge.svg)](https://github.com/skomski/DKIMVerifier/actions/workflows/build_and_test.yml)
+
 ### WIP!
 
 ## Features
@@ -10,14 +12,16 @@
   * More info: https://github.com/skomski/DKIMVerifier/issues/10
 * DMARC Alignment Policy Verification
   * additionally checks if the DMARC DKIM Alignment policy is correct for valid DKIM signatures
+* Supports DNSSEC via libunbound (and in theory with dnssd)
+* Includes a command line tool: DKIMVerifierTool with extensive output
 
 ## API
 
 ###  DKIM Verification
 
 ```swift
-DKIMVerifier.verifyDKIMSignatures(
-  dnsLoopupTxtFunction: @escaping (String) throws -> String?, mail: String,
+public func verifyDKIMSignatures(
+  dnsLoopupTxtFunction: @escaping DNSLookupFunctionType, email_raw: String,
   verifyDMARCAlignment: Bool = false
 )
   -> DKIMResult
@@ -29,7 +33,7 @@ Arguments:
 * verifyDMARCAlignment: additional verify DMARC DKIM Alignment for valid signatures (default: false)
 
 Result:
-* status: an overall status, Valid or Valid_Insecure if any of the dkim signatures in the mail returned this result
+* status: an overall status, Valid or Insecure if any of the dkim signatures in the mail returned this result
 * signatures: the individual signature results, good to check for DKIM Risks if the overall result is only Valid_Insecure
 * emailFromSender: the extracted email from the From: mail header field
 * extractedDomainFromSender: the extracted domain from the From: mail header field, used for the DKIM SDID and DMARC alignment checks 
@@ -39,104 +43,62 @@ Result:
 public struct DKIMResult: Equatable {
   public var status: DKIMStatus
   public var signatures: [DKIMSignatureResult]
+
   public var emailFromSender: String?
   public var extractedDomainFromSender: String?
-  public var DMARCResult: DMARCResult?
+  public var extractedDomainFromSenderIdnaEncoded: String?
+
+  public var dmarcResult: DMARCResult?
 }
 
 public struct DKIMSignatureResult: Equatable {
   public var status: DKIMSignatureStatus
   public var info: DKIMSignatureInfo?
+  public var dnsInfo: DKIMSignatureDNSInfo?
+  public var validatedWithDNSSEC: Bool = false
 }
 
 public enum DKIMSignatureStatus: Equatable {
   case Valid
-  case Valid_Insecure(Set<DKIMRisks>)
-  case Invalid(DKIMError)
+  case Insecure(Set<DKIMRisks>)
   case Error(DKIMError)
-}
-
-public enum DKIMStatus: Equatable {
-  case Valid
-  case Valid_Insecure
-  case Invalid
-  case NoSignature
-  case Error(DKIMError)
-}
-
-public enum DKIMError: Error, Equatable {
-  case TagValueListParsingError(message: String)
-  case RFC5322MessageParsingError(message: String)
-  case InvalidRFC5322Headers(message: String)
-  case InvalidEntryInDKIMHeader(message: String)
-  case BodyHashDoesNotMatch(message: String)
-  case SignatureDoesNotMatch
-  case InvalidDNSEntry(message: String)
-  case UnexpectedError(message: String)
 }
 
 public enum DKIMRisks: Hashable, Equatable {
-  case UsingLengthParameter  // only verified to a specific body length
-  case UsingSHA1  // insecure hashing algorithm
-  case SDIDNotEqualToSender  // third-party signature, From: Sender different to DKIM Domain
-  case ImportantHeaderFieldNotSigned(name: String)  // only From: field required, but more fields are better else manipulation possible
-  // Subject, Content-Type, Reply-To,... should be signed
+  /// third-party signature, DKIM specified domain is not a subdomain or equal to From: E-Mail-Header
+  case SDIDNotInFrom(sdid: String, fromDomain: String)
+  /// The DKIM RFC only requires the  From: field to be signed, but more fields are recommend else manipulation possible
+  /// Subject, Content-Type, Reply-To,... should be signed,  see importantHeaderFields
+  case ImportantHeaderFieldNotSigned(name: String)
+  /// Using a key size less than LowestSecureKeySize for RSA (default: 2048)
+  case InsecureKeySize(size: Int, expected: Int)
+  /// Signature Expiration Parameter is in the past
+  case SignatureExpired(expirationDate: Date)
+  /// could not validate dns requests with DNSSEC
+  case ValidatedWithoutDNSSEC
+
+  // Not accepted as a risk anymore (high risk, not used)
+  //   -> Ignored in body hash validation, error on additional content
+  // case UsingLengthParameter  // only verified to a specific body length
+
+  // Not accepted as a risk anymore (RFC8301) -> Error
+  // case UsingSHA1  // insecure hashing algorithm
 }
 
-// The rfc6376 recommended header fields to sign
-let importantHeaderFields: Set<String> = [
-  "from", "sender", "reply-to", "subject", "date", "message-id", "to", "cc",
-  "mime-version", "content-type", "content-transfer-encoding",
-  "content-id", "content-description", "resent-date", "resent-from",
-  "resent-sender", "resent-to", "resent-cc", "resent-message-id",
-  "in-reply-to", "references", "list-id", "list-help", "list-unsubscribe",
-  "list-subscribe", "list-post", "list-owner", "list-archive",
-]
-
-public struct DKIMSignatureInfo: Equatable {
-  var version: UInt
-  var algorithm: DKIMSignatureAlgorithm
-  var signature: String
-  var bodyHash: String
-  var headerCanonicalization: DKIMCanonicalization  // optional, but default simple
-  var bodyCanonicalization: DKIMCanonicalization  // optional, but default simple
-  var sdid: String
-  var signedHeaderFields: [String]
-  var domainSelector: String
-  var publicKeyQueryMethod: DKIMPublicKeyQueryMethod  // optional, but default dns/txt
-
-  var auid: String?
-  var bodyLength: UInt?
-  var signatureTimestamp: Date?
-  var signatureExpiration: String?
-  var copiedHeaderFields: String?
+public enum DMARCStatus: Equatable {
+  case validDKIMIdentifierAlignment
+  case Error(DMARCError)
 }
 
 public struct DMARCResult: Equatable {
-  var entry: DMARCEntry
-  var validDKIMIdentifierAlignment: Bool
-}
+  public var status: DMARCStatus
+  public var fromSenderDomain: String
+  public var validDKIMDomains: [String]
+  public var validatedWithDNSSEC: Bool
 
-public struct DMARCEntry: Equatable {
-  var dkimAlignmentMode: AlignmentMode  // default relaxed
-  // var SPFAlignmentMode : AlignmentMode // default relaxed
-  //var failureReportingOptions:  FailureReportingOptions // default is AllFail
-  var mailReceiverPolicy: MailReceiverPolicy  // required
-  //var pct : Int // default 100, between 0 and 100
-  //var reportFormats  : [String] // requested report formats
-  //var reportInterval: Int // default 86400
-  //var aggregateFeedbackAddresses: [String] // optional
-  //var failureFeedbackAdresses: [String] // optional
-  var subdomainMailReceiverPolicy: MailReceiverPolicy  // optional
-  var version: DMARCVersion
-}
-
-public enum DMARCError: Error, Equatable {
-  case TagValueListParsingError(message: String)
-  case InvalidEntryInDMARCHeader(message: String)
-  case InvalidDNSEntry(message: String)
-  case InvalidURL(message: String)
-  case UnexpectedError(message: String)
+  public var entry: DMARCEntry?
+  public var foundPolicyDomain: String?
+  public var validDomain: String?
 }
 ```
 
