@@ -22,7 +22,7 @@ final class DKIMVerifierTests: XCTestCase {
 
   func testDMARCEmail() {
     let emailFilePaths = Bundle.module.paths(forResourcesOfType: "eml", inDirectory: nil)
-    let emailFilePath = emailFilePaths.first(where: { $0.contains("multiple_signatures") })!
+    let emailFilePath = emailFilePaths.first(where: { $0.hasSuffix("multiple_signatures.eml") })!
 
     do {
       let email_raw = try String(
