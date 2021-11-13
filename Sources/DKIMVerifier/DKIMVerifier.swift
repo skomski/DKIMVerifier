@@ -80,6 +80,21 @@ public func verifyDKIMSignatures(
 
   result.extractedDomainFromSenderIdnaEncoded = idnaencoded_domain!
 
+  var duplicatedHeaders = Set<String>()
+  for header in headers {
+    let headerKeyLowercased = header.key.lowercased()
+    if !importantHeaderFields.contains(headerKeyLowercased) {
+      continue
+    }
+    if duplicatedHeaders.contains(headerKeyLowercased) {
+      result.status = DKIMStatus.Error(
+        DKIMError.ImportantHeaderMultipleTimesDetected(header: headerKeyLowercased))
+      return result
+    } else {
+      duplicatedHeaders.insert(headerKeyLowercased)
+    }
+  }
+
   guard headers.contains(where: { $0.key.lowercased() == "dkim-signature" }) else {
     result.status = DKIMStatus.Error(DKIMError.NoSignature)
     return result

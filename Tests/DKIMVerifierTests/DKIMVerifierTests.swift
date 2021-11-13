@@ -50,6 +50,28 @@ final class DKIMVerifierTests: XCTestCase {
 
   }
 
+  func testDuplicatedImportantHeaderEmail() {
+    let emailFilePaths = Bundle.module.paths(forResourcesOfType: "eml", inDirectory: nil)
+    let emailFilePath = emailFilePaths.first(where: {
+      $0.hasSuffix("duplicate_important_headers.eml")
+    })!
+
+    do {
+      let email_raw = try String(
+        contentsOf: URL(fileURLWithPath: emailFilePath), encoding: .utf8)
+
+      let result = DKIMVerifier.verifyDKIMSignatures(
+        dnsLoopupTxtFunction: GetDnsKey, email_raw: email_raw, verifyDMARC: false)
+
+      XCTAssertEqual(
+        result.status,
+        DKIMStatus.Error(DKIMError.ImportantHeaderMultipleTimesDetected(header: "subject")))
+      XCTAssertEqual(result.signatures.count, 0, emailFilePath)
+    } catch {
+      XCTFail("email \(emailFilePath) should not throw an error: \(error)")
+    }
+  }
+
   func testMultipleSignaturesWithFail() {
     let emailFilePaths = Bundle.module.paths(forResourcesOfType: "eml", inDirectory: nil)
     let emailFilePath = emailFilePaths.first(where: { $0.hasSuffix("multiple_signatures_fail.eml") }
@@ -133,6 +155,7 @@ final class DKIMVerifierTests: XCTestCase {
 
     // skip specific email - extern test: testMultipleSignaturesWithFail
     emailFilePaths = emailFilePaths.filter({ !$0.hasSuffix("multiple_signatures_fail.eml") })
+    emailFilePaths = emailFilePaths.filter({ !$0.hasSuffix("duplicate_important_headers.eml") })
 
     var total_emails = 0
     var valid_emails = 0

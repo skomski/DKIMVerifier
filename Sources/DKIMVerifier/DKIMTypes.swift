@@ -7,6 +7,9 @@ public enum DKIMError: Error, Equatable {
   case RFC5322MessageParsingError(message: String)
   /// rfc5322 email headers failed to validate
   case InvalidRFC5322Headers(message: String)
+  /// An important header is present several times, but should only be present once
+  /// See: importantHeaderFields.
+  case ImportantHeaderMultipleTimesDetected(header: String)
   /// No DKIM signature found in the email headers
   case NoSignature
   /// No valid or insecure signatures present in the email
@@ -187,9 +190,11 @@ public struct DKIMSignatureResult: Equatable {
 public struct DKIMResult: Equatable {
   public var status: DKIMStatus
   public var signatures: [DKIMSignatureResult]
+
   public var emailFromSender: String?
   public var extractedDomainFromSender: String?
   public var extractedDomainFromSenderIdnaEncoded: String?
+
   public var dmarcResult: DMARCResult?
 
   init() {
