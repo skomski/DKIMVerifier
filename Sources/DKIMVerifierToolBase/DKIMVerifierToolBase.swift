@@ -57,30 +57,38 @@ func printVerboseInfo(result: DKIMResult) {
   for signature in result.signatures {
     let status: String
     var info: String = "no info"
+    var dnsInfo: String = "no dns info"
     if signature.info != nil {
       let algorithm = signature.info!.algorithm
       let keysize: String
       if signature.info!.rsaKeySizeInBits != nil {
         keysize = String(signature.info!.rsaKeySizeInBits!)
       } else {
-        keysize = "unsupported"
+        keysize = "(key size missing)"
       }
       info =
-        "\(algorithm) \(keysize) sdid=\(signature.info!.sdid) auid=\(signature.info!.auid ?? "") dnssec=\(signature.validatedWithDNSSEC)"
+        "\(algorithm) \(keysize) sdid=\(signature.info!.sdid) auid=\(signature.info!.auid) dnssec=\(signature.validatedWithDNSSEC)"
+    }
+    if signature.dnsInfo != nil {
+      dnsInfo =
+        "dns: version=\(signature.dnsInfo?.version ?? "nil") flags=\(String(describing: signature.dnsInfo!.flags)) notes=\(signature.dnsInfo?.notes ?? "nil") keyType=\(String(describing: signature.dnsInfo?.keyType ?? nil)) serviceType=\(signature.dnsInfo?.serviceType ?? [])"
     }
     switch signature.status {
     case DKIMSignatureStatus.Valid:
       status = "Valid"
       print("  \(status) (\(info))")
+      print("  (\(dnsInfo))")
     case DKIMSignatureStatus.Insecure(let risks):
       status = "Insecure"
       print("  \(status) (\(info))")
+      print("  (\(dnsInfo))")
       for risk in risks {
         print("    \(String(describing: risk))")
       }
     case DKIMSignatureStatus.Error(let error):
       status = "\(error)"
       print("  Error\n    \(status) (\(info))")
+      print("  (\(dnsInfo))")
     }
   }
 }
@@ -136,12 +144,12 @@ public func baseRun(options: DKIMVerifierToolBaseArguments) {
       print("  \(error)")
     }
 
-    if options.verifyDMARC {
-      printDMARCInfo(result: result)
-    }
-
     if options.verbose {
       printVerboseInfo(result: result)
+    }
+
+    if options.verifyDMARC {
+      printDMARCInfo(result: result)
     }
   } catch {
     print("failure: \(error)")

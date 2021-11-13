@@ -1,0 +1,29 @@
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/simple; d=custom.com;
+ i=@custom.com; q=dns/txt; s=ed; t=1628083325; h=from : to : subject :
+ date : message-id : from;
+ bh=4bLNXImK9drULnmePzZNEBleUanJCX5PIsDIFoH4KTQ=;
+ b=gFrdBU/XKz5pXjripVd+bk4GdRDmgtjL+oP7TUQTFZd2l7DIkMGCYrOZH7NtFCylLe/7o
+ JkHUOdduDEJgWCMDg==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=custom.com;
+ i=@custom.com; q=dns/txt; s=test; t=1628083087; h=from : to : subject
+ : date : message-id : from;
+ bh=4bLNXImK9drULnmePzZNEBleUanJCX5PIsDIFoH4KTQ=;
+ b=fail
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=auidsub.com;
+ i=@hubert.auidsub.com; q=dns/txt; s=test; t=1628083087; h=from : to : subject
+ : date : message-id : from;
+ bh=4bLNXImK9drULnmePzZNEBleUanJCX5PIsDIFoH4KTQ=;
+ b=ATcwIiAU3N+obom253e44Dzw+/NO0mVV8ugEp1BImYi+Up9yhLtimU3hrk3PJwR8hkl+0
+ xAakfxgVkGqT3uXj8gUhfULMNnEx/sXtpn1hV0iR10kf6WGvW1ghxjH1AD/AzBeK2DwULoJ
+ 8lYsnilupT2vR4YP1vsSgBczZL3p5l8=
+From: Joe SixPack <joe@custom.com>
+To: Suzie Q <suzie@shopping.example.net>
+Subject: Is dinner ready?
+Date: Fri, 11 Jul 2003 21:00:37 -0700 (PDT)
+Message-ID: <20030712040037.46341.5F8J@football.example.com>
+
+Hi.
+
+We lost the game.  Are you hungry yet?
+
+Joe.

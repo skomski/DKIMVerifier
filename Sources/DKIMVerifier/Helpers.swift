@@ -64,6 +64,12 @@ internal func parseTagValueList(raw_list: String) throws -> TagValueDictionary {
   return tags
 }
 
+internal func parseColonSeperatedList(rawList: String) -> [String]? {
+  return try? rawList.regexSplit(#"\s*:\s*"#).map({
+    $0.lowercased()
+  })
+}
+
 // separates header and body for a RFC5322Message and parses the headers into a dictionary
 internal func parseRFC822Message(message: String) throws -> (OrderedKeyValueArray, String) {
   var headers: OrderedKeyValueArray = []

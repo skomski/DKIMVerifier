@@ -241,6 +241,10 @@ func verifyDKIMSignature(
   let dns_tag_value_list: TagValueDictionary
   do {
     dns_tag_value_list = try parseTagValueList(raw_list: record)
+    risks = risks.union(
+      try validateDKIMSignatureDNSFields(
+        dkimResult: &result, dnsFields: dns_tag_value_list,
+        extractedDomainFromSenderIdnaEncoded: extractedDomainFromSenderIdnaEncoded))
   } catch let error as DKIMError
     where error == .TagValueListParsingError(message: "no value for key: p")
   {
@@ -254,30 +258,8 @@ func verifyDKIMSignature(
       DKIMError.UnexpectedError(message: error.localizedDescription))
     return result
   }
-  guard let public_key_base64 = dns_tag_value_list[DNSEntryTagNames.PublicKey.rawValue] else {
-    result.status = DKIMSignatureStatus.Error(
-      DKIMError.InvalidDNSEntry(message: "no public key dns entry (p)"))
-    return result
-  }
 
-  // print(Optional(public_key_base64))
-
-  //    guard let dns_encryption_type = dns_tag_value_list[DNSEntryTagNames.KeyType.rawValue] else {
-  //      throw DKIMError.invalidDNSEntry(message: "no k entry")
-  //    }
-  //
-  //    switch encryption_method {
-  //    case DKIMEncryption.Ed25519_SHA256:
-  //      guard dns_encryption_type == "ed25519" else {
-  //        throw DKIMError.invalidDNSEntry(message: "email encryption different from dns encryption")
-  //      }
-  //    case DKIMEncryption.RSA_SHA256:
-  //      guard dns_encryption_type == "rsa" else {
-  //        throw DKIMError.invalidDNSEntry(message: "email encryption different from dns encryption")
-  //      }
-  //    }
-
-  guard let public_key_data = Data(base64Encoded: public_key_base64)
+  guard let public_key_data = Data(base64Encoded: result.dnsInfo!.publicKey)
   else {
     result.status = DKIMSignatureStatus.Error(
       DKIMError.InvalidDNSEntry(message: "invalid base64 encoding for public key"))

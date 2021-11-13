@@ -50,8 +50,89 @@ final class DKIMVerifierTests: XCTestCase {
 
   }
 
-  func testCompleteEmails() {
+  func testMultipleSignaturesWithFail() {
     let emailFilePaths = Bundle.module.paths(forResourcesOfType: "eml", inDirectory: nil)
+    let emailFilePath = emailFilePaths.first(where: { $0.hasSuffix("multiple_signatures_fail.eml") }
+    )!
+
+    do {
+      let email_raw = try String(
+        contentsOf: URL(fileURLWithPath: emailFilePath), encoding: .utf8)
+
+      func LocalGetDnsKey(domain: String) throws -> DNSResult {
+        if domain == "test._domainkey.auidsub.com" {
+          return DNSResult.init(
+            result: "k=rsa; t=s; v=DKIM1; p=yi50DjK5O9pqbFpNHklsv9lqaS0ArSYu02qp1S0DW1Y=",
+            validatedWithDNSSEC: false)
+        }
+
+        return try GetDnsKey(domain: domain)
+      }
+
+      let result = DKIMVerifier.verifyDKIMSignatures(
+        dnsLoopupTxtFunction: LocalGetDnsKey, email_raw: email_raw, verifyDMARC: false)
+
+      XCTAssertEqual(result.status, DKIMVerifier.DKIMStatus.Valid)
+
+      XCTAssertEqual(
+        result.signatures[0].status,
+        DKIMVerifier.DKIMSignatureResult.init(
+          status: DKIMVerifier.DKIMSignatureStatus.Valid
+        ).status, emailFilePath)
+
+      XCTAssertEqual(
+        result.signatures[1].status,
+        DKIMVerifier.DKIMSignatureResult.init(
+          status: DKIMVerifier.DKIMSignatureStatus.Error(DKIMError.SignatureDoesNotMatch)
+        ).status, emailFilePath)
+
+      XCTAssertEqual(
+        result.signatures[2].status,
+        DKIMVerifier.DKIMSignatureResult.init(
+          status: DKIMVerifier.DKIMSignatureStatus.Error(
+            DKIMError.AUIDDomainPartMustBeEqualToSDIDValidationError)
+        ).status, emailFilePath)
+    } catch {
+      XCTFail("email \(emailFilePath) should not throw an error: \(error)")
+    }
+  }
+
+  func testDKIMTestMode() {
+    let emailFilePaths = Bundle.module.paths(forResourcesOfType: "eml", inDirectory: nil)
+    let emailFilePath = emailFilePaths.first(where: { $0.hasSuffix("multiple_signatures.eml") })!
+
+    do {
+      let email_raw = try String(
+        contentsOf: URL(fileURLWithPath: emailFilePath), encoding: .utf8)
+
+      func LocalGetDnsKey(domain: String) throws -> DNSResult {
+        return DNSResult.init(
+          result: "k=rsa; t=y; v=DKIM1; p=yi50DjK5O9pqbFpNHklsv9lqaS0ArSYu02qp1S0DW1Y=",
+          validatedWithDNSSEC: false)
+      }
+
+      let result = DKIMVerifier.verifyDKIMSignatures(
+        dnsLoopupTxtFunction: LocalGetDnsKey, email_raw: email_raw, verifyDMARC: false)
+      var expected_result = DKIMVerifier.DKIMSignatureResult.init(
+        status: DKIMVerifier.DKIMSignatureStatus.Error(DKIMError.DKIMTestMode))
+      XCTAssertEqual(result.signatures[1].status, expected_result.status, emailFilePath)
+      expected_result = DKIMVerifier.DKIMSignatureResult.init(
+        status: DKIMVerifier.DKIMSignatureStatus.Error(
+          DKIMError.InvalidDNSEntry(
+            message:
+              "dns entry keyType rsa is not expected from DKIMSignature algorithm ed25519-sha256 (h)"
+          )))
+      XCTAssertEqual(result.signatures[0].status, expected_result.status, emailFilePath)
+    } catch {
+      XCTFail("email \(emailFilePath) should not throw an error: \(error)")
+    }
+  }
+
+  func testCompleteEmails() {
+    var emailFilePaths = Bundle.module.paths(forResourcesOfType: "eml", inDirectory: nil)
+
+    // skip specific email - extern test: testMultipleSignaturesWithFail
+    emailFilePaths = emailFilePaths.filter({ !$0.hasSuffix("multiple_signatures_fail.eml") })
 
     var total_emails = 0
     var valid_emails = 0

@@ -50,9 +50,9 @@ func validateDKIMFields(
 
   let dkimSignatureAlgorithm: DKIMSignatureAlgorithm
   let dkimSignatureAlgorithmString: String? = dkimFields[DKIMTagNames.Algorithm.rawValue]
-  if dkimSignatureAlgorithmString == "rsa-sha256" {
+  if dkimSignatureAlgorithmString == DKIMSignatureAlgorithm.RSA_SHA256.rawValue {
     dkimSignatureAlgorithm = DKIMSignatureAlgorithm.RSA_SHA256
-  } else if dkimSignatureAlgorithmString == "ed25519-sha256" {
+  } else if dkimSignatureAlgorithmString == DKIMSignatureAlgorithm.Ed25519_SHA256.rawValue {
     dkimSignatureAlgorithm = DKIMSignatureAlgorithm.Ed25519_SHA256
   } else if dkimSignatureAlgorithmString == "rsa-sha1" {
     throw DKIMError.InvalidEntryInDKIMHeader(
@@ -99,17 +99,9 @@ func validateDKIMFields(
       DKIMError.InvalidEntryInDKIMHeader(message: "missing required signed header field (h)")
   }
 
-  let signedHeaderFields: [String]
-  do {
-    signedHeaderFields =
-      try signedHeaderFieldsString
-      .regexSplit(#"\s*:\s*"#).map({
-        $0.lowercased()
-      })
-  } catch let error as DKIMError {
-    throw error
-  } catch {
-    throw DKIMError.UnexpectedError(message: error.localizedDescription)
+  guard let signedHeaderFields = parseColonSeperatedList(rawList: signedHeaderFieldsString) else {
+    throw
+      DKIMError.InvalidEntryInDKIMHeader(message: "could not parse signed header field (h)")
   }
 
   guard signedHeaderFields.contains("from") else {
@@ -156,20 +148,21 @@ func validateDKIMFields(
     }
   }
 
+  let finalAuid: String
+  if dkimFields[DKIMTagNames.AUID.rawValue] != nil {
+    let auid = dkimFields[DKIMTagNames.AUID.rawValue]!
+    finalAuid = auid
+  } else {
+    finalAuid = "@\(sdid)"
+  }
+
   var info: DKIMSignatureInfo = DKIMSignatureInfo.init(
     version: dkimVersion, algorithm: dkimSignatureAlgorithm, signature: dkimSignatureClean,
     bodyHash: bodyHash, headerCanonicalization: canonicalizationHeaderMethod,
     bodyCanonicalization: canonicalizationBodyMethod, sdid: sdidIdnaEncoded,
     signedHeaderFields: signedHeaderFields, domainSelector: domainSelectorString,
-    publicKeyQueryMethod: dkimPublicQueryMethod, auid: nil,
+    publicKeyQueryMethod: dkimPublicQueryMethod, auid: finalAuid,
     signatureTimestamp: nil, signatureExpiration: nil)
-
-  if dkimFields[DKIMTagNames.AUID.rawValue] != nil {
-    let auid = dkimFields[DKIMTagNames.AUID.rawValue]!
-    info.auid = auid
-  } else {
-    info.auid = "@\(info.sdid)"
-  }
 
   if dkimFields[DKIMTagNames.SignatureTimestamp.rawValue] != nil {
     guard let signatureTimestampNumber = UInt(dkimFields[DKIMTagNames.SignatureTimestamp.rawValue]!)
@@ -199,6 +192,127 @@ func validateDKIMFields(
   }
 
   dkim_result.info = info
+
+  return risks
+}
+
+func validateDKIMSignatureDNSFields(
+  dkimResult: inout DKIMSignatureResult,
+  dnsFields: TagValueDictionary,
+  extractedDomainFromSenderIdnaEncoded: String
+) throws -> Set<DKIMRisks> {
+  let risks: Set<DKIMRisks> = Set<DKIMRisks>.init()
+
+  guard let publicKey = dnsFields[DNSEntryTagNames.PublicKey.rawValue] else {
+    throw DKIMError.InvalidDNSEntry(message: "required: no public key dns entry (p)")
+  }
+
+  dkimResult.dnsInfo = DKIMSignatureDNSInfo.init(
+    publicKey: publicKey, version: nil, acceptableHashAlgorithms: nil, keyType: nil, notes: nil,
+    serviceType: nil, flags: nil)
+
+  if dnsFields[DNSEntryTagNames.Version.rawValue] != nil {
+    let version = dnsFields[DNSEntryTagNames.Version.rawValue]!
+    guard version == "DKIM1" else {
+      throw DKIMError.InvalidDNSEntry(
+        message: "invalid version in dns entry DKIM1 != \"\(version)\" (v)")
+    }
+  }
+
+  if dnsFields[DNSEntryTagNames.AcceptableHashAlgorithms.rawValue] != nil {
+    let acceptableHashAlgorithms = dnsFields[DNSEntryTagNames.AcceptableHashAlgorithms.rawValue]!
+    guard let parsedList = parseColonSeperatedList(rawList: acceptableHashAlgorithms) else {
+      throw DKIMError.InvalidDNSEntry(
+        message: "could not parse dns entry acceptableHashAlgorithms (h)")
+    }
+    switch dkimResult.info!.algorithm {
+    case DKIMSignatureAlgorithm.Ed25519_SHA256, DKIMSignatureAlgorithm.RSA_SHA256:
+      guard parsedList.contains(DKIMHashAlgorithm.SHA256.rawValue) else {
+        throw DKIMError.InvalidDNSEntry(
+          message:
+            "dns entry acceptableHashAlgorithms does not contain \(DKIMHashAlgorithm.SHA256.rawValue) (h)"
+        )
+      }
+    }
+  }
+
+  if dnsFields[DNSEntryTagNames.KeyType.rawValue] != nil {
+    let keyType = dnsFields[DNSEntryTagNames.KeyType.rawValue]!
+    let error_message =
+      "dns entry keyType \(keyType) is not expected from DKIMSignature algorithm \(dkimResult.info!.algorithm.rawValue) (h)"
+    switch keyType {
+    case "rsa":
+      guard dkimResult.info?.algorithm == DKIMSignatureAlgorithm.RSA_SHA256 else {
+        throw DKIMError.InvalidDNSEntry(message: error_message)
+      }
+      dkimResult.dnsInfo!.keyType = DKIMKeyType.RSA
+    case "ed25519":
+      guard dkimResult.info?.algorithm == DKIMSignatureAlgorithm.Ed25519_SHA256 else {
+        throw DKIMError.InvalidDNSEntry(message: error_message)
+      }
+      dkimResult.dnsInfo!.keyType = DKIMKeyType.Ed25519
+    default:
+      throw DKIMError.InvalidDNSEntry(message: error_message)
+    }
+  }
+
+  if dnsFields[DNSEntryTagNames.Notes.rawValue] != nil {
+    let notes = dnsFields[DNSEntryTagNames.Notes.rawValue]!
+    dkimResult.dnsInfo!.notes = notes
+  }
+
+  if dnsFields[DNSEntryTagNames.ServiceType.rawValue] != nil {
+    let serviceType = dnsFields[DNSEntryTagNames.ServiceType.rawValue]!
+    guard let parsedList = parseColonSeperatedList(rawList: serviceType) else {
+      throw DKIMError.InvalidDNSEntry(message: "could not parse dns entry service type (s)")
+    }
+    var serviceTypeList: [DKIMServiceType] = []
+    for serviceString in parsedList {
+      switch serviceString {
+      case DKIMServiceType.Email.rawValue:
+        serviceTypeList.append(DKIMServiceType.Email)
+      default:
+        throw DKIMError.InvalidDNSEntry(message: "unrecognized service type in dns entry (s)")
+      }
+    }
+    dkimResult.dnsInfo!.serviceType = serviceTypeList
+  } else {
+    dkimResult.dnsInfo!.serviceType = [DKIMServiceType.All]
+  }
+
+  if dnsFields[DNSEntryTagNames.Flags.rawValue] != nil {
+    let unparsedList = dnsFields[DNSEntryTagNames.Flags.rawValue]!
+    guard let parsedList = parseColonSeperatedList(rawList: unparsedList) else {
+      throw DKIMError.InvalidDNSEntry(message: "could not parse dns entry flags (t)")
+    }
+
+    var flags: [DKIMSignatureDNSFlag] = []
+    for flagString in parsedList {
+      switch flagString {
+      case DKIMSignatureDNSFlag.TestMode.rawValue:
+        flags.append(DKIMSignatureDNSFlag.TestMode)
+      case DKIMSignatureDNSFlag.AUIDDomainPartMustBeEqualToSDID.rawValue:
+        flags.append(DKIMSignatureDNSFlag.AUIDDomainPartMustBeEqualToSDID)
+      default:
+        throw DKIMError.InvalidDNSEntry(message: "unrecognized flag in dns entry (t)")
+      }
+    }
+    dkimResult.dnsInfo!.flags = flags
+
+    if dkimResult.dnsInfo!.flags!.contains(DKIMSignatureDNSFlag.TestMode) {
+      throw DKIMError.DKIMTestMode
+    }
+
+    if dkimResult.dnsInfo!.flags!.contains(DKIMSignatureDNSFlag.AUIDDomainPartMustBeEqualToSDID) {
+      let getDomainAuid = dkimResult.info!.auid.split(separator: "@")
+
+      if (getDomainAuid.count == 2 && dkimResult.info!.sdid != getDomainAuid[1].idnaEncoded!)
+        || (getDomainAuid.count == 1 && dkimResult.info!.sdid != getDomainAuid[0].idnaEncoded!)
+      {
+        throw DKIMError.AUIDDomainPartMustBeEqualToSDIDValidationError
+      }
+    }
+  }
 
   return risks
 }

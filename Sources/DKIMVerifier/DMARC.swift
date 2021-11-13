@@ -152,8 +152,6 @@ internal func queryDMARC(
     throw DMARCError.InvalidDNSEntry(message: "DNS Entry is empty for domain: \(dmarcDomain)")
   }
 
-  print(txtEntry)
-
   let dmarcFields = try parseTagValueList(raw_list: txtEntry)
 
   guard let dmarcVersionString: String = dmarcFields[DMARCTagNames.Version.rawValue] else {
