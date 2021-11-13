@@ -4,6 +4,8 @@ import DKIMVerifierDNS_dnssd
 import DKIMVerifierToolBase
 import Foundation
 
+#if canImport(dnssd)
+
 struct DKIMVerifierTool_dnssd: ParsableCommand {
   @OptionGroup var options: DKIMVerifierToolBase.DKIMVerifierToolBaseArguments
 
@@ -14,3 +16,5 @@ struct DKIMVerifierTool_dnssd: ParsableCommand {
 }
 
 DKIMVerifierTool_dnssd.main()
+
+#endif

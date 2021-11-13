@@ -1,5 +1,8 @@
 import DKIMVerifier
 import Foundation
+
+#if canImport(dnssd)
+
 import dnssd
 
 struct InternalDNSResult {
@@ -64,3 +67,5 @@ public func queryDNSTXTEntry(domainName: String) throws -> DNSResult {
   }
   return DNSResult.init(result: result.entry, validatedWithDNSSEC: result.validatedWithDNSSEC)
 }
+
+#endif
