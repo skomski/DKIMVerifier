@@ -15,10 +15,16 @@ jobs:
         with:
           swift-version: ${{ matrix.swift }}
       - uses: actions/checkout@v2
+      - name: Install pkg-config via brew
+        run: brew install pkg-config
       - name: Install openssl via brew
         run: brew install openssl
       - name: Install unbound via brew
         run: brew install unbound
+      - name: show pkg-config search path
+        run: pkg-config --variable pc_path pkg-config
+      - name: show include path for libunbound
+        run: pkg-config --cflags libunbound
       - name: Build
         run: swift build
       - name: Run tests
