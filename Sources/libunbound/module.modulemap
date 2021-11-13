@@ -1,5 +1,5 @@
 module libunbound [system] {
     header "shim.h"
-    link "libunbound"
+    link "unbound"
     export *
 }
