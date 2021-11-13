@@ -9,8 +9,11 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
-        swift: ["5.4"]
+        swift: ["5"]
     runs-on: ${{ matrix.os }}
+    env:
+      PKG_CONFIG_PATH: "/usr/local/opt/openssl@3/lib/pkgconfig"
+      LIBRARY_PATH: "/home/linuxbrew/.linuxbrew/Cellar/unbound/1.13.2_1/lib/"
     steps:
       - uses: fwal/setup-swift@v1
         with:
@@ -25,8 +28,8 @@ jobs:
       - name: show pkg-config search path
         run: pkg-config --variable pc_path pkg-config
       - name: show include path for libunbound
-        run: PKG_CONFIG_PATH="/usr/local/opt/openssl@3/lib/pkgconfig" LIBRARY_PATH="/home/linuxbrew/.linuxbrew/Cellar/unbound/1.13.2_1/lib/"  pkg-config --cflags libunbound
+        run: pkg-config --cflags libunbound && pkg-config --libs libunbound  
       - name: Build
-        run: PKG_CONFIG_PATH="/usr/local/opt/openssl@3/lib/pkgconfig" LIBRARY_PATH="/home/linuxbrew/.linuxbrew/Cellar/unbound/1.13.2_1/lib/" swift build
+        run: swift build
       - name: Run tests
-        run: PKG_CONFIG_PATH="/usr/local/opt/openssl@3/lib/pkgconfig" LIBRARY_PATH="/home/linuxbrew/.linuxbrew/Cellar/unbound/1.13.2_1/lib/" swift test
+        run: swift test
