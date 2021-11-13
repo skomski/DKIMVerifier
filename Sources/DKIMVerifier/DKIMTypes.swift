@@ -30,7 +30,7 @@ public enum DKIMError: Error, Equatable {
   /// An empty value for the public key entry ('p') means that this public key has been revoked.
   case PublicKeyRevoked
   /// Publiy key format incorrect.For example keySize lower than 1024 for RSA
-  case PublicKeyWithIncorrectParameters
+  case PublicKeyWithIncorrectParameters(message: String)
   /// DNS flags entry with the value 'y' specifies DKIMTestMode. Should not handled different than unsigned mail
   case DKIMTestMode
   /// DNS flags entry with the value 's' present.

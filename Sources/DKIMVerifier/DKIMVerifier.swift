@@ -332,9 +332,6 @@ func verifyDKIMSignature(
   } catch let error as DKIMError {
     result.status = DKIMSignatureStatus.Error(error)
     return result
-  } catch CryptoKitError.incorrectParameterSize {
-    result.status = DKIMSignatureStatus.Error(DKIMError.PublicKeyWithIncorrectParameters)
-    return result
   } catch {
     result.status = DKIMSignatureStatus.Error(
       DKIMError.UnexpectedError(message: "CryptoKit: \(error)"))

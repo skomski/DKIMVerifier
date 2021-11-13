@@ -5,7 +5,13 @@ import _CryptoExtras
 func checkRSA_SHA256_Signature(encodedKey: Data, signature: Data, data: Data) throws
   -> (Int, Bool)
 {
-  let key = try _RSA.Signing.PublicKey.init(derRepresentation: encodedKey)
+  let key: _RSA.Signing.PublicKey
+  do {
+    key = try _RSA.Signing.PublicKey.init(derRepresentation: encodedKey)
+  } catch {
+    throw DKIMError.PublicKeyWithIncorrectParameters(
+      message: "_RSA.Signing.PublicKey.init -> \(error)")
+  }
   let signature = _RSA.Signing.RSASignature.init(rawRepresentation: signature)
 
   return (
@@ -19,6 +25,12 @@ func checkRSA_SHA256_Signature(encodedKey: Data, signature: Data, data: Data) th
 func checkEd25519_SHA256_Signature(encodedKey: Data, signature: Data, data: Data) throws
   -> Bool
 {
-  let key = try Crypto.Curve25519.Signing.PublicKey.init(rawRepresentation: encodedKey)
+  let key: Crypto.Curve25519.Signing.PublicKey
+  do {
+    key = try Crypto.Curve25519.Signing.PublicKey.init(rawRepresentation: encodedKey)
+  } catch {
+    throw DKIMError.PublicKeyWithIncorrectParameters(
+      message: "Crypto.Curve25519.Signing.PublicKey.init -> \(error)")
+  }
   return key.isValidSignature(signature, for: Data(Crypto.SHA256.hash(data: data)))
 }

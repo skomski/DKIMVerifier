@@ -212,7 +212,8 @@ final class DKIMVerifierTests: XCTestCase {
           case _ where emailFilePath.contains("insecure_key_size"):
             expected_result = DKIMVerifier.DKIMSignatureResult.init(
               status: DKIMVerifier.DKIMSignatureStatus.Error(
-                DKIMVerifier.DKIMError.PublicKeyWithIncorrectParameters))
+                DKIMVerifier.DKIMError.PublicKeyWithIncorrectParameters(
+                  message: "_RSA.Signing.PublicKey.init -> incorrectParameterSize")))
             error_emails += 1
             XCTAssertEqual(result.status, DKIMStatus.Error(DKIMError.OnlyInvalidSignatures))
           case _ where emailFilePath.hasSuffix("revoked.eml"):
