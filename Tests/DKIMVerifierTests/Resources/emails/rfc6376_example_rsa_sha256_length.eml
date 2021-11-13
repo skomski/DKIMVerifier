@@ -1,12 +1,15 @@
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
  d=football.example.com; i=@football.example.com; l=55; q=dns/txt;
- s=sha256_2048; t=1636565887; h=from : to : subject : date : message-id
- : from; bh=4bLNXImK9drULnmePzZNEBleUanJCX5PIsDIFoH4KTQ=;
- b=PDm1f6/VtZrnrtN9NFHxWcyPX9gZQKfZ7hd1nTnS5IMnq4kNnJicZlnUSVRwga67cKl33
- G7CQf738FG6IMjw8Q9AX7Otp5747Fa4JIo4QnBn83Wqr//UCvn8jbMeaqbPCzFTQlhPAL86
- JuXEpEDWGcSjx2KwqJHXPIq4krSfRCFrP9Edq+eEvOm9OjQtqOAMqHwSNs+wb4n6GDMvtTu
- n6ubXIhnlZBRDJCtUgJMiD43bI9f/V6w1cSS4Zt4eo1E+Y+aF/giA0pMfLnICKcZ5X4G/P3
- PpaIRMItn/8T3Mxav0x1pR2sukuNkOIgPXY3qfL+QQ2w4QoyXHpu3X/zjp+Q==
+ s=rsa3096; t=1636839548; h=from : to : subject : date : message-id :
+ from; bh=4bLNXImK9drULnmePzZNEBleUanJCX5PIsDIFoH4KTQ=;
+ b=DUGXJVvmNyERxMVBg1TtWU+WVrQ307Uf2wrFfZp2houvfpA8E6c/SUX3iQpU1HI3bssTJ
+ KXZhNoqg/PHXKysQJXSKOnXr/7L+yQf5pO/iSeItcm/EvPJPbQcbTH03I81Qse/2ZmcpR9o
+ MlH9hjBgmuVt0XYWeY3Gu+i3Ei9pBGslxzL0sWXBYDI995rIc4X6E10QSOvcHB990OhWXeL
+ l6GDdF980PN7zl8Shn5/izTFxf3vMkJmZ9Nc0ZGNTUMzXp0ZbEqfPgzRIO0P+NuJQUV5ew/
+ y7FRkLJCKn0nOUFUYTNwiDH85SPG/at7P6/vIwjir1cVHGd9zBJkSes1yvA5Pnxn/bCrS7H
+ EWQiXQIDjLObesWCMKx5RtcZhxLUSNH1SrXJvGPl0dktfOBiyZZSZVkKRdQyHriM9kLrPAo
+ igQtta1uEGPMNdQYTClibXqiXrLyD4gHyvdH0ayJC9uKYSkBLrqXP2E3xirVil0xIHlDBPm
+ 305QJupyzIGt8+nqTgApD
 From: Joe SixPack <joe@football.example.com>
 To: Suzie Q <suzie@shopping.example.net>
 Subject: Is dinner ready?

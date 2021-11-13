@@ -1,12 +1,15 @@
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=brätzelein.com;
- i=@brätzelein.com; q=dns/txt; s=shä256_2048; x=1636742550; h=from :
- to : subject : date : from;
+ i=@brätzelein.com; q=dns/txt; s=rsä3096; t=1636839253; h=from : to :
+ subject : date : from;
  bh=vJ+60ZHtzurQdEMhV+atxq2NW3wC+5GWLrZFx/ffABE=;
- b=HIOjSmpQp4XAG2rdxZnqWQu2p8TxtNYjqe5E50VZeuuxbEWn/6I2JYiXKXB/j0YCGzqhR
- EBIOEg0ikSqQ2pkfB5dOxsC8RcddIGtbtHPtnbswTEUghubzDHNHZXt1TRiqVPqwOc3TnSu
- SVgryx4MgCZv5P49Y/khZ+GpbZ8dia8ofySiQcJxS9u241xsp6W3ereKO4njKL8J96V3bxq
- PHzw1dZoWRqsSl1FSUck48zgx8qo/jz4T0lUJIzb/Uprf0qKot1eWSEsWURpU4JIQi8ysVD
- Q987dVeUTO+xM8SOm/siX63jLROLfBvaKL0Gsx/i2wGnUUgYbZcu7AerJM/A==
+ b=x15nvRJ1FmzJEVw19TFVF+FZQeYO7a0Wef73vAkjK7Eh+8PoK4bduSyS/mDIDlHJXsA/7
+ d4f/YREz0Vr9xA7uL/l/mYwLlIWublvffNM1VLIrVlyFRV6UtOSfufoi0bVO7F/Oo9yeSNN
+ x8ZJMGdJYms2XZ1QZ8ESEfA7o3aCTgxKcElfxGaESZgP9Dj4IGfo5o3JBEsx0OVx4c2tPlt
+ kdyeRKtVi6vZiIwlDys6qn8wmc2BETyZAf+F6fQ2xrISXy7qi3n/STyCcUiPu0jhfxd7glx
+ +C18a45utnraPoYxVJJKqton1zgz2g/3TqlNVRetP2KAz3XruvNZ5OaZprvdjycNnt+oNDW
+ gYK3XwkozSBfHzd2VaA8Rb0wlVBogNnq2CR/a/S8QiMwaNTs4YfwiK4f77A5DZpYT2MOkLs
+ AfKZe6lRORObUt4tfza+THAjLDOZU1fxnFnOyhOi15YVSITOrh8JnEWsj6IM82GB4RST2GA
+ 6tJuRXzRCbCypCPEVD1rz
 From: <jäe@öüä.brätzelein.com>
 To: Suzie Q <suzie@shopping.exämple.net>
 Subject: Is dinner räedy?

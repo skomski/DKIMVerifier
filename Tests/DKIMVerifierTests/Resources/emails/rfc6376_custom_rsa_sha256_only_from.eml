@@ -1,9 +1,14 @@
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=custom.com;
- i=@custom.com; q=dns/txt; s=test; t=1627567579; h=from;
+ i=@custom.com; q=dns/txt; s=rsa3096; t=1636841364; h=from;
  bh=4bLNXImK9drULnmePzZNEBleUanJCX5PIsDIFoH4KTQ=;
- b=sFXxi211B4CUhPxsFALajWaZZj+0nzuMk+bb6shTVmX+J4fdW8cxzPUGUkUu+5lfNFFN3
- fh5/xGDWyj2ZcELGOZqtVdXNC0DsrJ8NphAcOdcIqNwJzC7irlL1crr4VLoUshb6BNVeF8Y
- YAVvqh83Cbb2tQ/vPHnaPBzlGOHewK4=
+ b=KCnCgCVH0NGVXIfX939DLWNBOBxou0+xRrywnQWovcV13QoQT8cDYU2KDD8a6i4SvpanQ
+ lghV93H+bzkXdwuiomLJrObMhf8ruPD5gh9fvTwWVBiaAGo1v4e83gkAq7MGOtChLZIDRJF
+ 9EDRwsgKbIQPzdDLInp9OvdWf5rLOe53nZk3HwsMvPtz3B39VmzoIGTWDqVX82Mo5bc2vhy
+ htQS6VuaR8+H9CFn0IVhvq899pDu6iNILxeKjeXw8/My944b16mtBLBGyFzIsf6A93pLuco
+ hhRXXxpvObSDNPh9mH4aUKTZIW1ok05dwgHz0dwJke0rfd+4ggZtaOELO119+eIyfeZF3di
+ ao4sQg+1yg8CKTFxYZz7lCXUdxB/V2F/Fci+tuzRJakQCXpg5T7gxv01LvvgKkmfYIzCXIT
+ vYUpjwvzdaLdXuAHd+/32tXKG74+0NMz/F1FYWGNcOfXLQINitaSXT3M5fdKv9P1tdgcoJr
+ 2yIqNnYhRLp1uYASP8F8g
 From: Joe SixPack <joe@football.example.com>
 To: Suzie Q <suzie@shopping.example.net>
 Subject: Is dinner ready?

@@ -5,7 +5,7 @@ DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/simple; d=custom.com;
  b=gFrdBU/XKz5pXjripVd+bk4GdRDmgtjL+oP7TUQTFZd2l7DIkMGCYrOZH7NtFCylLe/7o
  JkHUOdduDEJgWCMDg==
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=custom.com;
- i=@custom.com; q=dns/txt; s=test; t=1628083087; h=from : to : subject
+ i=@custom.com; q=dns/txt; s=rsa3096; t=1628083087; h=from : to : subject
  : date : message-id : from;
  bh=4bLNXImK9drULnmePzZNEBleUanJCX5PIsDIFoH4KTQ=;
  b=fail
