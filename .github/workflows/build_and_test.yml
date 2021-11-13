@@ -25,8 +25,8 @@ jobs:
       - name: show pkg-config search path
         run: pkg-config --variable pc_path pkg-config
       - name: show include path for libunbound
-        run: PKG_CONFIG_PATH="/usr/local/opt/openssl@3/lib/pkgconfig" LIBRARY_PATH="`pkg-config --libs libunbound`"  pkg-config --cflags libunbound
+        run: PKG_CONFIG_PATH="/usr/local/opt/openssl@3/lib/pkgconfig" LIBRARY_PATH="/home/linuxbrew/.linuxbrew/Cellar/unbound/1.13.2_1/lib/"  pkg-config --cflags libunbound
       - name: Build
-        run: PKG_CONFIG_PATH="/usr/local/opt/openssl@3/lib/pkgconfig" LIBRARY_PATH="`pkg-config --libs libunbound`" swift build
+        run: PKG_CONFIG_PATH="/usr/local/opt/openssl@3/lib/pkgconfig" LIBRARY_PATH="/home/linuxbrew/.linuxbrew/Cellar/unbound/1.13.2_1/lib/" swift build
       - name: Run tests
-        run: swift test
+        run: PKG_CONFIG_PATH="/usr/local/opt/openssl@3/lib/pkgconfig" LIBRARY_PATH="/home/linuxbrew/.linuxbrew/Cellar/unbound/1.13.2_1/lib/" swift test
