@@ -1,8 +1,6 @@
-# DKIMVerifier (Swift)
+# DKIMVerifier 0.1
 
 [![build_and_test](https://github.com/skomski/DKIMVerifier/actions/workflows/build_and_test.yml/badge.svg)](https://github.com/skomski/DKIMVerifier/actions/workflows/build_and_test.yml)
-
-### WIP!
 
 ## Features
 
