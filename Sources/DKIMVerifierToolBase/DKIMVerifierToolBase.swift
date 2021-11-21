@@ -48,7 +48,7 @@ func printDMARCInfo(result: DKIMResult) {
   }
 }
 
-func printVerboseInfo(result: DKIMResult) {
+func printVerboseDKIMInfo(result: DKIMResult) {
   print("DKIM (Verbose)")
   print(" emailFrom: \(result.emailFromSender ?? "missing")")
   print(" extractedDomain: \(result.extractedDomainFromSender ?? "missing")")
@@ -93,6 +93,45 @@ func printVerboseInfo(result: DKIMResult) {
   }
 }
 
+func printDKIMInfo(result: DKIMResult) {
+  print("DKIM")
+  print(" extractedDomain: \(result.extractedDomainFromSenderIdnaEncoded ?? "missing")")
+  print(" Overall: \(result.status) (\(result.signatures.count) signature(s))")
+  var count = 0
+  for signature in result.signatures {
+    let status: String
+    var info: String = "no info"
+
+    if signature.info != nil {
+      let algorithm = signature.info!.algorithm
+      let keysize: String
+      if signature.info!.rsaKeySizeInBits != nil {
+        keysize = String(signature.info!.rsaKeySizeInBits!)
+      } else {
+        keysize = "(key size missing)"
+      }
+      info =
+        "\(algorithm) \(keysize) sdid=\(signature.info!.sdid) auid=\(signature.info!.auid) dnssec=\(signature.validatedWithDNSSEC)"
+    }
+    switch signature.status {
+    case DKIMSignatureStatus.Valid:
+      status = "Valid"
+      print("   \(count): \(status) (\(info))")
+    case DKIMSignatureStatus.Insecure(let risks):
+      status = "Insecure"
+      print("   \(count): \(status) (\(info))")
+      for risk in risks {
+        print("    \(String(describing: risk))")
+      }
+    case DKIMSignatureStatus.Error(let error):
+      status = "\(error)"
+      print("   \(count): Error (\(info))")
+      print("     \(status)")
+    }
+    count += 1
+  }
+}
+
 public func baseRun(options: DKIMVerifierToolBaseArguments) {
   do {
 
@@ -133,19 +172,10 @@ public func baseRun(options: DKIMVerifierToolBaseArguments) {
         emailRaw: email_raw, verifyDMARCAlignment: options.verifyDMARC
       )
 
-    print("DKIM")
-    switch result.status {
-    case DKIMStatus.Valid:
-      print("Valid")
-    case DKIMStatus.Insecure:
-      print("Insecure")
-    case DKIMStatus.Error(let error):
-      print("Error")
-      print("  \(error)")
-    }
-
     if options.verbose {
-      printVerboseInfo(result: result)
+      printVerboseDKIMInfo(result: result)
+    } else {
+      printDKIMInfo(result: result)
     }
 
     if options.verifyDMARC {
