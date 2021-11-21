@@ -21,7 +21,8 @@
 
 ```swift
 public func verifyDKIMSignatures(
-  dnsLoopupTxtFunction: @escaping DNSLookupFunctionType, email_raw: String,
+  dnsLoopupTxtFunction: @escaping DNSLookupFunctionType,
+  emailRaw: String,
   verifyDMARCAlignment: Bool = false
 )
   -> DKIMResult
@@ -29,7 +30,7 @@ public func verifyDKIMSignatures(
 
 Arguments:
 * dnsLookupTxtFunction: should return txt value for specific domain
-* mail: RFC5322 Message as raw string
+* emailRaw: RFC5322 Message as raw string
 * verifyDMARCAlignment: additional verify DMARC DKIM Alignment for valid signatures (default: false)
 
 Result:
@@ -100,20 +101,4 @@ public struct DMARCResult: Equatable {
   public var foundPolicyDomain: String?
   public var validDomain: String?
 }
-```
-
-## Oracle Test Tool
-
-### Setup
-
-```
-python3 -m pip install dkimpy
-npm install -g mailauth
-```
-
-### Run
-
-```
-./Tools/gen_oracle_reports.sh ../../emails 50 > oracle_log.csv
-./Tools/analyze_oracle_report.py oracle_log.csv
 ```
