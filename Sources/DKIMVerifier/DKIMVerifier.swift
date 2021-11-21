@@ -6,8 +6,8 @@ import TLDExtract
 import _CryptoExtras
 
 public func verifyDKIMSignatures(
-  dnsLoopupTxtFunction: @escaping DNSLookupFunctionType, email_raw: String,
-  verifyDMARC: Bool = false
+  dnsLoopupTxtFunction: @escaping DNSLookupFunctionType, emailRaw: String,
+  verifyDMARCAlignment: Bool = false
 )
   -> DKIMResult
 {
@@ -16,7 +16,7 @@ public func verifyDKIMSignatures(
   // seperate headers from body
   var (headers, body): (OrderedKeyValueArray, String)
   do {
-    (headers, body) = try parseRFC822Message(message: email_raw)
+    (headers, body) = try parseRFC822Message(message: emailRaw)
   } catch let error as DKIMError {
     result.status = DKIMStatus.Error(error)
     return result
@@ -112,7 +112,7 @@ public func verifyDKIMSignatures(
     result.signatures.append(signatureResult)
   }
 
-  if verifyDMARC {
+  if verifyDMARCAlignment {
     var validDKIMDomains: [String] = []
     for signature in result.signatures {
       if signature.status == .Valid {

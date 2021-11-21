@@ -29,7 +29,7 @@ final class DKIMVerifierTests: XCTestCase {
         contentsOf: URL(fileURLWithPath: emailFilePath), encoding: .utf8)
 
       let result = DKIMVerifier.verifyDKIMSignatures(
-        dnsLoopupTxtFunction: GetDnsKey, email_raw: email_raw, verifyDMARC: true)
+        dnsLoopupTxtFunction: GetDnsKey, emailRaw: email_raw, verifyDMARCAlignment: true)
 
       var expected_result = DKIMVerifier.DKIMSignatureResult.init(
         status: DKIMVerifier.DKIMSignatureStatus.Valid)
@@ -59,7 +59,7 @@ final class DKIMVerifierTests: XCTestCase {
         contentsOf: URL(fileURLWithPath: emailFilePath), encoding: .utf8)
 
       let result = DKIMVerifier.verifyDKIMSignatures(
-        dnsLoopupTxtFunction: GetDnsKey, email_raw: email_raw, verifyDMARC: false)
+        dnsLoopupTxtFunction: GetDnsKey, emailRaw: email_raw, verifyDMARCAlignment: false)
 
       XCTAssertEqual(
         result.status,
@@ -90,7 +90,7 @@ final class DKIMVerifierTests: XCTestCase {
       }
 
       let result = DKIMVerifier.verifyDKIMSignatures(
-        dnsLoopupTxtFunction: LocalGetDnsKey, email_raw: email_raw, verifyDMARC: false)
+        dnsLoopupTxtFunction: LocalGetDnsKey, emailRaw: email_raw, verifyDMARCAlignment: false)
 
       XCTAssertEqual(result.status, DKIMVerifier.DKIMStatus.Valid)
 
@@ -132,7 +132,7 @@ final class DKIMVerifierTests: XCTestCase {
       }
 
       let result = DKIMVerifier.verifyDKIMSignatures(
-        dnsLoopupTxtFunction: LocalGetDnsKey, email_raw: email_raw, verifyDMARC: false)
+        dnsLoopupTxtFunction: LocalGetDnsKey, emailRaw: email_raw, verifyDMARCAlignment: false)
       var expected_result = DKIMVerifier.DKIMSignatureResult.init(
         status: DKIMVerifier.DKIMSignatureStatus.Error(DKIMError.DKIMTestMode))
       XCTAssertEqual(result.signatures[0].status, expected_result.status, emailFilePath)
@@ -167,7 +167,7 @@ final class DKIMVerifierTests: XCTestCase {
           contentsOf: URL(fileURLWithPath: emailFilePath), encoding: .utf8)
 
         let result = DKIMVerifier.verifyDKIMSignatures(
-          dnsLoopupTxtFunction: GetDnsKey, email_raw: email_raw)
+          dnsLoopupTxtFunction: GetDnsKey, emailRaw: email_raw)
 
         if emailFilePath.hasSuffix("unsigned.eml") {
           XCTAssertEqual(result.signatures.count, 0, emailFilePath)

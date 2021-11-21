@@ -130,7 +130,7 @@ public func baseRun(options: DKIMVerifierToolBaseArguments) {
     let result =
       DKIMVerifier.verifyDKIMSignatures(
         dnsLoopupTxtFunction: dns_function,
-        email_raw: email_raw, verifyDMARC: options.verifyDMARC
+        emailRaw: email_raw, verifyDMARCAlignment: options.verifyDMARC
       )
 
     print("DKIM")
